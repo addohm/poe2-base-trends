@@ -165,6 +165,7 @@ See [docs/collection.md](docs/collection.md) for the Task Scheduler registration
 | `POE2_BASES` | `6` | Size of the tracked set |
 | `POE2_BATCH` | `1` | Bases per run — **leave at 1** |
 | `POE2_RATES_TTL_H` | `6` | Hours to cache currency rates |
+| `POE2_UA` | repo URL | User-Agent. Point it at your own contact — the API is unsanctioned, and identifying yourself honestly is most of what earns tolerance |
 
 ## Rate limits
 
