@@ -8,5 +8,6 @@
 .env
 .env.local
 cache/
+cache/ratelimit.json
 dist/
 node_modules/

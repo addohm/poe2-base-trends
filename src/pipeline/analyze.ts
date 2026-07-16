@@ -277,7 +277,14 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
   for (const [, rows] of history) {
     if (!rows.length) continue;
     const latest = last(rows)!;
-    const pool = rows.slice(-POOL_SNAPSHOTS);
+
+    // Pool only snapshots that defined "expensive" the same way. The threshold is
+    // picked per run from a fixed rung ladder, so it is usually stable — but if the
+    // market moves enough to shift it (say 1000ex -> 200ex), pooling across the change
+    // would silently average two different questions together.
+    const pool = rows
+      .filter((r) => r.topThresholdEx === latest.topThresholdEx)
+      .slice(-POOL_SNAPSHOTS);
 
     // Pool sightings across snapshots; more evidence, same comparison each time.
     const agg = new Map<string, [number, number]>();

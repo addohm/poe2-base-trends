@@ -89,6 +89,30 @@ search and describes the entire market, where a sampled percentile costs a searc
 Set `POE2_BASES=2` for a cheap first run to confirm the IP is clear before
 committing to a full snapshot.
 
+## Limit debt, and why iterating hurts
+
+Rate limits are per-IP and live on the server. They do not reset when our process
+exits, and GGG escalate penalties for clients that keep pushing — a burst against
+the fetch rule's advertised 10s restriction produced a **600s** `Retry-After` in
+practice, and the exchange endpoint's `30:300:1800` means a **30 minute** ban.
+
+The practical consequence: **an IP accumulates debt**. Several runs in quick
+succession (as happens while developing) saturate the long windows, and each new
+run inherits a nearly-exhausted budget, 429s early, and earns a longer ban than
+the last. This is invisible in production, where runs sit 6 hours apart and every
+window is long empty.
+
+Two mitigations are built in:
+
+- `cache/ratelimit.json` persists the sliding window between runs, so a run that
+  starts minutes after another inherits its usage instead of firing blind.
+- A ban longer than 120s aborts the run (`RateLimitedError`) rather than sleeping
+  through it. Whatever bases were already collected are kept, and the next
+  scheduled run continues from there.
+
+If collection keeps aborting: **stop and leave the IP idle for half an hour.**
+Retrying immediately is what deepens the hole.
+
 ## Extending beyond helmets
 
 `SLICE` in `src/pipeline/collect.ts` names one `{itemClass, category, archetype}`.

@@ -17,6 +17,9 @@
  * so being conservative is cheap by comparison.
  */
 
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import path from 'node:path';
+
 export interface Rule {
   hits: number;
   period: number;
@@ -33,6 +36,23 @@ export function parseRules(header: string | null | undefined): Rule[] {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Where the sliding window is persisted between runs.
+ *
+ * Rate limits live on the server, keyed by IP, and they outlive our process. A limiter
+ * that starts each run with an empty window is asserting "nothing has ever called this
+ * API from here", which is false for any run that follows a recent one — so its very
+ * first request fires blind into a window that may already be full, and the reply is a
+ * ban. Runs 6 hours apart never notice; runs minutes apart cascade. Persisting the
+ * window closes the gap.
+ */
+const STATE_FILE = path.join(process.cwd(), 'cache', 'ratelimit.json');
+
+interface PersistedState {
+  hits: Record<string, number[]>;
+  blockedUntil: Record<string, number>;
+}
 
 export class RateLimiter {
   /** Request timestamps (ms) per policy, forming a sliding window. */
@@ -59,6 +79,43 @@ export class RateLimiter {
   constructor(safety = 0.5, minGap = 400) {
     this.safety = safety;
     this.minGap = minGap;
+    this.load();
+  }
+
+  /** Restores the window left by a previous run, dropping anything already expired. */
+  private load(): void {
+    if (!existsSync(STATE_FILE)) return;
+    try {
+      const s = JSON.parse(readFileSync(STATE_FILE, 'utf8')) as PersistedState;
+      const now = Date.now();
+      // Nothing in these rules looks back further than an hour.
+      for (const [policy, times] of Object.entries(s.hits ?? {})) {
+        const live = times.filter((t) => now - t < 3600_000);
+        if (live.length) this.hits.set(policy, live);
+      }
+      for (const [policy, until] of Object.entries(s.blockedUntil ?? {})) {
+        if (until > now) {
+          this.blockedUntil.set(policy, until);
+          console.warn(`[ratelimit] ${policy} still banned for ${Math.ceil((until - now) / 1000)}s (from a previous run).`);
+        }
+      }
+    } catch {
+      // A corrupt state file must not take the run down; worst case we start blind.
+    }
+  }
+
+  /** Persists the window so the next run inherits it. Best-effort. */
+  save(): void {
+    try {
+      mkdirSync(path.dirname(STATE_FILE), { recursive: true });
+      const hits: Record<string, number[]> = {};
+      for (const [p, t] of this.hits) hits[p] = t;
+      const blockedUntil: Record<string, number> = {};
+      for (const [p, u] of this.blockedUntil) blockedUntil[p] = u;
+      writeFileSync(STATE_FILE, JSON.stringify({ hits, blockedUntil } satisfies PersistedState));
+    } catch {
+      // Non-fatal: persistence is an optimisation, not a correctness requirement.
+    }
   }
 
   private budgetFor(rule: Rule): number {
@@ -90,6 +147,7 @@ export class RateLimiter {
       const until = Date.now() + active * 1000 + 500;
       this.blockedUntil.set(policy, Math.max(this.blockedUntil.get(policy) ?? 0, until));
       console.warn(`[ratelimit] ${policy} is restricted for ${active}s; holding off.`);
+      this.save();
     }
 
     const now = Date.now();
@@ -141,6 +199,9 @@ export class RateLimiter {
         live.push(now);
         this.hits.set(policy, live);
         this.lastAt.set(policy, now);
+        // Persist per request, not at exit: a killed or crashed run must still leave
+        // an accurate window behind, since that is exactly when the next run is close.
+        this.save();
         return;
       }
       await sleep(Math.min(waitMs, 60_000));
@@ -159,6 +220,7 @@ export class RateLimiter {
     const retry = Number(headers.get('retry-after') ?? '60');
     const secs = Number.isFinite(retry) ? retry : 60;
     this.blockedUntil.set(policy, Date.now() + secs * 1000 + 500);
+    this.save();
     if (secs > maxWaitSec) {
       console.warn(`[ratelimit] 429 on ${policy}; banned for ${secs}s — too long to wait out.`);
       return secs;

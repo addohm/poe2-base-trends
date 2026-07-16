@@ -157,15 +157,30 @@ X-Rate-Limit-Ip:       5:10:60,15:60:300,30:300:1800     hits:period:restriction
 X-Rate-Limit-Ip-State: 1:10:0,1:60:0,1:300:0             current:period:activeRestriction
 ```
 
-`src/lib/ratelimit.ts` obeys these, and — importantly — reconciles against the
-**state** header rather than trusting a purely local window. A local window
-assumes we're the only thing that has ever talked to this API from this IP, which
-is false after a previous run or a manual request. Getting this wrong is not
-theoretical: during development, a burst against the `12:4:10` fetch rule earned a
-**600s** `Retry-After`, not the 10s the rule advertises. GGG escalate on clients
-that push, so the limiter runs at 50% of published limits with a floor delay
-between requests. A full snapshot takes ~10 minutes, which is irrelevant for a
-job that runs a few times a day.
+`src/lib/ratelimit.ts` obeys these. Three things it does that a naive limiter
+doesn't, each learned the hard way:
+
+- **Reconciles against the `-State` header.** The server reports its live counts;
+  a purely local window assumes we're the only thing that has ever called this API
+  from this IP, which is false after any recent run.
+- **Persists the window to `cache/ratelimit.json`.** Limits live on the server and
+  outlive our process. Starting each run with an empty window means the first
+  request fires blind into a window that may already be full — invisible when runs
+  are 6h apart, a cascade when they're minutes apart.
+- **Bounds every 429 wait.** A ban longer than 120s aborts the run with a clear
+  message instead of sleeping. An earlier unbounded retry against the exchange
+  endpoint's 30-minute ban spun for **37 minutes** looking exactly like a hang.
+
+Penalties escalate well beyond the advertised `restriction`: a burst against the
+`12:4:10` fetch rule earned a **600s** `Retry-After`, not 10s. GGG punish clients
+that push, so the limiter runs at 50% of published limits with a floor delay. A
+full snapshot takes ~15-20 minutes, which is irrelevant for a job that runs a few
+times a day.
+
+**Searches are the scarce resource; fetches are not.** That asymmetry drove the
+design: price statistics come from count-only search ladders (one search, whole
+market) rather than sampled percentiles (one search *plus* ten fetches, 100
+listings).
 
 ## Caveats
 
