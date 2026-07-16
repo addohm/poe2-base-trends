@@ -109,9 +109,22 @@ Consequences baked into the design:
 RePoE dump ──> npm run bases ───> data/bases.json ──┐
                                                     ├──> npm run site ──> dist/ ──> GitHub Pages
 trade2 API ──> npm run collect ─> cache/raw/*.json  │
+              (ONE base per run)     │              │
+              cache/cursor.json <────┘              │
                      └────────── npm run analyze ──> data/history/*.jsonl
                                                      data/analysis.json ─┘
 ```
+
+**Collection is a trickle, not a batch.** Each run takes one base off a persisted
+queue, spends ~12 searches, and exits. Scheduled every 30 minutes, a full pass
+lands every ~3 hours.
+
+The reason is that rate limits are **per-IP**, and that IP is the one you browse
+trade from — the site rate-limits ordinary human users on its own. A scraper that
+drains the budget in a burst is competing with its own operator for it. One base
+per half hour uses a small fraction of the allowance and leaves the rest for the
+person at the keyboard. It also makes collection resumable for free: a run that
+aborts on a ban leaves its base at the head of the queue.
 
 **Collection runs on a real machine, not in CI.** Trade rate limits are per-IP,
 and CI runners use shared, rotating datacenter addresses behind Cloudflare.
@@ -129,21 +142,29 @@ in gitignored `cache/`.
 ```bash
 npm install
 npm run bases       # exact base tables from game data — no network beyond one CDN fetch
-npm run collect     # one trade snapshot (slow on purpose; see rate limits)
+npm run collect     # collect ONE base off the queue (~12 searches, ~4 min)
 npm run analyze     # aggregate into data/history + data/analysis.json
 npm run site        # render dist/
 npm run serve       # preview at http://localhost:4173
-npm run typecheck
+npm run typecheck && npm test
 ```
 
-Scheduled use (Windows):
+Scheduled use (Windows) — **every 30 minutes**, one base per run:
 
 ```powershell
 .\scripts\snapshot.ps1          # collect, analyse, render, commit locally
 .\scripts\snapshot.ps1 -Push    # ...and push, which triggers the Pages deploy
 ```
 
-Set `POE2_LEAGUE` to target a different league (defaults to `Runes of Aldur`).
+See [docs/collection.md](docs/collection.md) for the Task Scheduler registration.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `POE2_LEAGUE` | `Runes of Aldur` | League to query |
+| `POE2_MIN_ILVL` | `70` | Item level floor (clamped 60-100) |
+| `POE2_BASES` | `6` | Size of the tracked set |
+| `POE2_BATCH` | `1` | Bases per run — **leave at 1** |
+| `POE2_RATES_TTL_H` | `6` | Hours to cache currency rates |
 
 ## Rate limits
 

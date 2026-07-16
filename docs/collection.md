@@ -29,43 +29,76 @@ So the split is:
 - **GitHub Actions** — checkout, `npm run bases`, `npm run site`, deploy. No network
   calls to trade, no secrets.
 
+## One base per run, every 30 minutes
+
+Collection is a **trickle, not a batch**. `npm run collect` takes the next base off
+a persisted queue (`cache/cursor.json`), collects just that one — about a dozen
+searches — and stops. A full pass over the six tracked bases takes ~3 hours.
+
+The reason isn't abstract politeness. Rate limits are **per-IP**, and that IP is
+the same one you browse trade from — the site rate-limits ordinary human users all
+by itself. A collector that drains the budget in a burst is competing with its own
+operator for it. At one base per half hour we draw roughly 12 searches per 30
+minutes against an allowance of 30 per 5 minutes, leaving the large majority for
+the person at the keyboard.
+
+It also makes collection resumable for free: a run that aborts on a ban leaves its
+base at the head of the queue, and the next run picks it up. Nothing needs to know
+how far the last run got.
+
 ## Scheduling on Windows
 
 `scripts/snapshot.ps1` does collect → analyse → render → commit, and pushes with
-`-Push`. Register it with Task Scheduler:
+`-Push`. Register it every 30 minutes:
 
 ```powershell
 $action  = New-ScheduledTaskAction -Execute 'powershell.exe' `
   -Argument '-NoProfile -ExecutionPolicy Bypass -File "C:\Users\addohm\Documents\poe2-base-trends\scripts\snapshot.ps1" -Push'
-$trigger = New-ScheduledTaskTrigger -Daily -At 6am
-$trigger.Repetition = (New-ScheduledTaskTrigger -Once -At 6am `
-  -RepetitionInterval (New-TimeSpan -Hours 6) -RepetitionDuration (New-TimeSpan -Days 3650)).Repetition
+
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) `
+  -RepetitionInterval (New-TimeSpan -Minutes 30) `
+  -RepetitionDuration ([TimeSpan]::MaxValue)
+
+# Don't let a run pile up on top of a slow one.
+$settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew `
+  -ExecutionTimeLimit (New-TimeSpan -Minutes 20) -StartWhenAvailable
 
 Register-ScheduledTask -TaskName 'poe2-base-trends snapshot' `
-  -Action $action -Trigger $trigger -Description 'Snapshot PoE2 trade prices and publish'
+  -Action $action -Trigger $trigger -Settings $settings `
+  -Description 'Collect one PoE2 base per run and publish'
 ```
 
+`-MultipleInstances IgnoreNew` matters: if a run is slow, the next trigger is
+dropped rather than started alongside it. Two collectors sharing an IP is exactly
+the burst this design avoids.
+
 Pushing needs credentials the task can use non-interactively — a credential helper
-or a deploy key. Run it once by hand first (without `-Push`) to confirm the
-collection half works before wiring up the schedule.
+or a deploy key. Run it once by hand (without `-Push`) first.
 
 ## Cadence
 
-Every 6 hours is a good default.
+30 minutes per base is the default; a full refresh cycle lands every ~3 hours.
 
-- **Faster doesn't help.** A snapshot takes ~10 minutes at safe rates, and base
-  prices don't move meaningfully inside an hour.
-- **History size.** Each snapshot appends one JSONL row per query. At 18 queries,
-  4×/day, that's ~72 rows/day of a few hundred bytes — a few MB over a league.
-  Raw listings would be ~2 MB *per snapshot*, which is why they stay in `cache/`.
-- **Delisting resolution.** The delisting rate is measured between consecutive
-  snapshots, so the interval defines the window. Six hours reads as "share of
-  listings that vanished within 6 hours" — long enough to be a signal, short
-  enough that the 100-item sample still overlaps.
+- **Faster doesn't help.** Base prices don't move meaningfully inside an hour, and
+  the budget spent is budget taken from your own browsing.
+- **Currency rates are cached 6 hours** (`cache/rates.json`, `POE2_RATES_TTL_H`).
+  Exchange is the harshest endpoint (`30:300:1800` → a 30-minute ban); re-querying
+  it every half hour would make the gentlest part of the job the most abusive. Four
+  calls a day is plenty for a ratio that drifts over hours.
+- **History size.** Each collected base appends one JSONL row of a few hundred
+  bytes. Six bases refreshed 8×/day is ~48 rows/day — a few MB over a league. Raw
+  listings are ~200 KB *per base per snapshot*, which is why they stay in `cache/`.
+- **Delisting resolution.** Measured between consecutive snapshots *of the same
+  base*, so the cycle length — not the run interval — defines the window. At ~3
+  hours it reads as "share of blank bases that vanished within about three hours".
+- **Unchanged snapshots don't append.** `analyze` runs every time but only appends
+  history for a base whose snapshot timestamp is new. Otherwise the five bases that
+  didn't move would get a duplicate row every run, inflating pooled mod counts and
+  faking a flat trend into repeated observations.
 
-## What a snapshot costs
+## What one run costs
 
-Per base:
+One run = one base:
 
 | | Requests | Notes |
 |---|---:|---|
@@ -74,20 +107,21 @@ Per base:
 | Top-stratum sample | 1 + 10 | search + fetches (100 ids, 10 per call) |
 | Baseline sample | 1 + 10 | search + fetches |
 | Cheapest magic | 1 + 2 | 20 ids for the blank-base floor |
+| Currency rates | 0 (usually) | cached 6h; ~2 exchange calls 4×/day |
 
-So ~12 searches and ~22 fetches per base, plus ~10 exchange calls per run for
-currency rates (a separate limit bucket). For the default 6-base slice that's
-roughly **72 searches and 130 fetches**, about 15-20 minutes at 50% of published
-limits.
+**~12 searches, ~22 fetches, ~4 minutes**, then the process exits.
 
-The binding constraint is the search rule `30:300:1800` — 30 searches per 5
-minutes, and we use half of that. **Searches are the scarce resource, fetches are
-not**, which is why price statistics were moved onto ladders: a rung costs one
-search and describes the entire market, where a sampled percentile costs a search
-*plus* ten fetches and only describes 100 listings.
+Against the search rule `30:300:1800` (30 per 5 minutes) that's about 12 searches
+per 30 minutes — comfortably under, and it deliberately leaves most of the shared
+IP allowance for you browsing trade.
 
-Set `POE2_BASES=2` for a cheap first run to confirm the IP is clear before
-committing to a full snapshot.
+**Searches are the scarce resource; fetches are not.** That asymmetry is why price
+statistics live on ladders: a rung costs one search and describes the entire
+market, where a sampled percentile costs a search *plus* ten fetches and describes
+only 100 listings.
+
+`POE2_BATCH` raises bases per run, and `POE2_BASES` sizes the tracked set. Leave
+`POE2_BATCH` at 1 outside of a deliberate backfill on a known-idle IP.
 
 ## Limit debt, and why iterating hurts
 
@@ -117,5 +151,18 @@ Retrying immediately is what deepens the hole.
 
 `SLICE` in `src/pipeline/collect.ts` names one `{itemClass, category, archetype}`.
 Widening it is the intended next step; `data/bases.json` already carries every
-class and archetype, so the static half needs no work. Watch the search budget:
-each additional base is 3 more searches and ~30 more fetches.
+class and archetype, so the static half needs no work.
+
+Because collection is queue-driven, widening costs **cycle time, not burst size**.
+Every run still touches exactly one base — the tracked set just takes longer to get
+all the way around:
+
+| Tracked bases | Full cycle at 30 min/base |
+|---:|---|
+| 6 (helmets, ES) | 3 hours |
+| 24 (4 archetypes) | 12 hours |
+| 48 (all armour classes) | 24 hours |
+
+A day-long cycle is still faster than base prices meaningfully move, so the honest
+ceiling here is high. If you want a shorter cycle, shorten the *interval* before
+raising `POE2_BATCH` — the whole point is to never burst.

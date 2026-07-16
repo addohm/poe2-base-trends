@@ -1,5 +1,14 @@
 /**
- * Collects one snapshot per tracked base.
+ * Collects a snapshot for the next base(s) in the work queue — by default exactly one
+ * per invocation.
+ *
+ * This is a trickle, not a batch, and that is the point. Trade's rate limits are
+ * per-IP, and that IP belongs to a person who also browses the trade site — which
+ * rate-limits ordinary users on its own. Emptying the budget in one burst means
+ * competing with your own operator for it. One base per run, scheduled half an hour
+ * apart, draws ~12 searches per 30 minutes and leaves the rest of the allowance to
+ * the human. A full pass over the tracked bases takes a few hours; base prices don't
+ * move meaningfully faster than that anyway.
  *
  * Three things are gathered, each answering a different half of "is this worth
  * crafting?":
@@ -27,6 +36,7 @@ import path from 'node:path';
 import { TradeClient, toListing, itemMods, RateLimitedError, type RawResult } from '../lib/trade.ts';
 import { RatesClient, converter } from '../lib/rates.ts';
 import { buildQuery, specKey, slugify, type QuerySpec } from '../lib/query.ts';
+import { take, complete, peek } from '../lib/queue.ts';
 import type { RankedBase } from './bases.ts';
 
 const LEAGUE = process.env.POE2_LEAGUE ?? 'Runes of Aldur';
@@ -42,8 +52,15 @@ const PREV = path.join(ROOT, 'cache', 'prev');
  */
 export const MIN_ILVL = Math.min(100, Math.max(60, Number(process.env.POE2_MIN_ILVL ?? 70)));
 
-/** How many bases to price. Override with POE2_BASES (a small first run is cheap). */
+/** Size of the tracked set. A full cycle refreshes all of these, one run at a time. */
 const BASES_PER_GROUP = Number(process.env.POE2_BASES ?? 6);
+
+/**
+ * Bases collected per invocation. Keep this at 1 and schedule often; raising it
+ * re-creates the burst this design exists to avoid. Mainly a lever for a one-off
+ * backfill on an IP you know is idle.
+ */
+const BATCH = Math.max(1, Number(process.env.POE2_BATCH ?? 1));
 
 /** The vertical slice: pure energy-shield helmets. */
 const SLICE = { itemClass: 'Helmet', category: 'armour.helmet', archetype: 'es' };
@@ -167,22 +184,44 @@ async function main(): Promise<void> {
     classes: Record<string, RankedBase[]>;
   };
   const targets = targetBases(basesDoc.classes);
+  const byName = new Map(targets.map((b) => [b.name, b]));
 
-  console.log(`League: ${LEAGUE} | ilvl >= ${MIN_ILVL} | ${targets.length} bases`);
-  console.log(`  ${targets.map((b) => `${b.name} (ES ${b.energyShieldMaxQ})`).join(', ')}\n`);
+  // Take only this run's share of the work; the rest waits for later runs.
+  const { batch, state } = take(
+    targets.map((b) => b.name),
+    BATCH,
+  );
+  const queue = batch.map((n) => byName.get(n)!).filter(Boolean);
 
-  console.log('Fetching currency rates...');
+  console.log(`League: ${LEAGUE} | ilvl >= ${MIN_ILVL}`);
+  console.log(`Tracking ${targets.length} bases; ${state.pending.length} left in this cycle (cycle ${state.cycles + 1}).`);
+  console.log(`This run: ${queue.map((b) => b.name).join(', ')}\n`);
+
+  const trade = new TradeClient(LEAGUE, UA);
+
+  // Preflight, before a single request. A ban known from a previous run means this
+  // run cannot finish a base, and starting anyway would burn a dozen searches on
+  // ladders only to be refused at the first fetch. Those requests are shared with a
+  // human using the trade site; spending them on work we know will be discarded is
+  // the exact opposite of what a trickle collector is for.
+  const ban = trade.bannedFor();
+  if (ban) {
+    console.log(`${ban.policy} is banned for ${ban.seconds}s (~${Math.ceil(ban.seconds / 60)} min).`);
+    console.log(`Nothing requested. ${queue[0]?.name ?? 'The queue'} stays queued for the next run.`);
+    return;
+  }
+
+  console.log('Currency rates...');
   const rates = await new RatesClient(LEAGUE, UA).fetchRates();
   const toEx = converter(rates);
   console.log(`  1 divine = ${rates.divine?.toFixed(0) ?? '?'} ex\n`);
 
-  const trade = new TradeClient(LEAGUE, UA);
   const at = new Date().toISOString();
   await mkdir(RAW, { recursive: true });
   await mkdir(PREV, { recursive: true });
 
   let done = 0;
-  for (const base of targets) {
+  for (const base of queue) {
     const key = `${SLICE.category.replace('armour.', '')}:${slugify(base.name)}`;
     const file = `${key.replace(/:/g, '_')}.json`;
     const rawPath = path.join(RAW, file);
@@ -226,21 +265,27 @@ async function main(): Promise<void> {
 
       const total = rareLadder.find((r) => r.minEx === 1)?.count ?? 0;
       const pct = top && total ? ((top.count / total) * 100).toFixed(0) : '?';
+      // Only now is this base off the cycle's list; an abort leaves it at the head
+      // of the queue and the next scheduled run picks it up.
+      complete([base.name]);
       console.log(
         `  ${base.name.padEnd(24)} rare=${String(total).padStart(5)}  top>=${String(top?.minEx ?? '-').padStart(4)}ex (${pct}%)  sampled top=${String(topSample.length).padStart(3)} base=${String(baseSample.length).padStart(3)}`,
       );
     } catch (err) {
       if (err instanceof RateLimitedError) {
         console.error(`\n${err.message}`);
-        console.error(`Stopped after ${done}/${targets.length} bases; what was collected is kept.`);
-        process.exitCode = done > 0 ? 0 : 1;
+        console.error(`${base.name} stays queued for the next run; ${done} base(s) collected this run.`);
+        process.exitCode = 0; // A ban is expected weather, not a build failure.
         return;
       }
       throw err;
     }
   }
 
-  console.log(`\nSnapshot ${at} complete (${done} bases). Run 'npm run analyze'.`);
+  const left = peek()?.pending.length ?? 0;
+  console.log(`\nCollected ${done} base(s) at ${at}.`);
+  console.log(left ? `${left} left in this cycle.` : 'Cycle complete — next run starts a fresh pass.');
+  console.log(`Run 'npm run analyze' to fold this into the aggregates.`);
 }
 
 // Guarded so tests can import the pure helpers without triggering a collection.

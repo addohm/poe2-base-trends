@@ -93,6 +93,21 @@ export class TradeClient {
     return { 'user-agent': this.userAgent, accept: 'application/json' };
   }
 
+  /**
+   * Longest active ban across the endpoints a collection needs, in seconds.
+   *
+   * Call before doing any work. A run that starts under a fetch ban will spend all
+   * its searches on ladders and then throw them away when the first fetch is refused,
+   * so checking up front is the difference between costing nothing and costing a
+   * dozen requests that a real player could have used.
+   */
+  bannedFor(): { policy: string; seconds: number } | null {
+    const worst = [SEARCH_POLICY, FETCH_POLICY]
+      .map((p) => ({ policy: p, seconds: this.limiter.blockedFor(p) }))
+      .sort((a, b) => b.seconds - a.seconds)[0]!;
+    return worst.seconds > 0 ? worst : null;
+  }
+
   async search(query: unknown): Promise<SearchResponse> {
     const url = `${HOST}/api/trade2/search/poe2/${encodeURIComponent(this.league)}`;
     for (let attempt = 0; attempt < 3; attempt++) {

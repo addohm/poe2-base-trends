@@ -1,19 +1,32 @@
 <#
 .SYNOPSIS
-  Takes one trade snapshot, re-analyses, and commits the aggregates.
+  Collects the next base in the queue, re-analyses, renders, and commits.
 
 .DESCRIPTION
-  Intended to run from Windows Task Scheduler a few times a day. Pushing is what
-  triggers the Pages deploy, so a successful run updates the public site.
+  Designed to run from Windows Task Scheduler every 30 minutes. Each invocation
+  collects exactly ONE base — about a dozen searches — then stops. A full pass over
+  the tracked bases takes a few hours, which is faster than base prices actually
+  move.
 
-  Only aggregates are committed. Raw listings stay in cache/ (gitignored): a full
-  snapshot of raw listings is megabytes, and committing it every few hours would
-  bloat the repo into the hundreds of megabytes within a league for data we have
-  already reduced to what the site actually reads.
+  The reason for the trickle is not politeness in the abstract: trade's rate limits
+  are per-IP, and that IP is the same one you browse trade from. The site rate-limits
+  ordinary users on its own, so a collector that drains the budget in a burst is
+  competing with you at the keyboard. One base per half hour leaves nearly the whole
+  allowance for the human.
+
+  A rate-limit abort is not treated as a failure — the base stays queued and the next
+  run picks it up.
+
+  Only aggregates are committed. Raw listings stay in cache/ (gitignored): they are
+  megabytes per snapshot, and every run would bloat the repo for data already reduced
+  to what the site reads.
 
 .PARAMETER Push
-  Push to origin after committing. Without this the run stays local, which is the
-  safe default for a first manual run.
+  Push after committing. Without it the run stays local, which is the right default
+  for a first manual run.
+
+.PARAMETER Bases
+  Bases to collect this run. Leave at 1 unless backfilling on a known-idle IP.
 
 .EXAMPLE
   .\scripts\snapshot.ps1
@@ -22,18 +35,24 @@
 [CmdletBinding()]
 param(
   [switch]$Push,
-  [string]$League = $env:POE2_LEAGUE
+  [int]$Bases = 1,
+  [string]$League = $env:POE2_LEAGUE,
+  [int]$MinIlvl = 0
 )
 
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
 
 if ($League) { $env:POE2_LEAGUE = $League }
+if ($MinIlvl -gt 0) { $env:POE2_MIN_ILVL = $MinIlvl }
+$env:POE2_BATCH = $Bases
 
-Write-Host "[snapshot] collecting..." -ForegroundColor Cyan
+Write-Host "[snapshot] collecting (batch=$Bases)..." -ForegroundColor Cyan
 npm run collect
 if ($LASTEXITCODE -ne 0) { throw "collect failed with exit code $LASTEXITCODE" }
 
+# collect exits 0 on a rate-limit abort and writes nothing. Analysing anyway is
+# harmless (unchanged snapshots are skipped) and keeps the site current.
 Write-Host "[snapshot] analysing..." -ForegroundColor Cyan
 npm run analyze
 if ($LASTEXITCODE -ne 0) { throw "analyze failed with exit code $LASTEXITCODE" }
@@ -42,7 +61,6 @@ Write-Host "[snapshot] rendering..." -ForegroundColor Cyan
 npm run site
 if ($LASTEXITCODE -ne 0) { throw "site failed with exit code $LASTEXITCODE" }
 
-# Only data/ is versioned; dist/ is rebuilt by CI and cache/ is disposable.
 git add data
 $staged = git diff --cached --name-only
 if (-not $staged) {

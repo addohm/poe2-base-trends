@@ -135,9 +135,22 @@ async function main(): Promise<void> {
   await mkdir(HISTORY, { recursive: true });
   const labelUpdates: Record<string, ModLabel> = {};
   const keys: string[] = [];
+  let appended = 0;
+  let skipped = 0;
 
   for (const f of files) {
     const snap = JSON.parse(await readFile(path.join(RAW, f), 'utf8')) as RawSnapshot;
+    keys.push(snap.key);
+
+    // Collection refreshes one base per run, so most raw files are unchanged since
+    // last time. Appending them again would fabricate history: duplicate rows inflate
+    // the pooled mod counts and make a flat trend look like a repeated observation.
+    // The snapshot's own timestamp is the identity — only genuinely new ones append.
+    const existing = await readHistory(snap.key);
+    if (existing.length && last(existing)!.at === snap.at) {
+      skipped++;
+      continue;
+    }
 
     for (const it of [...snap.topSample, ...snap.baseSample]) {
       for (const m of it.mods) {
@@ -180,7 +193,7 @@ async function main(): Promise<void> {
     };
 
     await appendFile(histPath(snap.key), JSON.stringify(row) + '\n');
-    keys.push(snap.key);
+    appended++;
   }
 
   const labels = await mergeLabels(labelUpdates);
@@ -191,7 +204,9 @@ async function main(): Promise<void> {
   await writeFile(ANALYSIS, JSON.stringify(analysis, null, 2));
 
   const depth = Math.max(0, ...[...history.values()].map((h) => h.length));
-  console.log(`Analyzed ${files.length} bases (history depth: ${depth}) -> data/analysis.json`);
+  console.log(
+    `${appended} new snapshot(s), ${skipped} unchanged. ${files.length} bases known, deepest history ${depth} -> data/analysis.json`,
+  );
   for (const b of analysis.bases) {
     const t = b.trendPct === null ? '' : ` trend ${b.trendPct > 0 ? '+' : ''}${b.trendPct.toFixed(0)}%`;
     console.log(
@@ -223,6 +238,8 @@ export interface RankedMod {
 
 export interface BaseAnalysis {
   base: string;
+  /** When this base was last collected. Bases refresh on a rotation, not together. */
+  at: string;
   minIlvl: number;
   magicFloorEx: number | null;
   magicTotal: number | null;
@@ -329,6 +346,7 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
 
     out.push({
       base: latest.base,
+      at: latest.at,
       minIlvl: latest.minIlvl,
       magicFloorEx: latest.magicFloorEx,
       magicTotal: latest.magicLadder.find((r) => r.minEx === 1)?.count ?? null,

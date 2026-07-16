@@ -99,11 +99,19 @@ function ladderCell(b: BaseAnalysis, minEx: number): string {
   return `${((rung.count / total) * 100).toFixed(0)}%`;
 }
 
+/** Bases refresh on a rotation, so each row states its own age. */
+function ageOf(at: string): string {
+  const mins = Math.max(0, Math.round((Date.now() - Date.parse(at)) / 60_000));
+  if (mins < 90) return `${mins}m`;
+  const hrs = Math.round(mins / 60);
+  return hrs < 48 ? `${hrs}h` : `${Math.round(hrs / 24)}d`;
+}
+
 function marketTable(bases: BaseAnalysis[]): string {
   const rows = bases
     .map(
       (b) => `<tr>
-      <td>${esc(b.base)}</td>
+      <td>${esc(b.base)} <span class="dimcell">${esc(ageOf(b.at))} ago</span></td>
       <td class="mono">${num(b.magicFloorEx)}</td>
       <td class="mono">${b.magicTotal ?? '—'}</td>
       <td class="mono">${b.rareTotal ?? '—'}</td>
@@ -205,6 +213,10 @@ sample, so they say directly how often crafting this base pays off.</p>
 <p>All prices are Exalted Orb equivalent, converted by trade itself. Listings are
 collapsed to one per seller, so a single person dumping forty items can't tilt the
 numbers.</p>
+<p>Bases are refreshed <strong>one at a time, on a rotation</strong> — trade's rate
+limits are shared with real players, so this collects a trickle rather than a burst.
+Each row shows how long ago that base was last read; they are not all from the same
+moment.</p>
 ${analysis ? marketTable(analysis.bases) : '<p>No market snapshot yet. Run <code>npm run collect</code>.</p>'}
 
 <h2>Which mods are actually paid for</h2>

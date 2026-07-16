@@ -166,6 +166,19 @@ export class RateLimiter {
     this.hits.set(policy, live);
   }
 
+  /**
+   * Seconds remaining on a server-side ban for `policy`, or 0 if clear.
+   *
+   * Lets a caller check before spending anything. Without this, a run discovers a
+   * fetch ban only after paying for the searches that precede the first fetch — and
+   * throws that work away. Repeated every half hour, that's real load on a shared IP
+   * bought for nothing.
+   */
+  blockedFor(policy: string): number {
+    const until = this.blockedUntil.get(policy) ?? 0;
+    return Math.max(0, Math.ceil((until - Date.now()) / 1000));
+  }
+
   /** Blocks until a request under `policy` is safe to send, then records it. */
   async acquire(policy: string): Promise<void> {
     const rules = this.rules.get(policy) ?? [];
