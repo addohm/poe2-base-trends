@@ -185,7 +185,16 @@ listings).
 ## Caveats
 
 - Listing prices are **asks**. Treat every number as an upper-bound opinion.
-- The site samples the first 100 results per query (the API's cap), so
-  percentiles describe the sampled window, not the entire book.
+- **Ladder counts describe the whole market; mod samples describe new listings.**
+  Both mod strata are drawn newest-first, so lift compares the *flow* of expensive
+  listings against the flow of all listings. That's a consistent comparison and
+  arguably the right one for "what should I craft now", but it is not the same
+  population as the ladder counts, which measure standing stock. Expensive items
+  sell slower, so stock over-represents them.
+- The two mod strata overlap: the top stratum is a subset of the market, so the
+  confidence intervals are very slightly optimistic. With the top at ~25% of the
+  book and each stratum sampled separately, the effect is small.
+- Each query returns at most 100 items (the API's cap), so a stratum is a sample
+  of at most 100 listings per snapshot — hence the pooling.
 - Trends need history. A fresh clone shows "building…" until snapshots accumulate.
 - Not affiliated with Grinding Gear Games.
