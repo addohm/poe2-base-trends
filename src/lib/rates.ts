@@ -23,10 +23,14 @@ const SEED = '5:15:60,10:90:300,30:300:1800';
 const CACHE_FILE = path.join(process.cwd(), 'cache', 'rates.json');
 
 /**
- * How long a rate stays usable. Collection runs every half hour, but currency ratios
- * drift over hours, not minutes — and exchange is the harshest endpoint we touch
- * (`30:300:1800`, a thirty-minute ban). Re-querying it every run would make the
- * gentlest part of the job the most abusive. Six hours keeps it to ~4 calls a day.
+ * How long a rate stays usable.
+ *
+ * The rotation ticks far more often than currency ratios move — they drift over
+ * hours, not minutes — and exchange is the harshest endpoint we touch (`30:300:1800`,
+ * a thirty-minute ban). Re-querying it per tick would make the gentlest part of the
+ * job the most abusive, and would couple our exchange load to a knob (the tick
+ * interval) that has nothing to do with how fast rates change. Six hours decouples
+ * them at ~4 calls a day.
  */
 const TTL_MS = Number(process.env.POE2_RATES_TTL_H ?? 6) * 3600_000;
 

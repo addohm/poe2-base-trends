@@ -115,16 +115,20 @@ trade2 API ──> npm run collect ─> cache/raw/*.json  │
                                                      data/analysis.json ─┘
 ```
 
-**Collection is a trickle, not a batch.** Each run takes one base off a persisted
-queue, spends ~12 searches, and exits. Scheduled every 30 minutes, a full pass
-lands every ~3 hours.
+**Collection is a slow rotation, not a blitz.** Each run takes one base off a
+persisted queue, spends ~12 searches (~4 min), and exits. A scheduled task ticks it
+over and over; the tracked set refreshes by rotation.
 
 The reason is that rate limits are **per-IP**, and that IP is the one you browse
-trade from — the site rate-limits ordinary human users on its own. A scraper that
-drains the budget in a burst is competing with its own operator for it. One base
-per half hour uses a small fraction of the allowance and leaves the rest for the
-person at the keyboard. It also makes collection resumable for free: a run that
-aborts on a ban leaves its base at the head of the queue.
+trade from — the site rate-limits ordinary human players on its own. A scraper that
+drains the budget in a burst is competing with its own operator for it. The budget
+is a shared resource to leave most of alone.
+
+The interval is a knob, not a truth — see
+[choosing the interval](docs/collection.md#choosing-the-interval). The only rule is
+never to raise `POE2_BATCH` to catch up; that rebuilds the burst. Rotation also makes
+collection resumable for free: a run aborted by a ban leaves its base at the head of
+the queue.
 
 **Collection runs on a real machine, not in CI.** Trade rate limits are per-IP,
 and CI runners use shared, rotating datacenter addresses behind Cloudflare.
@@ -149,14 +153,16 @@ npm run serve       # preview at http://localhost:4173
 npm run typecheck && npm test
 ```
 
-Scheduled use (Windows) — **every 30 minutes**, one base per run:
+Scheduled use (Windows) — one base per tick, on a rotation:
 
 ```powershell
-.\scripts\snapshot.ps1          # collect, analyse, render, commit locally
-.\scripts\snapshot.ps1 -Push    # ...and push, which triggers the Pages deploy
+.\scripts\snapshot.ps1                                # one run by hand, local only
+.\scripts\register-task.ps1 -IntervalMinutes 30 -Push # wire up the rotation
 ```
 
-See [docs/collection.md](docs/collection.md) for the Task Scheduler registration.
+Pick the interval to taste; 15-60 min all work for a six-base set. Slower is politer,
+and the cycle only has to beat the speed prices move (hours). See
+[docs/collection.md](docs/collection.md#choosing-the-interval).
 
 | Variable | Default | Meaning |
 |---|---|---|

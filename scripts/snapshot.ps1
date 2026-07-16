@@ -3,19 +3,17 @@
   Collects the next base in the queue, re-analyses, renders, and commits.
 
 .DESCRIPTION
-  Designed to run from Windows Task Scheduler every 30 minutes. Each invocation
-  collects exactly ONE base — about a dozen searches — then stops. A full pass over
-  the tracked bases takes a few hours, which is faster than base prices actually
-  move.
+  One tick of the rotation. Collects exactly ONE base — about a dozen searches, ~4
+  minutes — then stops. This script has no opinion about how often it runs; that
+  belongs to the scheduler (see register-task.ps1) and is a knob, not a constant.
 
-  The reason for the trickle is not politeness in the abstract: trade's rate limits
-  are per-IP, and that IP is the same one you browse trade from. The site rate-limits
-  ordinary users on its own, so a collector that drains the budget in a burst is
-  competing with you at the keyboard. One base per half hour leaves nearly the whole
-  allowance for the human.
+  The reason for a rotation rather than a batch is not politeness in the abstract:
+  trade's rate limits are per-IP, and that IP is the same one you browse trade from.
+  The site rate-limits ordinary players on its own, so a collector that drains the
+  budget in a burst is competing with you at the keyboard.
 
-  A rate-limit abort is not treated as a failure — the base stays queued and the next
-  run picks it up.
+  A rate-limit abort is not a failure — the base stays queued and the next tick picks
+  it up.
 
   Only aggregates are committed. Raw listings stay in cache/ (gitignored): they are
   megabytes per snapshot, and every run would bloat the repo for data already reduced

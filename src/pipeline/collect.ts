@@ -2,13 +2,15 @@
  * Collects a snapshot for the next base(s) in the work queue — by default exactly one
  * per invocation.
  *
- * This is a trickle, not a batch, and that is the point. Trade's rate limits are
- * per-IP, and that IP belongs to a person who also browses the trade site — which
- * rate-limits ordinary users on its own. Emptying the budget in one burst means
- * competing with your own operator for it. One base per run, scheduled half an hour
- * apart, draws ~12 searches per 30 minutes and leaves the rest of the allowance to
- * the human. A full pass over the tracked bases takes a few hours; base prices don't
- * move meaningfully faster than that anyway.
+ * A slow rotation, never a blitz. Trade's rate limits are per-IP, and that IP belongs
+ * to a person who also browses the trade site — which rate-limits ordinary players on
+ * its own. Emptying the budget in one burst means competing with your own operator
+ * for it; it is a shared resource to leave most of alone.
+ *
+ * Hence: one base per process, ~12 searches, then exit. The *scheduler* supplies the
+ * pacing, not a long-running loop in here — which keeps the per-run cost flat and
+ * makes the tick interval a knob rather than something baked into this file. A full
+ * pass takes hours, which is fine: base prices don't move faster than that.
  *
  * Three things are gathered, each answering a different half of "is this worth
  * crafting?":
@@ -56,9 +58,12 @@ export const MIN_ILVL = Math.min(100, Math.max(60, Number(process.env.POE2_MIN_I
 const BASES_PER_GROUP = Number(process.env.POE2_BASES ?? 6);
 
 /**
- * Bases collected per invocation. Keep this at 1 and schedule often; raising it
- * re-creates the burst this design exists to avoid. Mainly a lever for a one-off
- * backfill on an IP you know is idle.
+ * Bases collected per invocation.
+ *
+ * Keep this at 1. If a full cycle feels too slow, shorten the *scheduler's* interval
+ * instead — that raises the duty cycle gently, where raising this spikes it and
+ * rebuilds the burst the rotation exists to avoid. Mainly a lever for a deliberate
+ * one-off backfill on an IP you know is idle.
  */
 const BATCH = Math.max(1, Number(process.env.POE2_BATCH ?? 1));
 

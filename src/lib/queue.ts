@@ -1,17 +1,18 @@
 /**
  * A persisted round-robin work queue over the tracked bases.
  *
- * Collection is deliberately a trickle, not a batch. The rate limits on trade are
- * per-IP, and that IP is also the one a human uses to browse the site — the trade
- * site rate-limits ordinary users all by itself, so a scraper that empties the
- * budget in a burst is competing with its own operator. Doing one base per run and
- * scheduling runs half an hour apart keeps our draw to roughly a dozen searches per
- * thirty minutes, which leaves nearly the whole allowance for the person at the
- * keyboard.
+ * This is what turns collection into a slow rotation instead of a blitz. Trade's
+ * rate limits are per-IP, and that IP is also the one a human browses the site
+ * from — trade rate-limits ordinary players all by itself, so a scraper that empties
+ * the budget in a burst is competing with its own operator for it.
+ *
+ * So each run takes one base and exits, and the scheduler decides how often that
+ * happens. Keeping the cadence out here rather than in a long-running loop is what
+ * makes the interval a knob: per-run cost stays flat whatever it's set to.
  *
  * The queue also makes collection resumable for free: a run that aborts on a ban
- * simply leaves its base at the head of the queue for next time, and nothing has to
- * know how far a previous run got.
+ * simply leaves its base at the head for next time, and nothing has to know how far
+ * a previous run got.
  */
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';

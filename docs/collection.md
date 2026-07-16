@@ -29,72 +29,88 @@ So the split is:
 - **GitHub Actions** — checkout, `npm run bases`, `npm run site`, deploy. No network
   calls to trade, no secrets.
 
-## One base per run, every 30 minutes
+## A slow rotation, not a blitz
 
-Collection is a **trickle, not a batch**. `npm run collect` takes the next base off
-a persisted queue (`cache/cursor.json`), collects just that one — about a dozen
-searches — and stops. A full pass over the six tracked bases takes ~3 hours.
+This is the one design rule that matters. Everything else here is a consequence.
+
+`npm run collect` takes the next base off a persisted queue (`cache/cursor.json`),
+collects **only that one** — about a dozen searches, ~4 minutes — and exits. A
+scheduled task ticks it over and over, so the tracked set refreshes by rotation.
 
 The reason isn't abstract politeness. Rate limits are **per-IP**, and that IP is
-the same one you browse trade from — the site rate-limits ordinary human users all
-by itself. A collector that drains the budget in a burst is competing with its own
-operator for it. At one base per half hour we draw roughly 12 searches per 30
-minutes against an allowance of 30 per 5 minutes, leaving the large majority for
-the person at the keyboard.
+the same one you browse trade from — the site rate-limits ordinary human players
+all by itself. A collector that drains the budget in a burst is competing with its
+own operator for it. The budget is a shared resource to leave most of alone, not an
+obstacle to route around.
 
-It also makes collection resumable for free: a run that aborts on a ban leaves its
-base at the head of the queue, and the next run picks it up. Nothing needs to know
-how far the last run got.
+Rotation also makes collection resumable for free: a run that aborts on a ban leaves
+its base at the head of the queue, and the next tick picks it up. Nothing needs to
+track how far the last run got.
+
+## Choosing the interval
+
+**There is no correct interval, and the default is not derived from anything.** Two
+quantities are worth reasoning about:
+
+- **Duty cycle** — a run costs ~4 minutes of requests, so at interval `I` we occupy
+  roughly `4/I` of the clock. Everything else is left for you. Smaller is politer.
+- **Cycle time** — `interval × tracked bases`. This is how stale the oldest row on
+  the page can be. It only has to beat the speed prices actually move (hours). It
+  does not have to feel fast.
+
+| Interval | Duty cycle | Cycle (6 bases) | Cycle (48 bases) |
+|---:|---:|---:|---:|
+| 15 min | ~27% | 1.5 h | 12 h |
+| 30 min | ~13% | 3 h | 24 h |
+| 60 min | ~7% | 6 h | 48 h |
+
+All three are defensible; lean slow. Even a 48-hour cycle beats the timescale base
+prices move on, and trends need days of history regardless.
+
+**The one rule: never raise `-Bases`/`POE2_BATCH` to catch up.** That rebuilds the
+burst this design exists to avoid. If a cycle feels too slow, shorten the interval —
+the per-run cost stays flat either way, and the duty cycle rises gently instead of
+spiking.
 
 ## Scheduling on Windows
 
-`scripts/snapshot.ps1` does collect → analyse → render → commit, and pushes with
-`-Push`. Register it every 30 minutes:
-
 ```powershell
-$action  = New-ScheduledTaskAction -Execute 'powershell.exe' `
-  -Argument '-NoProfile -ExecutionPolicy Bypass -File "C:\Users\addohm\Documents\poe2-base-trends\scripts\snapshot.ps1" -Push'
-
-$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) `
-  -RepetitionInterval (New-TimeSpan -Minutes 30) `
-  -RepetitionDuration ([TimeSpan]::MaxValue)
-
-# Don't let a run pile up on top of a slow one.
-$settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew `
-  -ExecutionTimeLimit (New-TimeSpan -Minutes 20) -StartWhenAvailable
-
-Register-ScheduledTask -TaskName 'poe2-base-trends snapshot' `
-  -Action $action -Trigger $trigger -Settings $settings `
-  -Description 'Collect one PoE2 base per run and publish'
+.\scripts\register-task.ps1 -IntervalMinutes 30 -Push
 ```
 
-`-MultipleInstances IgnoreNew` matters: if a run is slow, the next trigger is
-dropped rather than started alongside it. Two collectors sharing an IP is exactly
-the burst this design avoids.
+That wires up `scripts/snapshot.ps1` (collect → analyse → render → commit → push).
+Re-run it with a different `-IntervalMinutes` any time; it replaces the task.
+
+Two settings in there matter:
+
+- `-MultipleInstances IgnoreNew` — if a run is slow, the next tick is **dropped**
+  rather than started beside it. Two collectors sharing an IP is exactly the burst
+  we're avoiding.
+- `-ExecutionTimeLimit 20min` — a backstop. A healthy run is ~4 minutes.
 
 Pushing needs credentials the task can use non-interactively — a credential helper
-or a deploy key. Run it once by hand (without `-Push`) first.
+or a deploy key. Run `.\scripts\snapshot.ps1` by hand once (without `-Push`) first.
 
-## Cadence
+## Consequences of rotating
 
-30 minutes per base is the default; a full refresh cycle lands every ~3 hours.
-
-- **Faster doesn't help.** Base prices don't move meaningfully inside an hour, and
-  the budget spent is budget taken from your own browsing.
 - **Currency rates are cached 6 hours** (`cache/rates.json`, `POE2_RATES_TTL_H`).
-  Exchange is the harshest endpoint (`30:300:1800` → a 30-minute ban); re-querying
-  it every half hour would make the gentlest part of the job the most abusive. Four
-  calls a day is plenty for a ratio that drifts over hours.
-- **History size.** Each collected base appends one JSONL row of a few hundred
-  bytes. Six bases refreshed 8×/day is ~48 rows/day — a few MB over a league. Raw
-  listings are ~200 KB *per base per snapshot*, which is why they stay in `cache/`.
-- **Delisting resolution.** Measured between consecutive snapshots *of the same
-  base*, so the cycle length — not the run interval — defines the window. At ~3
-  hours it reads as "share of blank bases that vanished within about three hours".
-- **Unchanged snapshots don't append.** `analyze` runs every time but only appends
-  history for a base whose snapshot timestamp is new. Otherwise the five bases that
-  didn't move would get a duplicate row every run, inflating pooled mod counts and
-  faking a flat trend into repeated observations.
+  Exchange is the harshest endpoint (`30:300:1800` → a 30-minute ban); re-querying it
+  every tick would make the gentlest part of the job the most abusive. Four calls a
+  day is plenty for a ratio that drifts over hours.
+- **A run under a known ban costs zero requests.** `collect` preflights the persisted
+  ban state before touching the network. Otherwise every tick would spend its ladder
+  searches and then be refused at the first fetch, discarding the lot.
+- **Unchanged snapshots don't append history.** `analyze` runs every tick but only
+  appends for a base whose snapshot timestamp is new. Otherwise the bases that didn't
+  move would each gain a duplicate row per tick, inflating pooled mod counts and
+  faking a flat price into repeated observations.
+- **Rows aren't from the same moment.** The page states each base's age; with a
+  rotation that's a real caveat, not a footnote.
+- **Delisting resolution follows the cycle, not the interval**, since it compares
+  consecutive snapshots *of the same base*.
+- **History size.** One JSONL row of a few hundred bytes per collected base — a few
+  MB over a league. Raw listings are ~200 KB per base per snapshot, which is why they
+  stay in gitignored `cache/`.
 
 ## What one run costs
 
