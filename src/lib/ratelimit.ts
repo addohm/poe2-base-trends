@@ -52,7 +52,15 @@ const STATE_FILE = path.join(process.cwd(), 'cache', 'ratelimit.json');
 interface PersistedState {
   hits: Record<string, number[]>;
   blockedUntil: Record<string, number>;
+  /** Consecutive bans per policy, for backoff. Reset by any successful request. */
+  strikes?: Record<string, number>;
 }
+
+/**
+ * Ceiling on backoff. Long enough to outlast a flagged IP, short enough that a
+ * rotation left running unattended recovers on its own within a day.
+ */
+const MAX_BACKOFF_SEC = 4 * 3600;
 
 export class RateLimiter {
   /** Request timestamps (ms) per policy, forming a sliding window. */
@@ -60,6 +68,8 @@ export class RateLimiter {
   private rules = new Map<string, Rule[]>();
   /** Epoch ms until which a policy is server-side restricted. */
   private blockedUntil = new Map<string, number>();
+  /** Consecutive bans per policy. Any success clears it. */
+  private strikes = new Map<string, number>();
   /** Last request time per policy, for the fixed floor delay. */
   private lastAt = new Map<string, number>();
   private safety: number;
@@ -99,6 +109,7 @@ export class RateLimiter {
           console.warn(`[ratelimit] ${policy} still banned for ${Math.ceil((until - now) / 1000)}s (from a previous run).`);
         }
       }
+      for (const [policy, n] of Object.entries(s.strikes ?? {})) this.strikes.set(policy, n);
     } catch {
       // A corrupt state file must not take the run down; worst case we start blind.
     }
@@ -112,7 +123,9 @@ export class RateLimiter {
       for (const [p, t] of this.hits) hits[p] = t;
       const blockedUntil: Record<string, number> = {};
       for (const [p, u] of this.blockedUntil) blockedUntil[p] = u;
-      writeFileSync(STATE_FILE, JSON.stringify({ hits, blockedUntil } satisfies PersistedState));
+      const strikes: Record<string, number> = {};
+      for (const [p, n] of this.strikes) strikes[p] = n;
+      writeFileSync(STATE_FILE, JSON.stringify({ hits, blockedUntil, strikes } satisfies PersistedState));
     } catch {
       // Non-fatal: persistence is an optimisation, not a correctness requirement.
     }
@@ -221,21 +234,41 @@ export class RateLimiter {
     }
   }
 
+  /** A request came back OK: the policy is healthy, so forget the strike history. */
+  succeeded(policy: string): void {
+    if (this.strikes.get(policy)) {
+      this.strikes.delete(policy);
+      this.save();
+    }
+  }
+
   /**
-   * Honour an explicit 429. With correct pacing this should never fire.
+   * Honour an explicit 429, backing off harder each consecutive time.
    *
-   * Returns the ban length. Waits it out only when it's short: GGG escalate
-   * penalties well past the advertised `restriction` (a fetch burst once earned
-   * 600s against a rule claiming 10s), and silently sleeping through that looks
-   * exactly like a hung process. Anything longer is the caller's to decide about.
+   * Waiting exactly `Retry-After` and trying again is what a well-behaved client does
+   * against a *transient* limit. It is the wrong move against a flagged IP: observed
+   * behaviour is that each attempt re-arms the ban, so a fixed retry interval becomes
+   * a slow blitz that can never converge — three separate 600s bans were earned this
+   * way, each after politely waiting out the last.
+   *
+   * So consecutive bans double the wait. One 429 is weather; four in a row means the
+   * server is telling us something a `Retry-After` header doesn't express, and the
+   * only correct response is to get much quieter. Any success clears the count.
    */
   async penalty(policy: string, headers: Headers, maxWaitSec = 120): Promise<number> {
     const retry = Number(headers.get('retry-after') ?? '60');
-    const secs = Number.isFinite(retry) ? retry : 60;
+    const advertised = Number.isFinite(retry) ? retry : 60;
+
+    const strike = (this.strikes.get(policy) ?? 0) + 1;
+    this.strikes.set(policy, strike);
+    const secs = Math.min(advertised * 2 ** (strike - 1), MAX_BACKOFF_SEC);
+
     this.blockedUntil.set(policy, Date.now() + secs * 1000 + 500);
     this.save();
+
     if (secs > maxWaitSec) {
-      console.warn(`[ratelimit] 429 on ${policy}; banned for ${secs}s — too long to wait out.`);
+      const note = strike > 1 ? ` (strike ${strike}; advertised ${advertised}s, backed off)` : '';
+      console.warn(`[ratelimit] 429 on ${policy}; holding off ${secs}s${note}.`);
       return secs;
     }
     console.warn(`[ratelimit] 429 on ${policy}; sleeping ${secs}s.`);

@@ -124,6 +124,7 @@ export class TradeClient {
         continue;
       }
       if (!res.ok) throw new Error(`search failed: ${res.status} ${await res.text().catch(() => '')}`);
+      this.limiter.succeeded(SEARCH_POLICY);
       return (await res.json()) as SearchResponse;
     }
     throw new Error('search failed after retries');
@@ -143,6 +144,7 @@ export class TradeClient {
         continue;
       }
       if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+      this.limiter.succeeded(FETCH_POLICY);
       const body = (await res.json()) as { result: (RawResult | null)[] };
       // Listings sold between search and fetch come back as nulls.
       return body.result.filter((r): r is RawResult => r !== null);

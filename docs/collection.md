@@ -2,26 +2,31 @@
 
 ## Why collection doesn't run in CI
 
-The natural instinct with a GitHub Pages site is to let Actions do everything on a
-cron. Don't, for this project:
+Deploying the *site* from GitHub Actions is exactly right, and that's what
+`.github/workflows/pages.yml` does. Moving *collection* there is the tempting next
+step — especially when your own IP is in a penalty box — but it trades a problem you
+can see for several you can't:
 
-1. **Rate limits are per-IP, and CI IPs are shared.** GGG limit
-   `trade-search-request-limit` by IP. GitHub-hosted runners draw from shared,
-   rotating Azure address pools. A snapshot from CI spends budget that belongs to
-   whatever else is on that address, and inherits whatever they've already spent.
-   Two runs landing on the same IP can trip a limit neither would have hit alone.
-2. **A ban would not be ours to serve.** The worst search rule carries a 30 minute
-   restriction, applied to the IP. On a shared runner that punishes strangers.
-3. **Cloudflare.** `pathofexile.com` sits behind Cloudflare, which treats
-   datacenter ranges far more suspiciously than residential ones. A collector that
-   works locally can silently start returning 403 in CI.
-4. **No secret needs to exist.** The trade2 endpoints currently answer
-   unauthenticated, so nothing needs a `POESESSID` — but if that ever changes,
-   the session cookie is an account credential and putting it in CI would be a bad
-   trade for a page that updates a few times a day.
+1. **Cloudflare is hostile to datacenter IPs.** `pathofexile.com` sits behind
+   Cloudflare, and GitHub runners are Azure ranges — the most-challenged address space
+   there is. An automated browser gets a "Performing security verification" interstitial
+   even from a *residential* IP. Expect 403s or challenges, not data. Getting past that
+   would mean defeating bot detection, which isn't on the table.
+2. **Rate limits are per-IP, and CI IPs are shared and rotating.** A run spends budget
+   belonging to whatever else is on that address, and inherits whatever they've already
+   spent. Two runs landing on one IP can trip a limit neither would hit alone.
+3. **The 4xx spiral would land on strangers.** See above: bans accrue to the IP. On a
+   shared runner, ours is served by whoever draws that address next — and theirs by us.
+   The whole point of the rotation is to be a small, well-behaved fraction of a shared
+   budget; anonymising ourselves into someone else's pool is the opposite.
+4. **It would need a secret to be worth it.** If the answer to Cloudflare is "send a
+   session cookie", that's an account credential in CI, for a page that updates hourly.
+   Bad trade.
 
-None of this buys anything: the data changes on the order of hours, and a local
-scheduled task publishes just as freshly.
+And it buys nothing: the data moves over hours, and a local scheduled rotation
+publishes just as freshly. A flagged IP is a *timing* problem that resolves itself with
+silence; routing around it via someone else's address is a citizenship problem that
+doesn't.
 
 So the split is:
 
@@ -138,6 +143,44 @@ only 100 listings.
 
 `POE2_BATCH` raises bases per run, and `POE2_BASES` sizes the tracked set. Leave
 `POE2_BATCH` at 1 outside of a deliberate backfill on a known-idle IP.
+
+## The 4xx spiral — why retrying makes it worse
+
+GGG's developer docs contain the sentence that explains everything:
+
+> Applications that make too many invalid requests in a short period of time will be
+> restricted from further access, where **invalid requests include any response codes
+> in the HTTP 4xx range**.
+
+A `429` is a 4xx. So **every rate-limit rejection is itself an invalid request that
+deepens the restriction.** Waiting exactly `Retry-After` and trying again — textbook
+good-citizen behaviour against a transient limit — is precisely wrong here: the retry
+gets 429'd, that 429 counts against you, and the restriction extends. It never
+converges. During development this produced three separate 600s bans, each earned
+immediately after politely waiting out the last.
+
+The only escape is to **stop making requests entirely** and let the invalid-request
+window drain. Hence the exponential backoff in `ratelimit.ts`: consecutive bans double
+the wait (capped at 4h), and any success resets it. One 429 is weather; four in a row
+means the server is saying something `Retry-After` doesn't express.
+
+Corollary: a rejected request is not free. A run must never "just try and see" — that
+is what the preflight ban check is for.
+
+## Is the trade *site* banned too?
+
+No, and that distinction confuses the diagnosis. The website may work perfectly in
+your browser while the API refuses this client, because:
+
+- The site's own calls ride an authenticated session with its own budget.
+- Your browsing hasn't produced a burst of 4xx responses; the collector has.
+- Cloudflare fingerprints clients, and treats a scripted one very differently from
+  Chrome. (An automated browser pointed at `pathofexile.com` gets a bot challenge even
+  from a residential IP.)
+
+So "I can still browse trade" does **not** mean the API is clear, and it is not
+evidence the collector is safe to restart. Check `cache/ratelimit.json` instead — it
+records the real state, and a preflight run reports it without spending anything.
 
 ## Limit debt, and why iterating hurts
 
