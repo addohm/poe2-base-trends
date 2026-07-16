@@ -44,6 +44,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Test
+        run: npm test
+
       # Regenerated from the RePoE dump each deploy so base tables track game patches.
       - name: Build base tables
         run: npm run bases

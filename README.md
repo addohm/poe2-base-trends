@@ -31,9 +31,9 @@ in live data; three Ancestral Tiaras sampled during development:
 
 | ES | Price | Notable mod |
 |---:|---:|---|
-| 169 | **13 div** | `35% reduced Attribute Requirements` |
-| 254 | 3 div | `P1 94% increased Energy Shield` |
-| 452 | 2 div | `P2 +57 to maximum Energy Shield` |
+| 169 | **13 div** | `of the Proficient` S1 — 35% reduced Attribute Requirements |
+| 254 | 3 div | `Unassailable` P1 — 94% increased Energy Shield |
+| 452 | 2 div | `Celestial` P2 — +57 to maximum Energy Shield |
 
 The **highest-ES item is the cheapest**. An ES-sorted method would never surface
 `reduced Attribute Requirements`, which is what the expensive one is actually
@@ -42,13 +42,36 @@ selling on.
 Instead we compute **lift**:
 
 ```
-lift(mod) = P(mod | expensive quartile) / P(mod | whole sample)
+lift(mod) = P(mod | dearest slice of market) / P(mod | whole market)
 ```
 
 `2.0×` means a mod is twice as common on expensive items as on the market at
-large — someone is paying for it. `1.0×` means it's along for the ride. The
-sample is drawn by **recency** (`sort: {indexed: desc}`), which is uncorrelated
-with price, so we aren't measuring our own sort order.
+large — someone is paying for it. `1.0×` means it's along for the ride. Every
+lift carries a **95% confidence interval**, and a mod whose interval spans 1.0 is
+labelled *noise* rather than ranked — on a thin sample a mod seen a handful of
+times can show a lift of 2.0 by luck alone.
+
+#### Mods are identified by family and tier, never by stat text
+
+This is the single easiest way to get this analysis wrong, and the first version
+of this repo got it wrong. Trade reports one entry per *stat*, each naming the mod
+that granted it. Two facts make stat-level keys worthless:
+
+- **Hybrids grant several stats.** `Celestial` P3 emits both `29% increased Energy
+  Shield` and `+21 to maximum Mana`. It is one mod; a crafter hits it once.
+- **Unrelated families share a stat hash, each with its own tier ladder.** The stat
+  `increased Energy Shield` is granted by `Unassailable` (P1 = 92-100%), by
+  `Celestial` (P3 = 27-32%, hybrid), and by desecrated `Dauntless` (P3 = 68-79%).
+
+Keying on `stat_hash|tier` merges these into a bucket corresponding to **no real
+mod at all**. That bug is what once made "[P2] increased Energy Shield" look like
+a top result. The key is now `origin|family|tier` — e.g. `exp|Unassailable|P1`.
+
+#### Item level floor
+
+Mod tiers are ilvl-gated, so a market mixing levelling drops with endgame items
+compares bases that cannot roll the same mods. Set `POE2_MIN_ILVL` (default `70`,
+useful range `60`-`100`).
 
 ### 3. Prices are asks, not sales — so read the distribution carefully
 
@@ -58,23 +81,27 @@ for*.
 
 Consequences baked into the design:
 
+- **Price stats come from whole-market counts, not samples.** Passing `price` with
+  no currency option makes trade convert every listing to an Exalted Orb
+  equivalent itself. A handful of count-only searches (`total`, no fetches) then
+  yields an exact histogram — "27% of rare Ancestral Tiaras are ≥1000ex" is a fact
+  about every listing, not an estimate from 100 of them.
 - **We never read the top of the price distribution.** It's tempting to look at
   the top-5 priced items, but the top of a right-skewed ask distribution is
-  precisely where manipulation lives — the mirror-priced troll listings. We
-  report the **10th percentile of the cheapest asks** instead. This kills both
-  the bait listings and the trolls without needing any heuristic to detect them.
-- **Everything is normalised to exalted**, using GGG's own currency exchange. The
-  divine:exalted ratio moves a lot over a league; without deflating, every item
-  appears to trend together and you've plotted currency inflation instead of item
-  value. The rates used are stored with each snapshot so past readings stay
-  reproducible.
+  precisely where manipulation lives — the mirror-priced troll listings. Slicing
+  by an absolute threshold (the dearest ~25%) rather than by rank means trolls are
+  a rounding error inside a large stratum instead of the whole reading.
+- **Listings are collapsed per account**, so one seller dumping forty near-identical
+  items can't turn their personal crafting habits into a "market preference".
+- **Everything is normalised to exalted.** The divine:exalted ratio moves a lot
+  over a league; without deflating, every item appears to trend together and you've
+  plotted currency inflation instead of item value. Rates are stored per snapshot
+  so past readings stay reproducible.
 - **Delisting rate** is tracked between snapshots. An ask nobody takes is an
-  opinion; an ask that disappears is closer to a price. It's the best available
-  proxy for a sale.
-- **Mod counts are pooled across snapshots.** One snapshot yields a top quartile
-  of ~25 items, where a mod seen 8 times can show `2.0×` lift by chance alone. A
-  mod must be seen 25+ times before the site will rank it, so the page starts
-  sparse and sharpens.
+  opinion; an ask that disappears is closer to a price.
+- **Mod counts are pooled across snapshots**, and every lift is reported with a
+  confidence interval. The page starts sparse and sharpens rather than starting
+  confident and wrong.
 
 ## Architecture
 

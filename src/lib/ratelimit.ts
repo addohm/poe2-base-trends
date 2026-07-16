@@ -147,12 +147,24 @@ export class RateLimiter {
     }
   }
 
-  /** Honour an explicit 429. With correct pacing this should never fire. */
-  async penalty(policy: string, headers: Headers): Promise<void> {
+  /**
+   * Honour an explicit 429. With correct pacing this should never fire.
+   *
+   * Returns the ban length. Waits it out only when it's short: GGG escalate
+   * penalties well past the advertised `restriction` (a fetch burst once earned
+   * 600s against a rule claiming 10s), and silently sleeping through that looks
+   * exactly like a hung process. Anything longer is the caller's to decide about.
+   */
+  async penalty(policy: string, headers: Headers, maxWaitSec = 120): Promise<number> {
     const retry = Number(headers.get('retry-after') ?? '60');
     const secs = Number.isFinite(retry) ? retry : 60;
-    console.warn(`[ratelimit] 429 on ${policy}; sleeping ${secs}s.`);
     this.blockedUntil.set(policy, Date.now() + secs * 1000 + 500);
+    if (secs > maxWaitSec) {
+      console.warn(`[ratelimit] 429 on ${policy}; banned for ${secs}s — too long to wait out.`);
+      return secs;
+    }
+    console.warn(`[ratelimit] 429 on ${policy}; sleeping ${secs}s.`);
     await sleep(secs * 1000 + 500);
+    return secs;
   }
 }

@@ -1,6 +1,9 @@
 
+!requirements.txt
 # Local Claude settings (machine-specific)
+# stray curl debug output
 *.log
+*.txt
 .claude/settings.local.json
 .env
 .env.local

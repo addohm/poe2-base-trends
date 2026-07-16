@@ -50,7 +50,10 @@ tbody tr:hover { background:rgba(127,127,127,0.06); }
 .best td { color:var(--accent); font-weight:600; }
 .mono { font-variant-numeric: tabular-nums; }
 .lift-hi { color:var(--good); font-weight:600; }
+.lift-bad { color:var(--bad); font-weight:600; }
 .lift-lo { color:var(--dim); }
+.dimcell { color:var(--dim); font-size:0.82rem; }
+.tier { color:var(--accent); font-weight:600; font-size:0.8rem; }
 .note { border-left:3px solid var(--accent); padding:10px 14px; background:var(--panel);
   border-radius:0 8px 8px 0; margin:16px 0; }
 .note strong { color:var(--accent); }
@@ -88,16 +91,24 @@ function basesTable(bases: RankedBase[]): string {
     <tbody>${rows}</tbody></table></div>`;
 }
 
-function marketTable(bases: BaseAnalysis[], name: (slug: string) => string): string {
+/** Share of the rare market at or above a given exalted threshold. */
+function ladderCell(b: BaseAnalysis, minEx: number): string {
+  const total = b.rareTotal ?? 0;
+  const rung = b.rareLadder.find((r) => r.minEx === minEx);
+  if (!total || !rung) return '—';
+  return `${((rung.count / total) * 100).toFixed(0)}%`;
+}
+
+function marketTable(bases: BaseAnalysis[]): string {
   const rows = bases
     .map(
       (b) => `<tr>
-      <td>${esc(name(b.base))}</td>
+      <td>${esc(b.base)}</td>
       <td class="mono">${num(b.magicFloorEx)}</td>
-      <td class="mono">${b.magicListings ?? '—'}</td>
-      <td class="mono">${num(b.rareFloorEx)}</td>
-      <td class="mono">${num(b.rareMedianEx)}</td>
-      <td class="mono">${b.rareListings ?? '—'}</td>
+      <td class="mono">${b.magicTotal ?? '—'}</td>
+      <td class="mono">${b.rareTotal ?? '—'}</td>
+      <td class="mono">${ladderCell(b, 200)}</td>
+      <td class="mono">${ladderCell(b, 1000)}</td>
       <td class="mono">${b.delistRate === null ? '—' : (b.delistRate * 100).toFixed(0) + '%'}</td>
       <td class="mono">${trendCell(b.trendPct)}</td>
     </tr>`,
@@ -105,8 +116,8 @@ function marketTable(bases: BaseAnalysis[], name: (slug: string) => string): str
     .join('\n');
   return `<div class="panel scroll"><table>
     <thead><tr>
-      <th>Base</th><th>Magic p10 (ex)</th><th>Magic listed</th>
-      <th>Rare p10 (ex)</th><th>Rare median (ex)</th><th>Rare listed</th><th>Delisted/run</th><th>Trend</th>
+      <th>Base</th><th>Blank base (ex)</th><th>Magic listed</th><th>Rare listed</th>
+      <th>Rares ≥200ex</th><th>Rares ≥1000ex</th><th>Blank turnover</th><th>Base cost trend</th>
     </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -117,25 +128,37 @@ function trendCell(pct: number | null): string {
   return `<span class="${cls}">${pct > 0 ? '+' : ''}${pct.toFixed(0)}%</span>`;
 }
 
-function modsSection(b: BaseAnalysis, name: (slug: string) => string): string {
+function modsSection(b: BaseAnalysis): string {
+  const head = `<h3>${esc(b.base)}
+    <span class="pill">top ≥${b.topThresholdEx ?? '?'}ex</span>
+    <span class="pill">n = ${b.nTop} vs ${b.nBase}</span>
+    <span class="pill">${b.snapshots} snapshot(s)</span></h3>`;
+
   if (!b.topMods.length) {
-    return `<h3>${esc(name(b.base))}</h3><p>Not enough evidence to rank mods yet — pooled sample ${b.sampleSize} across ${b.snapshots} snapshot(s). A mod must be seen 25+ times before it's ranked, so this fills in as snapshots accumulate.</p>`;
+    return `${head}<p>No mod has been seen enough times in both strata to compare yet. This fills in as snapshots accumulate.</p>`;
   }
+
   const rows = b.topMods
-    .slice(0, 12)
+    .slice(0, 20)
     .map((m) => {
-      const cls = m.lift >= 1.5 ? 'lift-hi' : m.lift < 1 ? 'lift-lo' : '';
+      const cls = m.significant ? (m.lift > 1 ? 'lift-hi' : 'lift-bad') : 'lift-lo';
+      const mark = m.significant ? '' : ' <span class="pill">noise</span>';
       return `<tr>
+      <td>${esc(m.name)} <span class="tier">${esc(m.tier)}</span>${m.desecrated ? ' <span class="pill">desecrated</span>' : ''}${mark}</td>
       <td>${esc(m.label)}</td>
       <td class="mono ${cls}">${m.lift.toFixed(2)}&times;</td>
-      <td class="mono">${(m.share * 100).toFixed(0)}%</td>
-      <td class="mono">${m.inTop}/${m.inAll}</td>
+      <td class="mono dimcell">${m.ciLow.toFixed(2)}–${m.ciHigh.toFixed(2)}</td>
+      <td class="mono">${(m.shareTop * 100).toFixed(0)}% / ${(m.shareBase * 100).toFixed(0)}%</td>
+      <td class="mono">${m.inTop}/${m.inBase}</td>
     </tr>`;
     })
     .join('\n');
-  return `<h3>${esc(name(b.base))} <span class="pill">pooled sample ${b.sampleSize}</span> <span class="pill">${b.snapshots} snapshot(s)</span></h3>
+
+  return `${head}
   <div class="panel scroll"><table>
-    <thead><tr><th>Mod (tier)</th><th>Lift</th><th>Market share</th><th>Top/All</th></tr></thead>
+    <thead><tr>
+      <th>Mod</th><th>Grants</th><th>Lift</th><th>95% CI</th><th>Top / market</th><th>Sightings</th>
+    </tr></thead>
     <tbody>${rows}</tbody></table></div>`;
 }
 
@@ -149,6 +172,7 @@ async function main(): Promise<void> {
     ? (JSON.parse(await readFile(analysisPath, 'utf8')) as {
         generatedAt: string;
         league: string;
+        minIlvl: number | null;
         divineRate: number | null;
         bases: BaseAnalysis[];
       })
@@ -159,18 +183,11 @@ async function main(): Promise<void> {
     .sort((a, b) => b.energyShieldMaxQ - a.energyShieldMaxQ)
     .slice(0, 10);
 
-  // Query keys carry a slug ("AncestralTiara"); restore the real name for display.
-  const slugToName = new Map(
-    Object.values(basesDoc.classes)
-      .flat()
-      .map((b) => [b.name.replace(/[^A-Za-z0-9]/g, ''), b.name] as const),
-  );
-  const name = (slug: string) => slugToName.get(slug) ?? slug;
-
   const body = `
 <h1>PoE2 Base &amp; Mod Trends</h1>
 <div class="sub">
   <span class="pill">League: ${esc(analysis?.league ?? 'Runes of Aldur')}</span>
+  <span class="pill">Item level ≥ ${analysis?.minIlvl ?? '—'}</span>
   <span class="pill">1 divine ≈ ${analysis?.divineRate ? Math.round(analysis.divineRate) : '?'} ex</span>
   <span class="pill">Updated ${esc((analysis?.generatedAt ?? basesDoc.generatedAt).slice(0, 16).replace('T', ' '))} UTC</span>
 </div>
@@ -180,29 +197,31 @@ async function main(): Promise<void> {
 ones nobody currently has listed. It is exact, and it does not change during a league.</p>
 ${basesTable(esHelms)}
 
-<h2>What they cost</h2>
-<p>Prices are the 10th percentile of the cheapest asks, normalised to exalted using
-GGG's own currency exchange. We never read the top of the price distribution: that
-is where manipulation lives, so the mirror-priced troll listings simply never enter
-the calculation.</p>
-<p><em>Delisted/run</em> is the share of previously-seen listings that are gone —
-the closest available proxy for something selling, since no PoE2 API exposes
-completed sales. It only counts listings priced below the current window's ceiling,
-which are the ones that <em>had</em> to still be visible if they hadn't been taken;
-ambiguous ones are excluded rather than guessed at.</p>
-${analysis ? marketTable(analysis.bases, name) : '<p>No market snapshot yet. Run <code>npm run collect</code>.</p>'}
+<h2>What they cost, and what they sell for</h2>
+<p><em>Blank base</em> is the going rate for an uncrafted magic base. The
+<em>≥200ex</em> and <em>≥1000ex</em> columns are the share of the rare market at
+those prices — these are exact counts across every listing, not estimates from a
+sample, so they say directly how often crafting this base pays off.</p>
+<p>All prices are Exalted Orb equivalent, converted by trade itself. Listings are
+collapsed to one per seller, so a single person dumping forty items can't tilt the
+numbers.</p>
+${analysis ? marketTable(analysis.bases) : '<p>No market snapshot yet. Run <code>npm run collect</code>.</p>'}
 
 <h2>Which mods are actually paid for</h2>
 <div class="note">
-<strong>Lift</strong> compares how often a mod appears on the most expensive quartile
-against how often it appears on the market as a whole. <strong>2.0×</strong> means a mod
-is twice as common on expensive items as on average — someone is paying for it.
-<strong>1.0×</strong> means it's along for the ride. Sorting items by energy shield and
-reading off their mods can't tell you this: that method selects for ES mods by
-construction, so it finds them no matter what the market thinks. These samples are
-drawn by <em>recency</em> instead, which is uncorrelated with price.
+<p><strong>Lift</strong> compares how often a mod appears on the dearest slice of the
+market against how often it appears on the market overall. <strong>2.0×</strong> means
+twice as common on expensive items — someone is paying for it. <strong>1.0×</strong>
+means it's along for the ride.</p>
+<p>The <strong>95% CI</strong> is the range the true lift plausibly sits in. If it
+spans 1.0 the mod is marked <span class="pill">noise</span>: the apparent effect can't
+be told apart from chance at this sample size. Trust the interval, not the point.</p>
+<p>Mods are identified by <strong>family and tier</strong> — "Unassailable P1", not
+"increased Energy Shield". This matters: several unrelated mod families grant the same
+stat with their own separate tier ladders, so a stat-level reading blends mods that
+have nothing to do with each other.</p>
 </div>
-${analysis ? analysis.bases.map((b) => modsSection(b, name)).join('\n') : ''}
+${analysis ? analysis.bases.map((b) => modsSection(b)).join('\n') : ''}
 
 <footer>
 Base data from <a href="https://repoe-fork.github.io/poe2/">RePoE (PoE2)</a>.

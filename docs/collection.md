@@ -65,17 +65,29 @@ Every 6 hours is a good default.
 
 ## What a snapshot costs
 
-Per run, for the 6-base helmet slice:
+Per base:
 
 | | Requests | Notes |
 |---|---:|---|
-| Currency rates | 10 | one exchange call per tracked currency |
-| Searches | 18 | 6 bases × (magic price-asc, rare price-asc, rare recent) |
-| Fetches | ~180 | 100 ids per search, 10 ids per fetch call |
+| Rare price ladder | 5 | count-only searches; **no fetches** |
+| Magic price ladder | 4 | count-only searches |
+| Top-stratum sample | 1 + 10 | search + fetches (100 ids, 10 per call) |
+| Baseline sample | 1 + 10 | search + fetches |
+| Cheapest magic | 1 + 2 | 20 ids for the blank-base floor |
 
-Roughly 210 requests, ~10 minutes at 50% of published limits. The binding
-constraint is the search rule `30:300:1800` — 30 searches per 5 minutes — which
-means the slice could grow to ~5× its current size before cadence has to change.
+So ~12 searches and ~22 fetches per base, plus ~10 exchange calls per run for
+currency rates (a separate limit bucket). For the default 6-base slice that's
+roughly **72 searches and 130 fetches**, about 15-20 minutes at 50% of published
+limits.
+
+The binding constraint is the search rule `30:300:1800` — 30 searches per 5
+minutes, and we use half of that. **Searches are the scarce resource, fetches are
+not**, which is why price statistics were moved onto ladders: a rung costs one
+search and describes the entire market, where a sampled percentile costs a search
+*plus* ten fetches and only describes 100 listings.
+
+Set `POE2_BASES=2` for a cheap first run to confirm the IP is clear before
+committing to a full snapshot.
 
 ## Extending beyond helmets
 

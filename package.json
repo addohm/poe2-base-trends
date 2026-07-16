@@ -14,6 +14,7 @@
     "site": "node src/pipeline/site.ts",
     "serve": "node src/pipeline/serve.ts",
     "typecheck": "tsc --noEmit",
+    "test": "node --test src/**/*.test.ts",
     "build": "npm run bases && npm run analyze && npm run site",
     "snapshot": "npm run collect && npm run analyze && npm run site"
   },

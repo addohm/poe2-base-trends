@@ -37,6 +37,7 @@ interface RawMod {
 interface RawExplicit {
   description?: string;
   hash?: string;
+  flags?: { desecrated?: boolean };
   mods?: (RawMod | null)[];
 }
 export interface RawResult {
@@ -57,6 +58,23 @@ export interface RawResult {
     explicitMods?: RawExplicit[];
     extended?: { ar?: number; ev?: number; es?: number; [k: string]: unknown };
   };
+}
+
+/**
+ * Thrown when the API bans us for longer than a run should wait. Collection is a
+ * scheduled job — failing now with a clear reason beats sleeping half an hour and
+ * looking hung. The next scheduled run picks up once the ban has expired.
+ */
+export class RateLimitedError extends Error {
+  retryAfterSec: number;
+  constructor(policy: string, retryAfterSec: number) {
+    super(
+      `${policy} is rate-limited for ${retryAfterSec}s (~${Math.ceil(retryAfterSec / 60)} min). ` +
+        `Aborting; retry after that window. If this repeats, the IP is carrying limit debt — leave it idle a while.`,
+    );
+    this.name = 'RateLimitedError';
+    this.retryAfterSec = retryAfterSec;
+  }
 }
 
 export class TradeClient {
@@ -86,7 +104,8 @@ export class TradeClient {
       });
       this.limiter.observe(SEARCH_POLICY, res.headers);
       if (res.status === 429) {
-        await this.limiter.penalty(SEARCH_POLICY, res.headers);
+        const secs = await this.limiter.penalty(SEARCH_POLICY, res.headers);
+        if (secs > 120) throw new RateLimitedError(SEARCH_POLICY, secs);
         continue;
       }
       if (!res.ok) throw new Error(`search failed: ${res.status} ${await res.text().catch(() => '')}`);
@@ -104,7 +123,8 @@ export class TradeClient {
       const res = await fetch(url, { headers: this.headers() });
       this.limiter.observe(FETCH_POLICY, res.headers);
       if (res.status === 429) {
-        await this.limiter.penalty(FETCH_POLICY, res.headers);
+        const secs = await this.limiter.penalty(FETCH_POLICY, res.headers);
+        if (secs > 120) throw new RateLimitedError(FETCH_POLICY, secs);
         continue;
       }
       if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
@@ -164,14 +184,55 @@ export function toListing(r: RawResult, toEx: (amount: number, currency: string)
   };
 }
 
-/** Stable per-mod identity: the stat hash plus the rolled tier, e.g. "stat.explicit.stat_123|P1". */
-export function modKeys(r: RawResult): { key: string; hash: string; tier: string; text: string }[] {
-  const out: { key: string; hash: string; tier: string; text: string }[] = [];
-  for (const m of r.item.explicitMods ?? []) {
-    const hash = m.hash;
-    if (!hash) continue;
-    const tier = m.mods?.find((x) => x?.tier)?.tier ?? '?';
-    out.push({ key: `${hash}|${tier}`, hash, tier, text: m.description ?? hash });
+export interface ItemMod {
+  /** Stable identity: origin + mod family name + tier, e.g. "exp|Unassailable|P1". */
+  key: string;
+  /** The mod family's name as the game shows it, e.g. "Unassailable", "of the Proficient". */
+  name: string;
+  /** Tier within that family's own ladder, e.g. "P1" (prefix 1) or "S3" (suffix 3). */
+  tier: string;
+  desecrated: boolean;
+  /** Stat lines this one mod grants. Hybrids grant more than one. */
+  stats: string[];
+}
+
+/**
+ * Extracts the distinct **mods** on an item.
+ *
+ * The unit here is the mod family + tier, not the stat line, and the distinction is
+ * not cosmetic — it's the difference between a real measurement and nonsense.
+ *
+ * Trade reports one entry per *stat*, each naming the mod that granted it. Two facts
+ * make stat-level keys useless:
+ *
+ *  - **Hybrids grant several stats.** "Celestial" P3 emits both `29% increased Energy
+ *    Shield` and `+21 to maximum Mana` as separate entries. It is one mod, and a
+ *    crafter hits it once.
+ *  - **Unrelated families share stat hashes, and each has its own tier ladder.**
+ *    `stat_4015621042` (increased ES) is granted by "Unassailable" (P1 = 92-100%),
+ *    by "Celestial" (P3 = 27-32%, hybrid), and by desecrated "Dauntless" (P3 = 68-79%).
+ *    Keying on hash+tier merges these into a bucket that corresponds to no mod at all —
+ *    which is exactly how "[P2] increased Energy Shield" became a top result.
+ *
+ * So we key on the family name and its own tier, and keep desecrated mods separate
+ * since they come from a different mechanic and cannot be crafted the same way.
+ */
+export function itemMods(r: RawResult): ItemMod[] {
+  const byKey = new Map<string, ItemMod>();
+  for (const entry of r.item.explicitMods ?? []) {
+    const desecrated = Boolean(entry.flags?.desecrated) || (entry.hash ?? '').includes('.desecrated.');
+    for (const mod of entry.mods ?? []) {
+      if (!mod?.name) continue;
+      const tier = mod.tier ?? '?';
+      const key = `${desecrated ? 'des' : 'exp'}|${mod.name}|${tier}`;
+      const existing = byKey.get(key);
+      const stat = entry.description ?? entry.hash ?? '';
+      if (existing) {
+        if (stat && !existing.stats.includes(stat)) existing.stats.push(stat);
+      } else {
+        byKey.set(key, { key, name: mod.name, tier, desecrated, stats: stat ? [stat] : [] });
+      }
+    }
   }
-  return out;
+  return [...byKey.values()];
 }
