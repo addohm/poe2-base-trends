@@ -1,0 +1,66 @@
+name: Deploy site
+
+# Builds the static site from data that is already committed and publishes it.
+#
+# Note what this workflow deliberately does NOT do: collect from the trade API.
+# See docs/collection.md — trade rate limits are per-IP, and CI runners use shared,
+# rotating datacenter addresses. Scraping from here would mean sharing a rate-limit
+# bucket (and any resulting ban) with every unrelated project on the same runner IP,
+# behind Cloudflare, for no benefit. Collection runs on a real machine and commits
+# its aggregates; CI only renders them.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - 'src/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish; queue at most one behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install
+        run: npm ci --no-audit --fund=false
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Regenerated from the RePoE dump each deploy so base tables track game patches.
+      - name: Build base tables
+        run: npm run bases
+
+      - name: Render site
+        run: npm run site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

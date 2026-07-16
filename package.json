@@ -1,0 +1,24 @@
+{
+  "name": "poe2-base-trends",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Best crafting bases and most-paid-for stat lines in Path of Exile 2, derived from game data and trade listings.",
+  "engines": {
+    "node": ">=22.6"
+  },
+  "scripts": {
+    "bases": "node src/pipeline/bases.ts",
+    "collect": "node src/pipeline/collect.ts",
+    "analyze": "node src/pipeline/analyze.ts",
+    "site": "node src/pipeline/site.ts",
+    "serve": "node src/pipeline/serve.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run bases && npm run analyze && npm run site",
+    "snapshot": "npm run collect && npm run analyze && npm run site"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "typescript": "^7.0.2"
+  }
+}

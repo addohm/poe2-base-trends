@@ -1,0 +1,9 @@
+
+# Local Claude settings (machine-specific)
+*.log
+.claude/settings.local.json
+.env
+.env.local
+cache/
+dist/
+node_modules/
