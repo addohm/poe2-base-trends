@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T13:36:06.459Z",
+  "generatedAt": "2026-07-17T22:38:31.126Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 440,
@@ -172,81 +172,6 @@
       ],
       "suffixes": [
         {
-          "key": "exp|of the Lightning|S2",
-          "label": "#% to Lightning Resistance",
-          "lift": 1.3333333333333333,
-          "ciLow": 0.5880506191242306,
-          "ciHigh": 3.023171339272422,
-          "inDear": 12,
-          "inBase": 9,
-          "shareDear": 0.12,
-          "shareBase": 0.09,
-          "significant": false,
-          "name": "of the Lightning",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Ice|S2",
-          "label": "#% to Cold Resistance",
-          "lift": 1,
-          "ciLow": 0.48818257397584236,
-          "ciHigh": 2.048413960899565,
-          "inDear": 13,
-          "inBase": 13,
-          "shareDear": 0.13,
-          "shareBase": 0.13,
-          "significant": false,
-          "name": "of the Ice",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Furnace|S4",
-          "label": "#% to Fire Resistance",
-          "lift": 1.4000000000000001,
-          "ciLow": 0.4596867755017746,
-          "ciHigh": 4.263772865470292,
-          "inDear": 7,
-          "inBase": 5,
-          "shareDear": 0.07,
-          "shareBase": 0.05,
-          "significant": false,
-          "name": "of the Furnace",
-          "tier": "S4",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Tempest|S4",
-          "label": "#% to Lightning Resistance",
-          "lift": 1,
-          "ciLow": 0.33382671630800714,
-          "ciHigh": 2.995566116036514,
-          "inDear": 6,
-          "inBase": 6,
-          "shareDear": 0.06,
-          "shareBase": 0.06,
-          "significant": false,
-          "name": "of the Tempest",
-          "tier": "S4",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of Magma|S2",
-          "label": "#% to Fire Resistance",
-          "lift": 0.6923076923076923,
-          "ciLow": 0.31000481229978705,
-          "ciHigh": 1.54607258278594,
-          "inDear": 9,
-          "inBase": 13,
-          "shareDear": 0.09,
-          "shareBase": 0.13,
-          "significant": false,
-          "name": "of Magma",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
           "key": "exp|of the Phoenix|S1",
           "label": "# Life Regeneration per second",
           "lift": 1,
@@ -262,6 +187,83 @@
           "desecrated": false
         }
       ]
+    },
+    {
+      "key": "armour.gloves/ar",
+      "label": "Gloves — Armour",
+      "group": "Gloves / ar",
+      "section": "Armour",
+      "at": "2026-07-17T22:37:42.279Z",
+      "minIlvl": 70,
+      "total": 1402,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 1402
+        },
+        {
+          "minEx": 50,
+          "count": 876
+        },
+        {
+          "minEx": 200,
+          "count": 662
+        },
+        {
+          "minEx": 1000,
+          "count": 293
+        },
+        {
+          "minEx": 5000,
+          "count": 115
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 293,
+      "nDear": 100,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Massive Mitts",
+          "label": "Massive Mitts",
+          "lift": 0.9259259259259258,
+          "ciLow": 0.5798089471062339,
+          "ciHigh": 1.4786574518738833,
+          "inDear": 25,
+          "inBase": 27,
+          "shareDear": 0.25,
+          "shareBase": 0.27,
+          "significant": false
+        },
+        {
+          "key": "Vaal Mitts",
+          "label": "Vaal Mitts",
+          "lift": 0.8695652173913043,
+          "ciLow": 0.5111681565680364,
+          "ciHigh": 1.4792464232778235,
+          "inDear": 20,
+          "inBase": 23,
+          "shareDear": 0.2,
+          "shareBase": 0.23,
+          "significant": false
+        },
+        {
+          "key": "Ornate Mitts",
+          "label": "Ornate Mitts",
+          "lift": 1.2380952380952381,
+          "ciLow": 0.7480643088670343,
+          "ciHigh": 2.0491283976850823,
+          "inDear": 26,
+          "inBase": 21,
+          "shareDear": 0.26,
+          "shareBase": 0.21,
+          "significant": false
+        }
+      ],
+      "prefixes": [],
+      "suffixes": []
     },
     {
       "key": "armour.chest/ar/es",
@@ -431,83 +433,8 @@
       ],
       "suffixes": [
         {
-          "key": "exp|of the Polar Bear|S3",
-          "label": "#% to Cold Resistance",
-          "lift": 1.7500000000000002,
-          "ciLow": 0.7682417044348651,
-          "ciHigh": 3.986375618924308,
-          "inDear": 14,
-          "inBase": 8,
-          "shareDear": 0.14,
-          "shareBase": 0.08,
-          "significant": false,
-          "name": "of the Polar Bear",
-          "tier": "S3",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Volcano|S3",
-          "label": "#% to Fire Resistance",
-          "lift": 1.8333333333333335,
-          "ciLow": 0.7052503926730671,
-          "ciHigh": 4.7658408219692,
-          "inDear": 11,
-          "inBase": 6,
-          "shareDear": 0.11,
-          "shareBase": 0.06,
-          "significant": false,
-          "name": "of the Volcano",
-          "tier": "S3",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of Magma|S2",
-          "label": "#% to Fire Resistance",
-          "lift": 1.0833333333333335,
-          "ciLow": 0.5199651897444325,
-          "ciHigh": 2.257095540737932,
-          "inDear": 13,
-          "inBase": 12,
-          "shareDear": 0.13,
-          "shareBase": 0.12,
-          "significant": false,
-          "name": "of Magma",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Ice|S2",
-          "label": "#% to Cold Resistance",
-          "lift": 1.25,
-          "ciLow": 0.5146417804805132,
-          "ciHigh": 3.0360924030324887,
-          "inDear": 10,
-          "inBase": 8,
-          "shareDear": 0.1,
-          "shareBase": 0.08,
-          "significant": false,
-          "name": "of the Ice",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Lightning|S2",
-          "label": "#% to Lightning Resistance",
-          "lift": 1,
-          "ciLow": 0.3906344844597413,
-          "ciHigh": 2.5599378441537968,
-          "inDear": 8,
-          "inBase": 8,
-          "shareDear": 0.08,
-          "shareBase": 0.08,
-          "significant": false,
-          "name": "of the Lightning",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Furnace|S4",
-          "label": "#% to Fire Resistance",
+          "key": "exp|of Furring|S2",
+          "label": "#% of Armour also applies to Elemental Damage",
           "lift": 1.2,
           "ciLow": 0.37844096227562646,
           "ciHigh": 3.8050849235269033,
@@ -516,11 +443,118 @@
           "shareDear": 0.06,
           "shareBase": 0.05,
           "significant": false,
-          "name": "of the Furnace",
-          "tier": "S4",
+          "name": "of Furring",
+          "tier": "S2",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of Buffering|S3",
+          "label": "#% increased Energy Shield Recharge Rate",
+          "lift": 1,
+          "ciLow": 0.2987270064423112,
+          "ciHigh": 3.3475379809462105,
+          "inDear": 5,
+          "inBase": 5,
+          "shareDear": 0.05,
+          "shareBase": 0.05,
+          "significant": false,
+          "name": "of Buffering",
+          "tier": "S3",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of Obsidian Skin|S1",
+          "label": "# to Stun Threshold",
+          "lift": 0.6666666666666666,
+          "ciLow": 0.2464508260746015,
+          "ciHigh": 1.803379812206065,
+          "inDear": 6,
+          "inBase": 9,
+          "shareDear": 0.06,
+          "shareBase": 0.09,
+          "significant": false,
+          "name": "of Obsidian Skin",
+          "tier": "S1",
           "desecrated": false
         }
       ]
+    },
+    {
+      "key": "armour.boots/ar",
+      "label": "Boots — Armour",
+      "group": "Boots / ar",
+      "section": "Armour",
+      "at": "2026-07-17T14:00:52.250Z",
+      "minIlvl": 70,
+      "total": 1376,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 1376
+        },
+        {
+          "minEx": 50,
+          "count": 772
+        },
+        {
+          "minEx": 200,
+          "count": 600
+        },
+        {
+          "minEx": 1000,
+          "count": 283
+        },
+        {
+          "minEx": 5000,
+          "count": 113
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 283,
+      "nDear": 100,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Tasalian Greaves",
+          "label": "Tasalian Greaves",
+          "lift": 0.9729729729729729,
+          "ciLow": 0.6749899524186206,
+          "ciHigh": 1.402504441353148,
+          "inDear": 36,
+          "inBase": 37,
+          "shareDear": 0.36,
+          "shareBase": 0.37,
+          "significant": false
+        },
+        {
+          "key": "Vaal Greaves",
+          "label": "Vaal Greaves",
+          "lift": 0.95,
+          "ciLow": 0.5407981408689763,
+          "ciHigh": 1.66882970150346,
+          "inDear": 19,
+          "inBase": 20,
+          "shareDear": 0.19,
+          "shareBase": 0.2,
+          "significant": false
+        },
+        {
+          "key": "Ornate Greaves",
+          "label": "Ornate Greaves",
+          "lift": 0.631578947368421,
+          "ciLow": 0.3240092200605719,
+          "ciHigh": 1.2311130117977254,
+          "inDear": 12,
+          "inBase": 19,
+          "shareDear": 0.12,
+          "shareBase": 0.19,
+          "significant": false
+        }
+      ],
+      "prefixes": [],
+      "suffixes": []
     },
     {
       "key": "armour.chest/ar",
@@ -690,21 +724,6 @@
       ],
       "suffixes": [
         {
-          "key": "exp|of the Ice|S2",
-          "label": "#% to Cold Resistance",
-          "lift": 2.4285714285714284,
-          "ciLow": 1.05324143026276,
-          "ciHigh": 5.599816921560008,
-          "inDear": 17,
-          "inBase": 7,
-          "shareDear": 0.17,
-          "shareBase": 0.07,
-          "significant": true,
-          "name": "of the Ice",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
           "key": "exp|of Thermokryptance|S1",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 2.1999999999999997,
@@ -717,36 +736,6 @@
           "significant": false,
           "name": "of Thermokryptance",
           "tier": "S1",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of Magma|S2",
-          "label": "#% to Fire Resistance",
-          "lift": 1.5,
-          "ciLow": 0.5545143586678534,
-          "ciHigh": 4.057604577463646,
-          "inDear": 9,
-          "inBase": 6,
-          "shareDear": 0.09,
-          "shareBase": 0.06,
-          "significant": false,
-          "name": "of Magma",
-          "tier": "S2",
-          "desecrated": false
-        },
-        {
-          "key": "exp|of the Walrus|S4",
-          "label": "#% to Cold Resistance",
-          "lift": 1.5999999999999999,
-          "ciLow": 0.5420257603024515,
-          "ciHigh": 4.723022755544892,
-          "inDear": 8,
-          "inBase": 5,
-          "shareDear": 0.08,
-          "shareBase": 0.05,
-          "significant": false,
-          "name": "of the Walrus",
-          "tier": "S4",
           "desecrated": false
         },
         {
@@ -765,17 +754,17 @@
           "desecrated": false
         },
         {
-          "key": "exp|of the Lightning|S2",
-          "label": "#% to Lightning Resistance",
-          "lift": 1.25,
-          "ciLow": 0.5146417804805132,
-          "ciHigh": 3.0360924030324887,
-          "inDear": 10,
-          "inBase": 8,
-          "shareDear": 0.1,
-          "shareBase": 0.08,
+          "key": "exp|of Furring|S2",
+          "label": "#% of Armour also applies to Elemental Damage",
+          "lift": 0.6666666666666666,
+          "ciLow": 0.2464508260746015,
+          "ciHigh": 1.803379812206065,
+          "inDear": 6,
+          "inBase": 9,
+          "shareDear": 0.06,
+          "shareBase": 0.09,
           "significant": false,
-          "name": "of the Lightning",
+          "name": "of Furring",
           "tier": "S2",
           "desecrated": false
         }
