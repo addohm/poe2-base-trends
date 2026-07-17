@@ -63,14 +63,17 @@ export function take(all: string[], count: number): { batch: string[]; state: Qu
   let s = load();
 
   if (s) {
-    // Drop anything no longer tracked, from both lists, so a removed base can't
+    // Drop anything no longer tracked, from both lists, so a removed item can't
     // strand the queue or inflate the cycle.
-    s.pending = s.pending.filter((n) => all.includes(n));
+    const live = new Set(s.pending.filter((n) => all.includes(n)));
     s.done = (s.done ?? []).filter((n) => all.includes(n));
     // Anything tracked but neither pending nor done is new: fold it into this cycle
     // rather than making it wait out a pass it was never part of.
-    const fresh = all.filter((n) => !s!.pending.includes(n) && !s!.done.includes(n));
-    s.pending.push(...fresh);
+    for (const n of all) if (!live.has(n) && !s.done.includes(n)) live.add(n);
+    // Re-order to match `all`. The caller's order is the priority order — it decides
+    // which results appear first — so a stored queue must not pin yesterday's ordering
+    // for the rest of the cycle.
+    s.pending = all.filter((n) => live.has(n));
   }
 
   if (!s || !s.pending.length) {

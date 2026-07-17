@@ -55,6 +55,17 @@ test('adding a tracked base lets it join the current cycle', () => {
   assert.ok(state.pending.includes('D'), 'new base is picked up without a reset');
 });
 
+test('a reordered work list re-prioritises the rest of the cycle', () => {
+  // The caller's order decides which results land first. A stored queue must not pin
+  // yesterday's ordering: changing the priority should take effect on the next tick,
+  // not at the start of the next cycle.
+  take(ALL, 1);
+  complete(['A']);
+  const reordered = ['C', 'B', 'A'];
+  assert.deepEqual(take(reordered, 1).batch, ['C'], 'follows the new order immediately');
+  assert.deepEqual(peek()?.pending, ['C', 'B'], 'and A stays done rather than being redone');
+});
+
 test('untracking a base drops it from the queue', () => {
   take(ALL, 1);
   const { batch, state } = take(['B', 'C'], 1);

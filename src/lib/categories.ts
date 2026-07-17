@@ -108,7 +108,34 @@ export function workUnits(groups: Record<string, string[] | unknown[]>, families
       section: SECTION_OF[family] ?? 'Other',
     });
   }
-  return out.sort((a, b) => a.section.localeCompare(b.section) || a.label.localeCompare(b.label));
+  return interleave(out);
+}
+
+/**
+ * Orders the work list breadth-first: one unit from each item class before any class
+ * gets a second.
+ *
+ * The collector takes one unit per tick, so this order *is* the order results appear.
+ * Sorted naturally, the list runs Body Armour ar, ar/es, ar/ev, ar/ev/es, es, ev,
+ * ev/es... — seven hours of body armour before the first helmet, and two days before
+ * the page has any breadth. Round-robin instead: a helmet, a bow, a ring, a chest,
+ * then back around. Same total time to finish, but the page is useful from the first
+ * few ticks instead of the last.
+ */
+function interleave(units: WorkUnit[]): WorkUnit[] {
+  const byClass = new Map<string, WorkUnit[]>();
+  for (const u of [...units].sort((a, b) => a.label.localeCompare(b.label))) {
+    (byClass.get(u.itemClass) ?? byClass.set(u.itemClass, []).get(u.itemClass)!).push(u);
+  }
+  // Classes with the most archetypes go first within a round, so the widest markets
+  // (body armour, helmets) are covered early rather than trailing.
+  const queues = [...byClass.values()].sort((a, b) => b.length - a.length || a[0]!.label.localeCompare(b[0]!.label));
+
+  const out: WorkUnit[] = [];
+  for (let round = 0; out.length < units.length; round++) {
+    for (const q of queues) if (q[round]) out.push(q[round]!);
+  }
+  return out;
 }
 
 /**
