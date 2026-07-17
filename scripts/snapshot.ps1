@@ -45,35 +45,54 @@ if ($League) { $env:POE2_LEAGUE = $League }
 if ($MinIlvl -gt 0) { $env:POE2_MIN_ILVL = $MinIlvl }
 $env:POE2_BATCH = $Bases
 
-Write-Host "[snapshot] collecting (batch=$Bases)..." -ForegroundColor Cyan
-npm run collect
-if ($LASTEXITCODE -ne 0) { throw "collect failed with exit code $LASTEXITCODE" }
+<#
+  Runs a native command and judges it by its EXIT CODE, which is the only thing that
+  actually reports success.
 
-# collect exits 0 on a rate-limit abort and writes nothing. Analysing anyway is
-# harmless (unchanged snapshots are skipped) and keeps the site current.
-Write-Host "[snapshot] analysing..." -ForegroundColor Cyan
-npm run analyze
-if ($LASTEXITCODE -ne 0) { throw "analyze failed with exit code $LASTEXITCODE" }
+  Windows PowerShell 5.1 otherwise turns any stderr output from a native executable
+  into a NativeCommandError, and under $ErrorActionPreference='Stop' that terminates
+  the script. Node writes console.warn to stderr, so a healthy, expected message like
+  "[ratelimit] backing off for 600s" would fail the whole tick and light the task red
+  — for the collector doing precisely what it is designed to do.
+#>
+function Invoke-Step {
+  param([string]$Label, [scriptblock]$Command)
+  Write-Host "[snapshot] $Label..." -ForegroundColor Cyan
+  $prev = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & $Command 2>&1 | ForEach-Object { Write-Host $_ }
+  } finally {
+    $ErrorActionPreference = $prev
+  }
+  if ($LASTEXITCODE -ne 0) { throw "$Label failed with exit code $LASTEXITCODE" }
+}
 
-Write-Host "[snapshot] rendering..." -ForegroundColor Cyan
-npm run site
-if ($LASTEXITCODE -ne 0) { throw "site failed with exit code $LASTEXITCODE" }
+# A rate-limited collect exits 0 having written nothing; analyse and render still run
+# so the site stays current, and both no-op cleanly when there's nothing new.
+Invoke-Step 'collecting' { npm run collect }
+Invoke-Step 'analysing'  { npm run analyze }
+Invoke-Step 'rendering'  { npm run site }
 
-git add data
+# git writes progress to stderr routinely, so it gets the same treatment.
+Invoke-Step 'staging' { git add data }
+
+$ErrorActionPreference = 'Continue'
 $staged = git diff --cached --name-only
+$ErrorActionPreference = 'Stop'
+
 if (-not $staged) {
+  # The normal outcome for a tick held off by a rate limit, or one whose base hasn't
+  # moved. Not a failure.
   Write-Host "[snapshot] no data changes; nothing to commit." -ForegroundColor Yellow
   exit 0
 }
 
 $stamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm')
-git commit -m "data: snapshot $stamp UTC"
-if ($LASTEXITCODE -ne 0) { throw "commit failed with exit code $LASTEXITCODE" }
+Invoke-Step 'committing' { git commit -m "data: snapshot $stamp UTC" }
 
 if ($Push) {
-  Write-Host "[snapshot] pushing..." -ForegroundColor Cyan
-  git push
-  if ($LASTEXITCODE -ne 0) { throw "push failed with exit code $LASTEXITCODE" }
+  Invoke-Step 'pushing' { git push }
   Write-Host "[snapshot] done; Pages will redeploy." -ForegroundColor Green
 } else {
   Write-Host "[snapshot] committed locally. Re-run with -Push to publish." -ForegroundColor Green

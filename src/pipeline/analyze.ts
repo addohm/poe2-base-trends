@@ -128,9 +128,17 @@ async function mergeLabels(add: Record<string, ModLabel>): Promise<Record<string
 }
 
 async function main(): Promise<void> {
-  if (!existsSync(RAW)) throw new Error('No snapshots in cache/raw. Run `npm run collect` first.');
-  const files = (await readdir(RAW)).filter((f) => f.endsWith('.json'));
-  if (!files.length) throw new Error('No snapshots in cache/raw. Run `npm run collect` first.');
+  const files = existsSync(RAW) ? (await readdir(RAW)).filter((f) => f.endsWith('.json')) : [];
+
+  // Nothing collected yet is a normal state, not a failure. The rotation runs on a
+  // schedule and its first ticks may be held off by a rate limit, so throwing here
+  // would mark every tick as failed until the first base lands — training the operator
+  // to ignore a red task. The site renders fine without market data.
+  if (!files.length) {
+    console.log('No snapshots in cache/raw yet — nothing to aggregate.');
+    console.log("The rotation collects one base per tick; this resolves once one lands.");
+    return;
+  }
 
   await mkdir(HISTORY, { recursive: true });
   const labelUpdates: Record<string, ModLabel> = {};
