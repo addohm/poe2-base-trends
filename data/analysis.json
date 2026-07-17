@@ -1,9 +1,268 @@
 {
-  "generatedAt": "2026-07-17T11:57:49.671Z",
+  "generatedAt": "2026-07-17T12:36:07.320Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 440,
   "categories": [
+    {
+      "key": "armour.chest/ar/es",
+      "label": "Body Armour — Armour + Energy Shield",
+      "group": "Body Armour / ar/es",
+      "section": "Armour",
+      "at": "2026-07-17T12:35:16.687Z",
+      "minIlvl": 70,
+      "total": 1399,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 1399
+        },
+        {
+          "minEx": 50,
+          "count": 688
+        },
+        {
+          "minEx": 200,
+          "count": 547
+        },
+        {
+          "minEx": 1000,
+          "count": 242
+        },
+        {
+          "minEx": 5000,
+          "count": 83
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 242,
+      "nDear": 100,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Conjurer Mantle",
+          "label": "Conjurer Mantle",
+          "lift": 1.0256410256410258,
+          "ciLow": 0.7277687561700388,
+          "ciHigh": 1.445430989664794,
+          "inDear": 40,
+          "inBase": 39,
+          "shareDear": 0.4,
+          "shareBase": 0.39,
+          "significant": false
+        },
+        {
+          "key": "Wolfskin Mantle",
+          "label": "Wolfskin Mantle",
+          "lift": 0.9411764705882353,
+          "ciLow": 0.5043326439626228,
+          "ciHigh": 1.7564065292877946,
+          "inDear": 16,
+          "inBase": 17,
+          "shareDear": 0.16,
+          "shareBase": 0.17,
+          "significant": false
+        },
+        {
+          "key": "Seastorm Mantle",
+          "label": "Seastorm Mantle",
+          "lift": 0.923076923076923,
+          "ciLow": 0.4430472622674454,
+          "ciHigh": 1.923205667847705,
+          "inDear": 12,
+          "inBase": 13,
+          "shareDear": 0.12,
+          "shareBase": 0.13,
+          "significant": false
+        }
+      ],
+      "prefixes": [
+        {
+          "key": "exp|Godly|P1",
+          "label": "# to Armour / # to maximum Energy Shield",
+          "lift": 1.5,
+          "ciLow": 0.5545143586678534,
+          "ciHigh": 4.057604577463646,
+          "inDear": 9,
+          "inBase": 6,
+          "shareDear": 0.09,
+          "shareBase": 0.06,
+          "significant": false,
+          "name": "Godly",
+          "tier": "P1",
+          "desecrated": false
+        },
+        {
+          "key": "exp|Saintly|P2",
+          "label": "# to Armour / # to maximum Energy Shield",
+          "lift": 1.5,
+          "ciLow": 0.5545143586678534,
+          "ciHigh": 4.057604577463646,
+          "inDear": 9,
+          "inBase": 6,
+          "shareDear": 0.09,
+          "shareBase": 0.06,
+          "significant": false,
+          "name": "Saintly",
+          "tier": "P2",
+          "desecrated": false
+        },
+        {
+          "key": "exp|Prime|P1",
+          "label": "# to maximum Life",
+          "lift": 1.2222222222222223,
+          "ciLow": 0.5296492481131941,
+          "ciHigh": 2.8204083472512993,
+          "inDear": 11,
+          "inBase": 9,
+          "shareDear": 0.11,
+          "shareBase": 0.09,
+          "significant": false,
+          "name": "Prime",
+          "tier": "P1",
+          "desecrated": false
+        },
+        {
+          "key": "exp|Consecrated|P3",
+          "label": "# to Armour / # to maximum Energy Shield",
+          "lift": 1.25,
+          "ciLow": 0.5146417804805132,
+          "ciHigh": 3.0360924030324887,
+          "inDear": 10,
+          "inBase": 8,
+          "shareDear": 0.1,
+          "shareBase": 0.08,
+          "significant": false,
+          "name": "Consecrated",
+          "tier": "P3",
+          "desecrated": false
+        },
+        {
+          "key": "exp|Interpermeated|P1",
+          "label": "#% increased Armour and Energy Shield",
+          "lift": 1.25,
+          "ciLow": 0.5146417804805132,
+          "ciHigh": 3.0360924030324887,
+          "inDear": 10,
+          "inBase": 8,
+          "shareDear": 0.1,
+          "shareBase": 0.08,
+          "significant": false,
+          "name": "Interpermeated",
+          "tier": "P1",
+          "desecrated": false
+        },
+        {
+          "key": "exp|Inspired|P2",
+          "label": "#% increased Armour and Energy Shield",
+          "lift": 1,
+          "ciLow": 0.4720724296688644,
+          "ciHigh": 2.118319006050514,
+          "inDear": 12,
+          "inBase": 12,
+          "shareDear": 0.12,
+          "shareBase": 0.12,
+          "significant": false,
+          "name": "Inspired",
+          "tier": "P2",
+          "desecrated": false
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|of the Polar Bear|S3",
+          "label": "#% to Cold Resistance",
+          "lift": 1.7500000000000002,
+          "ciLow": 0.7682417044348651,
+          "ciHigh": 3.986375618924308,
+          "inDear": 14,
+          "inBase": 8,
+          "shareDear": 0.14,
+          "shareBase": 0.08,
+          "significant": false,
+          "name": "of the Polar Bear",
+          "tier": "S3",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of the Volcano|S3",
+          "label": "#% to Fire Resistance",
+          "lift": 1.8333333333333335,
+          "ciLow": 0.7052503926730671,
+          "ciHigh": 4.7658408219692,
+          "inDear": 11,
+          "inBase": 6,
+          "shareDear": 0.11,
+          "shareBase": 0.06,
+          "significant": false,
+          "name": "of the Volcano",
+          "tier": "S3",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of Magma|S2",
+          "label": "#% to Fire Resistance",
+          "lift": 1.0833333333333335,
+          "ciLow": 0.5199651897444325,
+          "ciHigh": 2.257095540737932,
+          "inDear": 13,
+          "inBase": 12,
+          "shareDear": 0.13,
+          "shareBase": 0.12,
+          "significant": false,
+          "name": "of Magma",
+          "tier": "S2",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of the Ice|S2",
+          "label": "#% to Cold Resistance",
+          "lift": 1.25,
+          "ciLow": 0.5146417804805132,
+          "ciHigh": 3.0360924030324887,
+          "inDear": 10,
+          "inBase": 8,
+          "shareDear": 0.1,
+          "shareBase": 0.08,
+          "significant": false,
+          "name": "of the Ice",
+          "tier": "S2",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of the Lightning|S2",
+          "label": "#% to Lightning Resistance",
+          "lift": 1,
+          "ciLow": 0.3906344844597413,
+          "ciHigh": 2.5599378441537968,
+          "inDear": 8,
+          "inBase": 8,
+          "shareDear": 0.08,
+          "shareBase": 0.08,
+          "significant": false,
+          "name": "of the Lightning",
+          "tier": "S2",
+          "desecrated": false
+        },
+        {
+          "key": "exp|of the Furnace|S4",
+          "label": "#% to Fire Resistance",
+          "lift": 1.2,
+          "ciLow": 0.37844096227562646,
+          "ciHigh": 3.8050849235269033,
+          "inDear": 6,
+          "inBase": 5,
+          "shareDear": 0.06,
+          "shareBase": 0.05,
+          "significant": false,
+          "name": "of the Furnace",
+          "tier": "S4",
+          "desecrated": false
+        }
+      ]
+    },
     {
       "key": "armour.chest/ar",
       "label": "Body Armour — Armour",
