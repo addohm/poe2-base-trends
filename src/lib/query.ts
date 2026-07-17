@@ -37,6 +37,13 @@ export interface QuerySpec {
   priceMax?: number;
   /** Ask trade to return one listing per account. */
   collapse?: boolean;
+  /**
+   * Defence bounds, e.g. `{ar:{max:0}, ev:{max:0}, es:{min:1}}` for pure energy
+   * shield. This is what separates a pure-ES helmet market from an armour/evasion
+   * one — without it a category's "top bases" are three unrelated items that no
+   * single build would ever consider together.
+   */
+  defence?: Record<string, { min?: number; max?: number }> | null;
 }
 
 export function buildQuery(spec: QuerySpec): unknown {
@@ -62,6 +69,7 @@ export function buildQuery(spec: QuerySpec): unknown {
     misc_filters: { filters: { corrupted: { option: 'false' } } },
   };
   if (Object.keys(tradeFilters).length) filters.trade_filters = { filters: tradeFilters };
+  if (spec.defence) filters.equipment_filters = { filters: spec.defence };
 
   const query: Record<string, unknown> = {
     status: { option: 'online' },

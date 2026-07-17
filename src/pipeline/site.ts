@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { BasesDoc, RankedBase } from './bases.ts';
 import type { CategoryAnalysis, RankedMod, Ranked } from './analyze.ts';
-import { CATEGORIES } from '../lib/categories.ts';
+import { workUnits } from '../lib/categories.ts';
 
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, 'dist');
@@ -112,14 +112,21 @@ function baseRows(bases: Ranked[], statOf: (name: string) => string): string {
     .join('');
 }
 
+/**
+ * A mod row is the stat line and its tier — what you actually craft toward.
+ *
+ * The mod family name ("Celestial", "of the Proficient") stays out of the display: it
+ * names the mod for the game's benefit, not the crafter's, and "#% increased Energy
+ * Shield P1" is the useful sentence. The name is kept on the tooltip because it's what
+ * makes the identity unambiguous underneath — several families grant the same stat.
+ */
 function modRows(mods: RankedMod[]): string {
   if (!mods.length) return '<div class="empty">Not enough evidence yet.</div>';
   return mods
     .map(
       (m) => `<div class="row">
-      <span class="grow"><span class="name">${esc(m.name)}</span> <span class="tier">${esc(m.tier)}</span>
-        ${m.desecrated ? '<span class="pill">desecrated</span>' : ''}
-        <span class="stat">${esc(m.label)}</span></span>
+      <span class="grow" title="${esc(m.name)}"><span class="name">${esc(m.label)}</span>
+        <span class="tier">${esc(m.tier)}</span>${m.desecrated ? ' <span class="pill">desecrated</span>' : ''}</span>
       <span class="num">${pct(m.shareBase)}</span>
       ${liftCell(m)}
     </div>`,
@@ -196,11 +203,12 @@ async function main(): Promise<void> {
   }
   const statOf = (name: string) => statByName.get(name) ?? '';
 
-  const byGroup = (g: string) => (analysis?.categories ?? []).filter((c) => CATEGORIES.find((x) => x.id === c.key)?.group === g);
-  const GROUPS = ['Armour', 'Weapons', 'Caster weapons', 'Jewellery'] as const;
+  const UNITS = workUnits(basesDoc.groups, basesDoc.families);
+  const bySection = (s: string) => (analysis?.categories ?? []).filter((c) => c.section === s);
+  const SECTIONS = ['Armour', 'Weapons', 'Caster weapons', 'Jewellery'] as const;
 
   const covered = analysis?.categories.length ?? 0;
-  const pending = CATEGORIES.length - covered;
+  const pending = UNITS.length - covered;
 
   const body = `
 <h1>What to craft in PoE2</h1>
@@ -208,7 +216,7 @@ async function main(): Promise<void> {
   <span class="pill">League: ${esc(analysis?.league ?? 'Runes of Aldur')}</span>
   <span class="pill">Item level ≥ ${analysis?.minIlvl ?? '—'}</span>
   <span class="pill">1 divine ≈ ${analysis?.divineRate ? Math.round(analysis.divineRate) : '?'} ex</span>
-  <span class="pill">${covered}/${CATEGORIES.length} categories${pending ? ` · ${pending} still collecting` : ''}</span>
+  <span class="pill">${covered}/${UNITS.length} groups${pending ? ` · ${pending} still collecting` : ''}</span>
   <span class="pill">Updated ${esc((analysis?.generatedAt ?? basesDoc.generatedAt).slice(0, 16).replace('T', ' '))} UTC</span>
 </div>
 
@@ -230,15 +238,15 @@ seller so a single dumper can't tilt the numbers.</p>
 
 ${
   analysis && covered
-    ? GROUPS.map((g) => {
-        const cats = byGroup(g);
+    ? SECTIONS.map((s) => {
+        const cats = bySection(s);
         if (!cats.length) return '';
-        return `<h2>${esc(g)}</h2>${cats.map((c) => categoryCard(c, statOf)).join('\n')}`;
+        return `<h2>${esc(s)}</h2>${cats.map((c) => categoryCard(c, statOf)).join('\n')}`;
       })
         .filter(Boolean)
         .join('\n')
     : `<div class="card"><div class="empty">No market data collected yet. The rotation gathers one
-       category per tick — see <code>docs/collection.md</code>. The reference tables below need no
+       group per tick — see <code>docs/collection.md</code>. The reference tables below need no
        market data and are complete.</div></div>`
 }
 
@@ -266,7 +274,7 @@ Not affiliated with Grinding Gear Games.
   await mkdir(DIST, { recursive: true });
   await writeFile(path.join(DIST, 'index.html'), page('What to craft in PoE2', body));
   await writeFile(path.join(DIST, '.nojekyll'), '');
-  console.log(`Wrote dist/index.html — ${covered}/${CATEGORIES.length} categories with market data`);
+  console.log(`Wrote dist/index.html — ${covered}/${UNITS.length} groups with market data`);
 }
 
 await main();

@@ -1,52 +1,126 @@
 /**
- * The equipment categories worth crafting on, as trade names them.
+ * The unit of work: a category *and*, for armour, a defence archetype.
  *
- * These are the tradeable `type_filters.category` ids. Deliberately excluded: the
- * "Any One-Handed Melee Weapon" style umbrellas (they overlap the specific ones and
- * would double-count), unarmed, fishing rods, and everything that isn't gear you craft
- * — gems, flasks, maps, currency, relics.
+ * "Best helmet base" is not one question. A pure-energy-shield helmet and an
+ * armour/evasion hybrid are not competing — no build shops for both — so pooling them
+ * produces a top-3 list of three unrelated items, which is what happened when the unit
+ * was the bare category. Armour splits into the seven ways defences combine; weapons,
+ * caster weapons and jewellery have no such split.
+ *
+ * The archetype maps onto trade's `equipment_filters` exactly, and it holds up on rare
+ * items despite mods adding to defences: an int-based ES helmet can't roll armour, so
+ * `ar max 0, ev max 0, es min 1` returns Tiaras and nothing else. Verified live.
  */
-export interface Category {
-  /** trade's category id, e.g. "armour.helmet". */
+import type { Archetype } from './types.ts';
+
+/** RePoE item class -> trade category id. */
+const CLASS_TO_CATEGORY: Record<string, string> = {
+  Helmet: 'armour.helmet',
+  'Body Armour': 'armour.chest',
+  Gloves: 'armour.gloves',
+  Boots: 'armour.boots',
+  Shield: 'armour.shield',
+  Focus: 'armour.focus',
+  Buckler: 'armour.buckler',
+  Quiver: 'armour.quiver',
+
+  'One Hand Mace': 'weapon.onemace',
+  'Two Hand Mace': 'weapon.twomace',
+  'One Hand Sword': 'weapon.onesword',
+  'Two Hand Sword': 'weapon.twosword',
+  'One Hand Axe': 'weapon.oneaxe',
+  'Two Hand Axe': 'weapon.twoaxe',
+  Dagger: 'weapon.dagger',
+  Claw: 'weapon.claw',
+  Flail: 'weapon.flail',
+  Spear: 'weapon.spear',
+  Bow: 'weapon.bow',
+  Crossbow: 'weapon.crossbow',
+  Warstaff: 'weapon.warstaff',
+  Talisman: 'weapon.talisman',
+
+  Wand: 'weapon.wand',
+  Sceptre: 'weapon.sceptre',
+  Staff: 'weapon.staff',
+
+  Ring: 'accessory.ring',
+  Amulet: 'accessory.amulet',
+  Belt: 'accessory.belt',
+};
+
+export const categoryForClass = (itemClass: string): string | undefined => CLASS_TO_CATEGORY[itemClass];
+
+/** Human labels for the defence archetypes. */
+export const ARCHETYPE_LABEL: Record<string, string> = {
+  ar: 'Armour',
+  ev: 'Evasion',
+  es: 'Energy Shield',
+  'ar/ev': 'Armour + Evasion',
+  'ar/es': 'Armour + Energy Shield',
+  'ev/es': 'Evasion + Energy Shield',
+  'ar/ev/es': 'Armour + Evasion + ES',
+};
+
+export interface WorkUnit {
+  /** Stable id, e.g. "armour.helmet/es" or "weapon.bow". */
   id: string;
-  /** Display name, e.g. "Helmet". */
+  /** The group key in bases.json, e.g. "Helmet / es". */
+  group: string;
+  category: string;
+  itemClass: string;
+  /** Null for non-armour: they have no defence split. */
+  archetype: Archetype | null;
+  /** Display, e.g. "Helmet — Energy Shield". */
   label: string;
-  /** Rough grouping for the page. */
-  group: 'Armour' | 'Weapons' | 'Caster weapons' | 'Jewellery';
+  /** Page grouping. */
+  section: string;
 }
 
-export const CATEGORIES: Category[] = [
-  { id: 'armour.helmet', label: 'Helmet', group: 'Armour' },
-  { id: 'armour.chest', label: 'Body Armour', group: 'Armour' },
-  { id: 'armour.gloves', label: 'Gloves', group: 'Armour' },
-  { id: 'armour.boots', label: 'Boots', group: 'Armour' },
-  { id: 'armour.shield', label: 'Shield', group: 'Armour' },
-  { id: 'armour.focus', label: 'Focus', group: 'Armour' },
-  { id: 'armour.buckler', label: 'Buckler', group: 'Armour' },
-  { id: 'armour.quiver', label: 'Quiver', group: 'Armour' },
+const SECTION_OF: Record<string, string> = {
+  armour: 'Armour',
+  weapon: 'Weapons',
+  caster: 'Caster weapons',
+  implicit: 'Jewellery',
+};
 
-  { id: 'weapon.onemace', label: 'One-Handed Mace', group: 'Weapons' },
-  { id: 'weapon.twomace', label: 'Two-Handed Mace', group: 'Weapons' },
-  { id: 'weapon.onesword', label: 'One-Handed Sword', group: 'Weapons' },
-  { id: 'weapon.twosword', label: 'Two-Handed Sword', group: 'Weapons' },
-  { id: 'weapon.oneaxe', label: 'One-Handed Axe', group: 'Weapons' },
-  { id: 'weapon.twoaxe', label: 'Two-Handed Axe', group: 'Weapons' },
-  { id: 'weapon.dagger', label: 'Dagger', group: 'Weapons' },
-  { id: 'weapon.claw', label: 'Claw', group: 'Weapons' },
-  { id: 'weapon.flail', label: 'Flail', group: 'Weapons' },
-  { id: 'weapon.spear', label: 'Spear', group: 'Weapons' },
-  { id: 'weapon.bow', label: 'Bow', group: 'Weapons' },
-  { id: 'weapon.crossbow', label: 'Crossbow', group: 'Weapons' },
-  { id: 'weapon.warstaff', label: 'Quarterstaff', group: 'Weapons' },
-  { id: 'weapon.talisman', label: 'Talisman', group: 'Weapons' },
+/**
+ * Builds the work list from the static base tables.
+ *
+ * Deriving it rather than hand-listing it means a group only exists if real bases
+ * exist for it — no querying trade for an armour/evasion Focus that the game has no
+ * bases for.
+ */
+export function workUnits(groups: Record<string, string[] | unknown[]>, families: Record<string, string>): WorkUnit[] {
+  const out: WorkUnit[] = [];
+  for (const group of Object.keys(groups)) {
+    const family = families[group]!;
+    const [itemClass, archetype] = group.split(' / ') as [string, string | undefined];
+    const category = categoryForClass(itemClass);
+    if (!category) continue;
 
-  { id: 'weapon.wand', label: 'Wand', group: 'Caster weapons' },
-  { id: 'weapon.sceptre', label: 'Sceptre', group: 'Caster weapons' },
-  { id: 'weapon.staff', label: 'Staff', group: 'Caster weapons' },
+    out.push({
+      id: archetype ? `${category}/${archetype}` : category,
+      group,
+      category,
+      itemClass,
+      archetype: (archetype as Archetype) ?? null,
+      label: archetype ? `${itemClass} — ${ARCHETYPE_LABEL[archetype] ?? archetype}` : itemClass,
+      section: SECTION_OF[family] ?? 'Other',
+    });
+  }
+  return out.sort((a, b) => a.section.localeCompare(b.section) || a.label.localeCompare(b.label));
+}
 
-  { id: 'accessory.ring', label: 'Ring', group: 'Jewellery' },
-  { id: 'accessory.amulet', label: 'Amulet', group: 'Jewellery' },
-  { id: 'accessory.belt', label: 'Belt', group: 'Jewellery' },
-];
-
-export const categoryById = (id: string): Category | undefined => CATEGORIES.find((c) => c.id === id);
+/**
+ * The equipment filter for an archetype: present defences need min 1, absent ones
+ * max 0. That exactness is what keeps a hybrid out of a pure group.
+ */
+export function archetypeFilter(archetype: Archetype | null): Record<string, { min?: number; max?: number }> | null {
+  if (!archetype || archetype === 'none') return null;
+  const has = archetype.split('/');
+  return {
+    ar: has.includes('ar') ? { min: 1 } : { max: 0 },
+    ev: has.includes('ev') ? { min: 1 } : { max: 0 },
+    es: has.includes('es') ? { min: 1 } : { max: 0 },
+  };
+}

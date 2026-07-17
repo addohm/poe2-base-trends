@@ -37,8 +37,8 @@ const TREND_LOOKBACK = 14;
 const MIN_IN_STRATUM = 5;
 /** Bases listed on the page per category. */
 const TOP_BASES = 3;
-/** Prefixes and suffixes listed per category. */
-const TOP_MODS = 3;
+/** Prefixes and suffixes listed per unit. */
+const TOP_MODS = 6;
 
 export interface ModLabel {
   name: string;
@@ -51,6 +51,9 @@ export interface HistoryRow {
   at: string;
   key: string;
   label: string;
+  /** bases.json group, e.g. "Helmet / es" — links a unit to its static stats. */
+  group: string;
+  section: string;
   minIlvl: number;
   ladder: LadderRung[];
   total: number;
@@ -104,7 +107,8 @@ export function liftCI(a: number, nDear: number, b: number, nBase: number) {
   return { lift: rr, ciLow: rr * Math.exp(-z * se), ciHigh: rr * Math.exp(z * se), pDear, pBase };
 }
 
-const histPath = (key: string) => path.join(HISTORY, `${key.replace(/\./g, '_')}.jsonl`);
+/** Unit ids look like "armour.chest/ar" — the slash must not become a directory. */
+const histPath = (key: string) => path.join(HISTORY, `${key.replace(/[./]/g, '_')}.jsonl`);
 
 async function readHistory(key: string): Promise<HistoryRow[]> {
   const p = histPath(key);
@@ -176,6 +180,8 @@ async function main(): Promise<void> {
       at: snap.at,
       key: snap.key,
       label: snap.label,
+      group: snap.group,
+      section: snap.section,
       minIlvl: snap.minIlvl,
       ladder: snap.ladder,
       total: snap.total,
@@ -230,6 +236,8 @@ export interface RankedMod extends Ranked {
 export interface CategoryAnalysis {
   key: string;
   label: string;
+  group: string;
+  section: string;
   at: string;
   minIlvl: number;
   total: number;
@@ -338,6 +346,8 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
     out.push({
       key: latest.key,
       label: latest.label,
+      group: latest.group,
+      section: latest.section,
       at: latest.at,
       minIlvl: latest.minIlvl,
       total: latest.total,

@@ -1,8 +1,14 @@
 /**
- * Collects one equipment category per run.
+ * Collects one work unit per run — a category, split by defence archetype for armour.
  *
- * The question this answers is "what should I craft on to make a profit?", which needs
- * two things and gets both from the same sample:
+ * The archetype split is not cosmetic. A pure-energy-shield helmet and an
+ * armour/evasion one are different markets serving different builds; asking for "the
+ * top 3 helmet bases" across both returns three unrelated items that no build would
+ * consider together. So "Helmet / es" and "Helmet / ar/ev" are separate units, and
+ * each gets its own top bases and affixes.
+ *
+ * The question each unit answers is "what should I craft on to make a profit?", which
+ * needs two things and gets both from the same sample:
  *
  *  1. **Which bases do people actually use.** Every base type gets used by somebody;
  *     what matters is which ones the market is thick with. That's the frequency of
@@ -30,7 +36,8 @@ import { TradeClient, toListing, itemMods, RateLimitedError, type RawResult } fr
 import { RatesClient, converter } from '../lib/rates.ts';
 import { buildQuery, type QuerySpec } from '../lib/query.ts';
 import { take, complete, peek } from '../lib/queue.ts';
-import { CATEGORIES, categoryById } from '../lib/categories.ts';
+import { workUnits, archetypeFilter, type WorkUnit } from '../lib/categories.ts';
+import type { BasesDoc } from './bases.ts';
 
 const LEAGUE = process.env.POE2_LEAGUE ?? 'Runes of Aldur';
 const UA = process.env.POE2_UA ?? 'poe2-base-trends/0.1 (+https://github.com/addohm/poe2-base-trends)';
@@ -71,9 +78,12 @@ export interface RawSnapshot {
   at: string;
   league: string;
   minIlvl: number;
-  /** trade category id, e.g. "armour.helmet". */
+  /** Work unit id, e.g. "armour.helmet/es". */
   key: string;
   label: string;
+  /** The bases.json group this unit corresponds to, e.g. "Helmet / es". */
+  group: string;
+  section: string;
   rates: Record<string, number>;
   ladder: LadderRung[];
   dearThresholdEx: number | null;
@@ -84,23 +94,24 @@ export interface RawSnapshot {
   dearSample: SampledItem[];
 }
 
-function spec(category: string, tag: string, extra: Partial<QuerySpec> = {}): QuerySpec {
+function spec(unit: WorkUnit, tag: string, extra: Partial<QuerySpec> = {}): QuerySpec {
   return {
-    key: `${category}:${tag}`,
-    category,
+    key: `${unit.id}:${tag}`,
+    category: unit.category,
     rarity: 'rare',
     sampling: 'recent',
     minIlvl: MIN_ILVL,
     collapse: true,
+    defence: archetypeFilter(unit.archetype),
     ...extra,
   };
 }
 
 /** Count-only searches: they describe the whole market and cost no fetches. */
-async function ladder(trade: TradeClient, category: string): Promise<LadderRung[]> {
+async function ladder(trade: TradeClient, unit: WorkUnit): Promise<LadderRung[]> {
   const out: LadderRung[] = [];
   for (const minEx of LADDER) {
-    const res = await trade.search(buildQuery(spec(category, `ladder${minEx}`, { priceMin: minEx })));
+    const res = await trade.search(buildQuery(spec(unit, `ladder${minEx}`, { priceMin: minEx })));
     out.push({ minEx, count: res.total });
   }
   return out;
@@ -133,15 +144,21 @@ async function sample(
 }
 
 async function main(): Promise<void> {
+  // The work list is derived from the static tables, so a unit exists only if the game
+  // actually has bases for it — no querying trade for an evasion Focus.
+  const basesDoc = JSON.parse(await readFile(path.join(ROOT, 'data', 'bases.json'), 'utf8')) as BasesDoc;
+  const UNITS = workUnits(basesDoc.groups, basesDoc.families);
+  const byId = new Map(UNITS.map((u) => [u.id, u]));
+
   const { batch, state } = take(
-    CATEGORIES.map((c) => c.id),
+    UNITS.map((u) => u.id),
     BATCH,
   );
-  const queue = batch.map((id) => categoryById(id)!).filter(Boolean);
+  const queue = batch.map((id) => byId.get(id)!).filter(Boolean);
 
   console.log(`League: ${LEAGUE} | ilvl >= ${MIN_ILVL}`);
-  console.log(`${CATEGORIES.length} categories tracked; ${state.pending.length} left this cycle (cycle ${state.cycles + 1}).`);
-  console.log(`This run: ${queue.map((c) => c.label).join(', ')}\n`);
+  console.log(`${UNITS.length} units tracked; ${state.pending.length} left this cycle (cycle ${state.cycles + 1}).`);
+  console.log(`This run: ${queue.map((u) => u.label).join(', ')}\n`);
 
   const trade = new TradeClient(LEAGUE, UA);
 
@@ -164,23 +181,25 @@ async function main(): Promise<void> {
   await mkdir(PREV, { recursive: true });
 
   let done = 0;
-  for (const cat of queue) {
-    const file = `${cat.id.replace(/\./g, '_')}.json`;
+  for (const unit of queue) {
+    const file = `${unit.id.replace(/[./]/g, '_')}.json`;
     const rawPath = path.join(RAW, file);
     if (existsSync(rawPath)) await rename(rawPath, path.join(PREV, file));
 
     try {
-      const rungs = await ladder(trade, cat.id);
+      const rungs = await ladder(trade, unit);
       const dear = pickDearThreshold(rungs);
-      const baseSample = await sample(trade, spec(cat.id, 'base', { priceMin: 1 }), toEx);
-      const dearSample = dear ? await sample(trade, spec(cat.id, 'dear', { priceMin: dear.minEx }), toEx) : [];
+      const baseSample = await sample(trade, spec(unit, 'base', { priceMin: 1 }), toEx);
+      const dearSample = dear ? await sample(trade, spec(unit, 'dear', { priceMin: dear.minEx }), toEx) : [];
 
       const snap: RawSnapshot = {
         at,
         league: LEAGUE,
         minIlvl: MIN_ILVL,
-        key: cat.id,
-        label: cat.label,
+        key: unit.id,
+        label: unit.label,
+        group: unit.group,
+        section: unit.section,
         rates,
         ladder: rungs,
         dearThresholdEx: dear?.minEx ?? null,
@@ -189,19 +208,19 @@ async function main(): Promise<void> {
         baseSample,
         dearSample,
       };
-      // Written per category, so a ban partway through keeps what's already gathered.
+      // Written per unit, so a ban partway through keeps what's already gathered.
       await writeFile(rawPath, JSON.stringify(snap));
-      complete([cat.id]);
+      complete([unit.id]);
       done++;
 
       const pct = dear && snap.total ? ((dear.count / snap.total) * 100).toFixed(0) : '?';
       console.log(
-        `  ${cat.label.padEnd(20)} listed=${String(snap.total).padStart(5)}  dear>=${String(dear?.minEx ?? '-').padStart(4)}ex (${pct}%)  sampled ${baseSample.length}/${dearSample.length}`,
+        `  ${unit.label.padEnd(32)} listed=${String(snap.total).padStart(5)}  dear>=${String(dear?.minEx ?? '-').padStart(4)}ex (${pct}%)  sampled ${baseSample.length}/${dearSample.length}`,
       );
     } catch (err) {
       if (err instanceof RateLimitedError) {
         console.error(`\n${err.message}`);
-        console.error(`${cat.label} stays queued; ${done} categor(y|ies) collected this run.`);
+        console.error(`${unit.label} stays queued; ${done} unit(s) collected this run.`);
         process.exitCode = 0; // A ban is expected weather, not a build failure.
         return;
       }
@@ -210,7 +229,7 @@ async function main(): Promise<void> {
   }
 
   const left = peek()?.pending.length ?? 0;
-  console.log(`\nCollected ${done} categor${done === 1 ? 'y' : 'ies'} at ${at}.`);
+  console.log(`\nCollected ${done} unit${done === 1 ? '' : 's'} at ${at}.`);
   console.log(left ? `${left} left this cycle.` : 'Cycle complete — next run starts a fresh pass.');
 }
 
