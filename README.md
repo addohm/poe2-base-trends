@@ -5,10 +5,14 @@ actually pays for — for the current Path of Exile 2 league.
 
 Two halves, and they are not the same kind of thing:
 
-| Question | Source | Confidence |
-|---|---|---|
-| Which base has the highest energy shield? | Game data (RePoE) | **Exact.** Every released base, no sampling. |
-| What does it cost, and what mods are paid for? | Trade listings | **Estimated.** Asks, not sales. |
+| Question | Source | Confidence | Status |
+|---|---|---|---|
+| Best base, every category | Game data (RePoE) | **Exact.** Every released base, no sampling. | **Done** — 957 bases, 54 groups |
+| What does it cost, and what mods are paid for? | Trade listings | **Estimated.** Asks, not sales. | Collecting — ES helmets first |
+
+The static half needs no API and is complete. The market half is gated on trade's
+rate limits and refreshes one base per tick; widening it costs cycle time, not burst
+size (see [docs/collection.md](docs/collection.md)).
 
 ## The three claims this repo makes, and why they hold
 
@@ -20,7 +24,45 @@ and it covers bases nobody currently has listed. Trade search can only ever show
 you what someone happens to be selling.
 
 So `npm run bases` reads [RePoE](https://repoe-fork.github.io/poe2/) and produces
-the complete table offline. Zero API calls.
+the complete table offline — **957 bases across 54 groups**. Zero API calls.
+
+#### "Best" is four different questions
+
+Answering them all with one metric would be the same class of error as ranking mods
+by the stat you sorted on:
+
+| Family | Categories | Ranked by |
+|---|---|---|
+| **armour** | Body Armour, Helmet, Gloves, Boots, Shield, Buckler, Focus | defence at 20% quality, **within an archetype** — a pure-ES helmet and an ar/ev hybrid aren't competing for the same build |
+| **weapon** | maces, swords, axes, bows, crossbows, spears, daggers, claws, flails, warstaves, talismans | physical DPS (mean hit × attacks/sec) |
+| **caster** | Wand, Sceptre, Staff | **which spell mods it can roll** — see below |
+| **implicit** | Ring, Amulet, Belt, Quiver | *nothing* — the base **is** its implicit, so there's no "best", only which one you want |
+
+#### Caster weapons have no stats at all
+
+Wands, sceptres and staves carry no defence, no damage, and no implicit. What
+distinguishes them is the skill they grant (Withered Wand → Chaos Bolt, Rattling
+Sceptre → Skeletal Warrior) and — the part that decides crafting — which spell mod
+families they're *barred* from rolling, via `no_fire_spell_mods` tags. A Frigid Wand
+can only roll cold; a Dueling Wand can roll **any type**. That's the ranking.
+
+#### Rune-forged bases are excluded
+
+This one isn't obvious, and including them puts a fiction at the top of every table.
+`Runeforged`/`Runemastered` bases (metadata `...Verisium*`) are **44% of the dump**.
+They're rune-forging *outputs*, not bases you can buy and craft on — and up to six
+share one display name with wildly different stats:
+
+| "Runemastered Torment Club" variant | Phys damage |
+|---|---|
+| Unique2 / 3 / 5 | 44–73 — *identical to the plain base* |
+| Unique1 | 44–209 |
+| Unique4 | **85–403** |
+
+Ranking them means silently reporting the luckiest variant as though it were the
+base's stats, on a name trade can't even search for. Detected three ways (metadata
+key, name, tag) because the dump contradicts itself: three bases are *named*
+"Runeforged …" without the tag, and one carries the tag without the name.
 
 ### 2. Sorting by a stat cannot tell you which mods are valuable
 

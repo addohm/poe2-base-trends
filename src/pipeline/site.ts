@@ -8,11 +8,15 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import type { RankedBase } from './bases.ts';
+import type { BasesDoc, RankedBase } from './bases.ts';
 import type { BaseAnalysis } from './analyze.ts';
+import type { Family } from '../lib/types.ts';
 
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, 'dist');
+
+/** Bases shown per group. The full ranking lives in data/bases.json. */
+const TOP_N = Number(process.env.POE2_TOP_N ?? 8);
 
 const esc = (s: unknown): string =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
@@ -73,22 +77,85 @@ function page(title: string, body: string): string {
 </head><body><div class="wrap">${body}</div></body></html>`;
 }
 
-function basesTable(bases: RankedBase[]): string {
-  const rows = bases
-    .map((b, i) => {
-      const cls = i === 0 ? ' class="best"' : '';
-      return `<tr${cls}>
-      <td>${esc(b.name)}</td>
-      <td class="mono">${b.energyShield}</td>
-      <td class="mono">${b.energyShieldMaxQ}</td>
-      <td class="mono">${b.dropLevel}</td>
-      <td class="mono">${b.req.int || '—'}</td>
-    </tr>`;
-    })
-    .join('\n');
+/** Requirement string like "115 int" or "82 str / 60 dex". */
+function reqOf(b: RankedBase): string {
+  const parts: string[] = [];
+  if (b.req.str) parts.push(`${b.req.str} str`);
+  if (b.req.dex) parts.push(`${b.req.dex} dex`);
+  if (b.req.int) parts.push(`${b.req.int} int`);
+  return parts.join(' / ') || '—';
+}
+
+/**
+ * Renders a group with the columns its family actually has.
+ *
+ * Each family gets different headers because "best" is a different question for each.
+ * A shared table would force a lowest common denominator and quietly imply that, say,
+ * a ring can be ranked the way a helmet can.
+ */
+function basesTable(group: string, family: Family, bases: RankedBase[], limit: number): string {
+  const shown = bases.slice(0, limit);
+  const rowsOf = (cells: (b: RankedBase) => string) =>
+    shown.map((b, i) => `<tr${i === 0 && b.rank !== null ? ' class="best"' : ''}>${cells(b)}</tr>`).join('\n');
+
+  if (family === 'armour') {
+    const arch = group.split(' / ')[1] ?? '';
+    const cols = [
+      ['ar', 'Armour', (b: RankedBase) => `${b.armour} / ${b.armourMaxQ}`],
+      ['ev', 'Evasion', (b: RankedBase) => `${b.evasion} / ${b.evasionMaxQ}`],
+      ['es', 'Energy shield', (b: RankedBase) => `${b.energyShield} / ${b.energyShieldMaxQ}`],
+    ].filter(([k]) => arch.includes(k as string)) as [string, string, (b: RankedBase) => string][];
+
+    return `<div class="panel scroll"><table>
+      <thead><tr><th>#</th><th>Base</th>${cols.map(([, h]) => `<th>${h} (base / @20%)</th>`).join('')}${cols.length > 1 ? '<th>Total @20%</th>' : ''}<th>Drop lvl</th><th>Requires</th></tr></thead>
+      <tbody>${rowsOf(
+        (b) =>
+          `<td class="mono dimcell">${b.rank}</td><td>${esc(b.name)}</td>` +
+          cols.map(([, , f]) => `<td class="mono">${f(b)}</td>`).join('') +
+          (cols.length > 1 ? `<td class="mono">${b.totalDefenceMaxQ}</td>` : '') +
+          `<td class="mono">${b.dropLevel}</td><td class="dimcell">${reqOf(b)}</td>`,
+      )}</tbody></table></div>`;
+  }
+
+  if (family === 'weapon') {
+    return `<div class="panel scroll"><table>
+      <thead><tr><th>#</th><th>Base</th><th>Phys damage</th><th>Atk/sec</th><th>Crit</th><th>pDPS</th><th>pDPS @20%</th><th>Drop lvl</th><th>Requires</th></tr></thead>
+      <tbody>${rowsOf(
+        (b) =>
+          `<td class="mono dimcell">${b.rank}</td><td>${esc(b.name)}</td>
+           <td class="mono">${b.physMin}–${b.physMax}</td>
+           <td class="mono">${b.aps.toFixed(2)}</td>
+           <td class="mono">${b.crit.toFixed(2)}%</td>
+           <td class="mono">${Math.round(b.pdps)}</td>
+           <td class="mono">${b.pdpsMaxQ}</td>
+           <td class="mono">${b.dropLevel}</td><td class="dimcell">${reqOf(b)}</td>`,
+      )}</tbody></table></div>`;
+  }
+
+  if (family === 'caster') {
+    return `<div class="panel scroll"><table>
+      <thead><tr><th>#</th><th>Base</th><th>Grants skill</th><th>Can roll spell mods</th><th>Drop lvl</th><th>Requires</th></tr></thead>
+      <tbody>${rowsOf((b) => {
+        const free = b.cannotRoll.length === 0;
+        const cell = free
+          ? '<span class="lift-hi">any type</span>'
+          : `<span class="lift-lo">not ${esc(b.cannotRoll.join(', '))}</span>`;
+        return `<td class="mono dimcell">${b.rank}</td><td>${esc(b.name)}</td>
+          <td class="dimcell">${b.skills.length ? esc(b.skills.join(' / ')) : '—'}</td>
+          <td>${cell}</td>
+          <td class="mono">${b.dropLevel}</td><td class="dimcell">${reqOf(b)}</td>`;
+      })}</tbody></table></div>`;
+  }
+
+  // implicit
   return `<div class="panel scroll"><table>
-    <thead><tr><th>Base</th><th>ES</th><th>ES @20%</th><th>Drop lvl</th><th>Int req</th></tr></thead>
-    <tbody>${rows}</tbody></table></div>`;
+    <thead><tr><th>Base</th><th>Implicit</th><th>Drop lvl</th><th>Requires</th></tr></thead>
+    <tbody>${rowsOf(
+      (b) =>
+        `<td>${esc(b.name)}</td>
+         <td>${b.implicits.length ? b.implicits.map((i) => esc(i)).join('<br>') : '—'}</td>
+         <td class="mono">${b.dropLevel}</td><td class="dimcell">${reqOf(b)}</td>`,
+    )}</tbody></table></div>`;
 }
 
 /** Share of the rare market at or above a given exalted threshold. */
@@ -171,10 +238,7 @@ function modsSection(b: BaseAnalysis): string {
 }
 
 async function main(): Promise<void> {
-  const basesDoc = JSON.parse(await readFile(path.join(ROOT, 'data', 'bases.json'), 'utf8')) as {
-    generatedAt: string;
-    classes: Record<string, RankedBase[]>;
-  };
+  const basesDoc = JSON.parse(await readFile(path.join(ROOT, 'data', 'bases.json'), 'utf8')) as BasesDoc;
   const analysisPath = path.join(ROOT, 'data', 'analysis.json');
   const analysis = existsSync(analysisPath)
     ? (JSON.parse(await readFile(analysisPath, 'utf8')) as {
@@ -186,10 +250,35 @@ async function main(): Promise<void> {
       })
     : null;
 
-  const esHelms = (basesDoc.classes['Helmet'] ?? [])
-    .filter((b) => b.archetype === 'es')
-    .sort((a, b) => b.energyShieldMaxQ - a.energyShieldMaxQ)
-    .slice(0, 10);
+  const groups = basesDoc.groups;
+  const families = basesDoc.families;
+  const total = Object.values(groups).reduce((n, g) => n + g.length, 0);
+  const inFamily = (f: Family) => Object.keys(groups).filter((g) => families[g] === f).sort();
+
+  const FAMILY_BLURB: Record<Family, string> = {
+    armour: `Ranked by defence at 20% quality, <strong>within an archetype</strong>. A pure-energy-shield
+      helmet and an armour/evasion hybrid aren't competing for the same build, so ranking them against
+      each other would be meaningless.`,
+    weapon: `Ranked by physical DPS — mean hit &times; attacks per second — at 20% quality. Crit and
+      attack rate are shown because the highest pDPS base is often not the one you want.`,
+    caster: `Wands, sceptres and staves have <strong>no defence, damage or implicit at all</strong>. What
+      separates them is the skill they grant and, for crafting, which spell mod families they're barred
+      from rolling. A base that can roll <em>any</em> type is the general crafting target; a restricted
+      one is locked to its element. That's the ranking here.`,
+    implicit: `Rings, amulets, belts and quivers have no base stats. The base <em>is</em> its implicit,
+      so there is no "best" — only which implicit you want. Listed by item level, not ranked.`,
+  };
+
+  const section = (f: Family, title: string, note?: string) => `
+<h2>${title}</h2>
+<p>${FAMILY_BLURB[f]}</p>
+${note ?? ''}
+${inFamily(f)
+  .map(
+    (g) => `<h3>${esc(g)} <span class="pill">${groups[g]!.length} bases</span></h3>
+${basesTable(g, f, groups[g]!, TOP_N)}`,
+  )
+  .join('\n')}`;
 
   const body = `
 <h1>PoE2 Base &amp; Mod Trends</h1>
@@ -200,10 +289,28 @@ async function main(): Promise<void> {
   <span class="pill">Updated ${esc((analysis?.generatedAt ?? basesDoc.generatedAt).slice(0, 16).replace('T', ' '))} UTC</span>
 </div>
 
-<h2>Best energy shield helmet bases</h2>
-<p>From the game's own base-item table, so this covers every released base — including
-ones nobody currently has listed. It is exact, and it does not change during a league.</p>
-${basesTable(esHelms)}
+<h2>Best base, every category</h2>
+<p>Straight from the game's own item table — ${total} bases across ${Object.keys(groups).length} groups.
+This covers every released base, including ones nobody currently has listed, so it can't be skewed by
+what happens to be for sale. It's exact, and it doesn't change during a league. Top ${TOP_N} shown per
+group.</p>
+<div class="note">
+<strong>"Best" isn't one question.</strong> Armour is decided by defence, weapons by DPS, caster weapons
+by which spell mods they can roll, and jewellery not at all — the base <em>is</em> its implicit. Each
+table below uses the metric that actually applies to it.
+</div>
+<div class="note">
+<strong>Rune-forged bases are excluded.</strong> They're outputs of rune-forging rather than bases you can
+buy and craft on, and up to six of them share one display name with wildly different stats — "Runemastered
+Torment Club" covers rolls from 44–73 (identical to the plain base) up to 85–403 physical damage. Ranking
+them would mean reporting the luckiest variant as if it were the base, on a name trade can't even search
+for. They're 44% of the game data, so including them would put a fiction at the top of every table.
+</div>
+
+${section('armour', 'Armour')}
+${section('weapon', 'Weapons')}
+${section('caster', 'Caster weapons')}
+${section('implicit', 'Jewellery &amp; quivers')}
 
 <h2>What they cost, and what they sell for</h2>
 <p><em>Blank base</em> is the going rate for an uncrafted magic base. The
@@ -246,7 +353,9 @@ Not affiliated with Grinding Gear Games.
   await writeFile(path.join(DIST, 'index.html'), page('PoE2 Base & Mod Trends', body));
   // Tell Pages not to run Jekyll over our output.
   await writeFile(path.join(DIST, '.nojekyll'), '');
-  console.log(`Wrote dist/index.html (${esHelms.length} bases, ${analysis?.bases.length ?? 0} priced)`);
+  console.log(
+    `Wrote dist/index.html — ${total} bases in ${Object.keys(groups).length} groups, ${analysis?.bases.length ?? 0} priced`,
+  );
 }
 
 await main();
