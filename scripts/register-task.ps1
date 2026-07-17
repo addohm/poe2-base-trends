@@ -61,9 +61,11 @@ if ($Push) { $argList += ' -Push' }
 
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument $argList -WorkingDirectory $repo
 
+# Omit -RepetitionDuration: that means "repeat indefinitely". Do NOT pass
+# [TimeSpan]::MaxValue -- it serialises to P99999999DT23H59M59S, which the Task
+# Scheduler service rejects as out of range.
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
-  -RepetitionInterval (New-TimeSpan -Minutes $IntervalMinutes) `
-  -RepetitionDuration ([TimeSpan]::MaxValue)
+  -RepetitionInterval (New-TimeSpan -Minutes $IntervalMinutes)
 
 # IgnoreNew matters: if one run is slow, the next tick is dropped rather than started
 # beside it. Two collectors sharing an IP is precisely the burst we avoid.
@@ -79,11 +81,23 @@ if (Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue) {
   Write-Host "[register] replaced existing task" -ForegroundColor Yellow
 }
 
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
-  -Description "Refresh one PoE2 base per run on a slow rotation (every $IntervalMinutes min)" | Out-Null
+# Register-ScheduledTask surfaces service errors as NON-terminating CIM errors, which
+# sail straight past $ErrorActionPreference='Stop'. Without -ErrorAction Stop this
+# script will happily print a success summary for a task that was never created.
+try {
+  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
+    -Description "Refresh one PoE2 base per run on a slow rotation (every $IntervalMinutes min)" `
+    -ErrorAction Stop | Out-Null
+} catch {
+  throw "Register-ScheduledTask failed: $($_.Exception.Message)"
+}
+
+# Trust the scheduler, not the return value: read the task back.
+$registered = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+if (-not $registered) { throw "Task '$TaskName' is not present after registration." }
 
 $cycle = [math]::Round(($IntervalMinutes * 6) / 60.0, 1)
 $duty = [math]::Round(100 * 4.0 / $IntervalMinutes, 0)
-Write-Host "[register] '$TaskName' every $IntervalMinutes min, $Bases base/run." -ForegroundColor Green
+Write-Host "[register] '$TaskName' registered ($($registered.State)): every $IntervalMinutes min, $Bases base/run." -ForegroundColor Green
 Write-Host "[register] ~$duty% duty cycle; a 6-base cycle completes about every $cycle h." -ForegroundColor Green
 if (-not $Push) { Write-Host "[register] Local commits only. Re-run with -Push to publish." -ForegroundColor Yellow }
