@@ -1,15 +1,22 @@
 /**
- * Turns raw snapshots into the committable aggregates the site renders.
+ * Turns raw category snapshots into the answer: what to craft on, and what to hit.
  *
- * Mod ranking is a two-sample comparison: how often does a mod appear on items in the
- * dearest slice of the market, versus on the market as a whole? That ratio is the
- * lift. Because both strata are drawn by an absolute exalted price rather than by
- * position within a sample, the comparison means the same thing from run to run.
+ * Everything here is one calculation applied twice. For any feature of an item — the
+ * base it's on, or a mod it carries — compare how often it shows up on the dearest
+ * slice of the market against how often it shows up on the market as a whole:
  *
- * Every lift is reported with a 95% confidence interval, and nothing is ranked unless
- * the interval clears 1.0. This is the part that stops the page from printing
- * confident nonsense: on a thin sample a mod seen a handful of times can show a lift
- * of 2.0 by luck alone, and an interval makes that visible instead of hiding it.
+ *     lift = P(feature | dear) / P(feature | market)
+ *
+ * Above 1 means people pay for it. That works identically for "Ancestral Tiara" and
+ * for "Unassailable P1", so bases and mods share the same maths and the same caveats.
+ *
+ * Two things this deliberately does NOT do:
+ *
+ *  - Rank bases by their game-file stats. Every base gets used by someone; the market
+ *    decides which are worth crafting. The static tables are annotation, not the answer.
+ *  - Report a lift without an interval. On a thin sample a feature seen a handful of
+ *    times shows a lift of 2.0 by luck alone, so anything whose 95% CI spans 1.0 is
+ *    marked noise rather than ranked.
  */
 import { mkdir, readdir, readFile, writeFile, appendFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -18,17 +25,20 @@ import type { LadderRung, RawSnapshot, SampledItem } from './collect.ts';
 
 const ROOT = process.cwd();
 const RAW = path.join(ROOT, 'cache', 'raw');
-const PREV = path.join(ROOT, 'cache', 'prev');
 const HISTORY = path.join(ROOT, 'data', 'history');
 const ANALYSIS = path.join(ROOT, 'data', 'analysis.json');
 const LABELS = path.join(ROOT, 'data', 'mod-labels.json');
 
-/** Snapshots pooled for mod statistics. */
+/** Snapshots pooled for statistics. */
 const POOL_SNAPSHOTS = 60;
 /** Snapshots back for a trend reading. */
 const TREND_LOOKBACK = 14;
-/** Minimum sightings in each stratum before a mod may be ranked. */
+/** Minimum sightings in each stratum before a feature may be ranked. */
 const MIN_IN_STRATUM = 5;
+/** Bases listed on the page per category. */
+const TOP_BASES = 3;
+/** Prefixes and suffixes listed per category. */
+const TOP_MODS = 3;
 
 export interface ModLabel {
   name: string;
@@ -40,28 +50,19 @@ export interface ModLabel {
 export interface HistoryRow {
   at: string;
   key: string;
-  base: string;
+  label: string;
   minIlvl: number;
-  magicLadder: LadderRung[];
-  rareLadder: LadderRung[];
-  magicFloorEx: number | null;
-  topThresholdEx: number | null;
-  topCount: number | null;
-  nTop: number;
+  ladder: LadderRung[];
+  total: number;
+  dearThresholdEx: number | null;
+  dearCount: number | null;
+  nDear: number;
   nBase: number;
-  /** mod key -> [count in top stratum, count in baseline] */
+  /** base name -> [count in dear, count in baseline] */
+  bases: Record<string, [number, number]>;
+  /** mod key -> [count in dear, count in baseline] */
   mods: Record<string, [number, number]>;
   divineRate: number | null;
-  delisted: { seen: number; gone: number } | null;
-}
-
-export function quantile(sorted: number[], q: number): number | null {
-  if (!sorted.length) return null;
-  const pos = (sorted.length - 1) * q;
-  const lo = Math.floor(pos);
-  const hi = Math.ceil(pos);
-  if (lo === hi) return sorted[lo]!;
-  return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (pos - lo);
 }
 
 /** Trade wraps game terms as [Display|Link]; unwrap to plain text. */
@@ -74,50 +75,41 @@ export function genericLabel(s: string): string {
   return cleanText(s).replace(/[+-]?\d+(\.\d+)?/g, '#');
 }
 
-function countMods(items: SampledItem[]): Map<string, number> {
+/** Tier "P1" is a prefix, "S3" a suffix — the split the crafter actually needs. */
+export function affixOf(tier: string): 'prefix' | 'suffix' | 'other' {
+  if (tier.startsWith('P')) return 'prefix';
+  if (tier.startsWith('S')) return 'suffix';
+  return 'other';
+}
+
+function countBy<T>(items: T[], key: (t: T) => string[]): Map<string, number> {
   const out = new Map<string, number>();
-  for (const it of items) {
-    // itemMods already deduped per item; count each mod once per item.
-    for (const m of it.mods) out.set(m.key, (out.get(m.key) ?? 0) + 1);
-  }
+  for (const it of items) for (const k of new Set(key(it))) out.set(k, (out.get(k) ?? 0) + 1);
   return out;
 }
 
 /**
- * Share of previously-seen listings that are gone.
+ * Risk-ratio confidence interval on the log scale.
  *
- * Only decidable on a price-ascending sample, and only for listings priced below the
- * current window's ceiling: those are the ones that would necessarily still be visible
- * if they hadn't been taken. Anything at or above the ceiling might merely have been
- * pushed out of view, so it is excluded rather than guessed at.
+ * The ratio of two proportions is roughly log-normal, so the interval is built around
+ * ln(RR) and exponentiated back. An interval spanning 1.0 means the apparent effect is
+ * indistinguishable from chance at this sample size.
  */
-async function delisting(key: string, magicCheap: SampledItem[]): Promise<HistoryRow['delisted']> {
-  const prevPath = path.join(PREV, `${key.replace(/:/g, '_')}.json`);
-  if (!existsSync(prevPath)) return null;
-  const prev = JSON.parse(await readFile(prevPath, 'utf8')) as RawSnapshot;
-
-  const prices = magicCheap.map((i) => i.priceEx).filter((p): p is number => p !== null);
-  if (!prices.length) return null;
-  const ceiling = Math.max(...prices);
-  const capped = magicCheap.length >= 20;
-
-  const decidable = (prev.magicCheap ?? []).filter(
-    (i) => i.priceEx !== null && (!capped || i.priceEx < ceiling),
-  );
-  if (decidable.length < 8) return null;
-  const nowIds = new Set(magicCheap.map((i) => i.id));
-  return { seen: decidable.length, gone: decidable.filter((i) => !nowIds.has(i.id)).length };
+export function liftCI(a: number, nDear: number, b: number, nBase: number) {
+  const pDear = a / nDear;
+  const pBase = b / nBase;
+  const rr = pDear / pBase;
+  const se = Math.sqrt((1 - pDear) / a + (1 - pBase) / b);
+  const z = 1.96;
+  return { lift: rr, ciLow: rr * Math.exp(-z * se), ciHigh: rr * Math.exp(z * se), pDear, pBase };
 }
 
-const histPath = (key: string) => path.join(HISTORY, `${key.replace(/:/g, '_')}.jsonl`);
+const histPath = (key: string) => path.join(HISTORY, `${key.replace(/\./g, '_')}.jsonl`);
 
 async function readHistory(key: string): Promise<HistoryRow[]> {
   const p = histPath(key);
   if (!existsSync(p)) return [];
-  return (await readFile(p, 'utf8'))
-    .split('\n')
-    .filter(Boolean)
-    .map((l) => JSON.parse(l) as HistoryRow);
+  return (await readFile(p, 'utf8')).split('\n').filter(Boolean).map((l) => JSON.parse(l) as HistoryRow);
 }
 
 async function mergeLabels(add: Record<string, ModLabel>): Promise<Record<string, ModLabel>> {
@@ -127,16 +119,17 @@ async function mergeLabels(add: Record<string, ModLabel>): Promise<Record<string
   return merged;
 }
 
+const last = <T>(xs: T[]): T | undefined => xs[xs.length - 1];
+
 async function main(): Promise<void> {
   const files = existsSync(RAW) ? (await readdir(RAW)).filter((f) => f.endsWith('.json')) : [];
 
-  // Nothing collected yet is a normal state, not a failure. The rotation runs on a
-  // schedule and its first ticks may be held off by a rate limit, so throwing here
-  // would mark every tick as failed until the first base lands — training the operator
-  // to ignore a red task. The site renders fine without market data.
+  // Nothing collected yet is a normal state, not a failure: the rotation does one
+  // category per tick and early ticks may be held off by a rate limit. Throwing here
+  // would mark every tick red until the first category lands.
   if (!files.length) {
     console.log('No snapshots in cache/raw yet — nothing to aggregate.');
-    console.log("The rotation collects one base per tick; this resolves once one lands.");
+    console.log('The rotation collects one category per tick; this resolves once one lands.');
     return;
   }
 
@@ -150,17 +143,16 @@ async function main(): Promise<void> {
     const snap = JSON.parse(await readFile(path.join(RAW, f), 'utf8')) as RawSnapshot;
     keys.push(snap.key);
 
-    // Collection refreshes one base per run, so most raw files are unchanged since
-    // last time. Appending them again would fabricate history: duplicate rows inflate
-    // the pooled mod counts and make a flat trend look like a repeated observation.
-    // The snapshot's own timestamp is the identity — only genuinely new ones append.
+    // One category refreshes per run, so most raw files are unchanged. Re-appending
+    // them would fabricate history: duplicate rows inflate pooled counts and make a
+    // flat market look like repeated observations.
     const existing = await readHistory(snap.key);
     if (existing.length && last(existing)!.at === snap.at) {
       skipped++;
       continue;
     }
 
-    for (const it of [...snap.topSample, ...snap.baseSample]) {
+    for (const it of [...snap.dearSample, ...snap.baseSample]) {
       for (const m of it.mods) {
         labelUpdates[m.key] ??= {
           name: m.name,
@@ -171,33 +163,29 @@ async function main(): Promise<void> {
       }
     }
 
-    const top = countMods(snap.topSample);
-    const base = countMods(snap.baseSample);
-    const mods: Record<string, [number, number]> = {};
-    for (const k of new Set([...top.keys(), ...base.keys()])) {
-      mods[k] = [top.get(k) ?? 0, base.get(k) ?? 0];
-    }
+    const baseKey = (i: SampledItem) => [i.baseName];
+    const modKey = (i: SampledItem) => i.mods.map((m) => m.key);
 
-    const magicPrices = snap.magicCheap
-      .map((i) => i.priceEx)
-      .filter((p): p is number => p !== null && p > 0)
-      .sort((a, b) => a - b);
+    const pair = (dear: Map<string, number>, base: Map<string, number>) => {
+      const out: Record<string, [number, number]> = {};
+      for (const k of new Set([...dear.keys(), ...base.keys()])) out[k] = [dear.get(k) ?? 0, base.get(k) ?? 0];
+      return out;
+    };
 
     const row: HistoryRow = {
       at: snap.at,
       key: snap.key,
-      base: snap.base,
+      label: snap.label,
       minIlvl: snap.minIlvl,
-      magicLadder: snap.magicLadder,
-      rareLadder: snap.rareLadder,
-      magicFloorEx: quantile(magicPrices, 0.1),
-      topThresholdEx: snap.topThresholdEx,
-      topCount: snap.topCount,
-      nTop: snap.topSample.length,
+      ladder: snap.ladder,
+      total: snap.total,
+      dearThresholdEx: snap.dearThresholdEx,
+      dearCount: snap.dearCount,
+      nDear: snap.dearSample.length,
       nBase: snap.baseSample.length,
-      mods,
+      bases: pair(countBy(snap.dearSample, baseKey), countBy(snap.baseSample, baseKey)),
+      mods: pair(countBy(snap.dearSample, modKey), countBy(snap.baseSample, modKey)),
       divineRate: snap.rates.divine ?? null,
-      delisted: await delisting(snap.key, snap.magicCheap),
     };
 
     await appendFile(histPath(snap.key), JSON.stringify(row) + '\n');
@@ -211,79 +199,79 @@ async function main(): Promise<void> {
   const analysis = buildAnalysis(history, labels);
   await writeFile(ANALYSIS, JSON.stringify(analysis, null, 2));
 
-  const depth = Math.max(0, ...[...history.values()].map((h) => h.length));
-  console.log(
-    `${appended} new snapshot(s), ${skipped} unchanged. ${files.length} bases known, deepest history ${depth} -> data/analysis.json`,
-  );
-  for (const b of analysis.bases) {
-    const t = b.trendPct === null ? '' : ` trend ${b.trendPct > 0 ? '+' : ''}${b.trendPct.toFixed(0)}%`;
+  console.log(`${appended} new, ${skipped} unchanged. ${analysis.categories.length} categories -> data/analysis.json`);
+  for (const c of analysis.categories) {
+    const top = c.bases[0];
     console.log(
-      `  ${b.base.padEnd(24)} blank ${fmt(b.magicFloorEx)}ex | rare ${String(b.rareTotal ?? 0).padStart(5)} | top>=${b.topThresholdEx ?? '-'}ex | ${String(b.topMods.length).padStart(2)} ranked (n=${b.nTop}/${b.nBase})${t}`,
+      `  ${c.label.padEnd(20)} ${String(c.total).padStart(5)} listed | top base: ${(top ? `${top.label} (${(top.shareBase * 100).toFixed(0)}%)` : '—').padEnd(30)} ${c.prefixes.length}P/${c.suffixes.length}S ranked`,
     );
   }
-  if (depth < 2) console.log('\nTrends need 2+ snapshots. Mod ranks sharpen as history accumulates.');
 }
 
-function fmt(x: number | null): string {
-  return x === null ? '  ?' : x < 10 ? x.toFixed(1) : String(Math.round(x));
-}
-
-export interface RankedMod {
+export interface Ranked {
   key: string;
   label: string;
-  name: string;
-  tier: string;
-  desecrated: boolean;
   lift: number;
   ciLow: number;
   ciHigh: number;
-  inTop: number;
+  inDear: number;
   inBase: number;
-  shareTop: number;
+  shareDear: number;
   shareBase: number;
   significant: boolean;
 }
 
-export interface BaseAnalysis {
-  base: string;
-  /** When this base was last collected. Bases refresh on a rotation, not together. */
+export interface RankedMod extends Ranked {
+  name: string;
+  tier: string;
+  desecrated: boolean;
+}
+
+export interface CategoryAnalysis {
+  key: string;
+  label: string;
   at: string;
   minIlvl: number;
-  magicFloorEx: number | null;
-  magicTotal: number | null;
-  rareTotal: number | null;
-  rareLadder: LadderRung[];
-  topThresholdEx: number | null;
-  topCount: number | null;
-  delistRate: number | null;
-  nTop: number;
+  total: number;
+  ladder: LadderRung[];
+  dearThresholdEx: number | null;
+  dearCount: number | null;
+  nDear: number;
   nBase: number;
   snapshots: number;
   trendPct: number | null;
-  topMods: RankedMod[];
+  /** Most-listed bases, i.e. what the market actually uses. */
+  bases: Ranked[];
+  prefixes: RankedMod[];
+  suffixes: RankedMod[];
 }
 
-/**
- * Risk-ratio confidence interval on the log scale.
- *
- * With a = sightings in the top stratum out of nTop, and b = sightings in the baseline
- * out of nBase, the ratio of proportions is approximately log-normal, so we build the
- * interval around ln(RR) and exponentiate back. If the interval spans 1.0 the mod's
- * apparent enrichment is indistinguishable from chance.
- */
-export function liftCI(a: number, nTop: number, b: number, nBase: number) {
-  const pTop = a / nTop;
-  const pBase = b / nBase;
-  const rr = pTop / pBase;
-  const se = Math.sqrt((1 - pTop) / a + (1 - pBase) / b);
-  const z = 1.96;
-  return {
-    lift: rr,
-    ciLow: rr * Math.exp(-z * se),
-    ciHigh: rr * Math.exp(z * se),
-    pTop,
-    pBase,
-  };
+function rankFeatures(
+  agg: Map<string, [number, number]>,
+  nDear: number,
+  nBase: number,
+  label: (k: string) => string,
+): Ranked[] {
+  const out: Ranked[] = [];
+  if (!nDear || !nBase) return out;
+  for (const [key, [a, b]] of agg) {
+    if (a < MIN_IN_STRATUM || b < MIN_IN_STRATUM) continue;
+    const { lift, ciLow, ciHigh, pDear, pBase } = liftCI(a, nDear, b, nBase);
+    if (!Number.isFinite(lift)) continue;
+    out.push({
+      key,
+      label: label(key),
+      lift,
+      ciLow,
+      ciHigh,
+      inDear: a,
+      inBase: b,
+      shareDear: pDear,
+      shareBase: pBase,
+      significant: ciLow > 1 || ciHigh < 1,
+    });
+  }
+  return out;
 }
 
 function trend(rows: HistoryRow[], pick: (r: HistoryRow) => number | null): number | null {
@@ -294,80 +282,75 @@ function trend(rows: HistoryRow[], pick: (r: HistoryRow) => number | null): numb
   return then === 0 ? null : ((now - then) / then) * 100;
 }
 
-const last = <T>(xs: T[]): T | undefined => xs[xs.length - 1];
-
 export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record<string, ModLabel>) {
-  const out: BaseAnalysis[] = [];
+  const out: CategoryAnalysis[] = [];
 
   for (const [, rows] of history) {
     if (!rows.length) continue;
     const latest = last(rows)!;
 
-    // Pool only snapshots that defined "expensive" the same way. The threshold is
-    // picked per run from a fixed rung ladder, so it is usually stable — but if the
-    // market moves enough to shift it (say 1000ex -> 200ex), pooling across the change
-    // would silently average two different questions together.
-    const pool = rows
-      .filter((r) => r.topThresholdEx === latest.topThresholdEx)
-      .slice(-POOL_SNAPSHOTS);
+    // Pool only snapshots that defined "dear" the same way; a market move that shifts
+    // the threshold would otherwise average two different questions together.
+    const pool = rows.filter((r) => r.dearThresholdEx === latest.dearThresholdEx).slice(-POOL_SNAPSHOTS);
 
-    // Pool sightings across snapshots; more evidence, same comparison each time.
-    const agg = new Map<string, [number, number]>();
-    let nTop = 0;
+    const aggBases = new Map<string, [number, number]>();
+    const aggMods = new Map<string, [number, number]>();
+    let nDear = 0;
     let nBase = 0;
     for (const r of pool) {
-      nTop += r.nTop;
+      nDear += r.nDear;
       nBase += r.nBase;
+      for (const [k, [a, b]] of Object.entries(r.bases)) {
+        const c = aggBases.get(k) ?? [0, 0];
+        aggBases.set(k, [c[0] + a, c[1] + b]);
+      }
       for (const [k, [a, b]] of Object.entries(r.mods)) {
-        const cur = agg.get(k) ?? [0, 0];
-        agg.set(k, [cur[0] + a, cur[1] + b]);
+        const c = aggMods.get(k) ?? [0, 0];
+        aggMods.set(k, [c[0] + a, c[1] + b]);
       }
     }
 
-    const topMods: RankedMod[] = [];
-    if (nTop > 0 && nBase > 0) {
-      for (const [key, [a, b]] of agg) {
-        if (a < MIN_IN_STRATUM || b < MIN_IN_STRATUM) continue;
-        const { lift, ciLow, ciHigh, pTop, pBase } = liftCI(a, nTop, b, nBase);
-        if (!Number.isFinite(lift)) continue;
-        const l = labels[key];
-        const stats = l?.stats.length ? l.stats.join(' / ') : key;
-        topMods.push({
-          key,
-          label: stats,
-          name: l?.name ?? '?',
-          tier: l?.tier ?? '?',
-          desecrated: l?.desecrated ?? false,
-          lift,
-          ciLow,
-          ciHigh,
-          inTop: a,
-          inBase: b,
-          shareTop: pTop,
-          shareBase: pBase,
-          significant: ciLow > 1 || ciHigh < 1,
-        });
-      }
-      // Significant results first, then by strength.
-      topMods.sort((x, y) => Number(y.significant) - Number(x.significant) || y.lift - x.lift);
-    }
+    // Bases are ordered by how much of the market they are: that IS "popular", and a
+    // base nobody lists is a base nobody buys, however good its stats look.
+    const bases = rankFeatures(aggBases, nDear, nBase, (k) => k).sort((a, b) => b.shareBase - a.shareBase);
+
+    const modLabel = (k: string) => {
+      const l = labels[k];
+      return l?.stats.length ? l.stats.join(' / ') : k;
+    };
+    const mods: RankedMod[] = rankFeatures(aggMods, nDear, nBase, modLabel).map((r) => ({
+      ...r,
+      name: labels[r.key]?.name ?? '?',
+      tier: labels[r.key]?.tier ?? '?',
+      desecrated: labels[r.key]?.desecrated ?? false,
+    }));
+
+    // Order by the LOWER bound of the interval, not the point estimate.
+    //
+    // Sorting by lift itself surfaces noise preferentially: a mod seen 6 times can
+    // show 2.2x on luck alone, and its variance is exactly why it floats to the top,
+    // so the "best" three affixes would be the three least-evidenced ones. Ranking by
+    // ciLow asks "what lift can we actually stand behind?", which rewards a solid 1.6x
+    // from 40 sightings over a wild 2.2x from 6 and needs no arbitrary cutoff. Same
+    // idea as a Wilson lower bound for rating sorts.
+    const byEvidence = (x: RankedMod, y: RankedMod) => y.ciLow - x.ciLow || y.lift - x.lift;
 
     out.push({
-      base: latest.base,
+      key: latest.key,
+      label: latest.label,
       at: latest.at,
       minIlvl: latest.minIlvl,
-      magicFloorEx: latest.magicFloorEx,
-      magicTotal: latest.magicLadder.find((r) => r.minEx === 1)?.count ?? null,
-      rareTotal: latest.rareLadder.find((r) => r.minEx === 1)?.count ?? null,
-      rareLadder: latest.rareLadder,
-      topThresholdEx: latest.topThresholdEx,
-      topCount: latest.topCount,
-      delistRate: latest.delisted ? latest.delisted.gone / Math.max(1, latest.delisted.seen) : null,
-      nTop,
+      total: latest.total,
+      ladder: latest.ladder,
+      dearThresholdEx: latest.dearThresholdEx,
+      dearCount: latest.dearCount,
+      nDear,
       nBase,
       snapshots: pool.length,
-      trendPct: trend(rows, (r) => r.magicFloorEx),
-      topMods,
+      trendPct: trend(rows, (r) => r.total),
+      bases: bases.slice(0, TOP_BASES),
+      prefixes: mods.filter((m) => affixOf(m.tier) === 'prefix').sort(byEvidence).slice(0, TOP_MODS),
+      suffixes: mods.filter((m) => affixOf(m.tier) === 'suffix').sort(byEvidence).slice(0, TOP_MODS),
     });
   }
 
@@ -377,7 +360,7 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
     league: process.env.POE2_LEAGUE ?? 'Runes of Aldur',
     minIlvl: latestRows[0]?.minIlvl ?? null,
     divineRate: latestRows.find((r) => r.divineRate)?.divineRate ?? null,
-    bases: out.sort((a, b) => (b.rareTotal ?? 0) - (a.rareTotal ?? 0)),
+    categories: out.sort((a, b) => b.total - a.total),
   };
 }
 

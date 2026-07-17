@@ -5,8 +5,8 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { liftCI } from '../pipeline/analyze.ts';
-import { pickTopThreshold } from '../pipeline/collect.ts';
+import { liftCI, affixOf } from '../pipeline/analyze.ts';
+import { pickDearThreshold } from '../pipeline/collect.ts';
 import { itemMods, type RawResult } from './trade.ts';
 
 test('lift is 1.0 when a mod is equally common in both strata', () => {
@@ -36,7 +36,7 @@ test('depletion is detected as well as enrichment', () => {
   assert.ok(ciHigh < 1, 'CI should exclude 1 below for a depleted mod');
 });
 
-test('pickTopThreshold targets roughly the dearest quarter', () => {
+test('pickDearThreshold targets roughly the dearest quarter', () => {
   const rungs = [
     { minEx: 1, count: 1000 },
     { minEx: 50, count: 800 },
@@ -44,20 +44,44 @@ test('pickTopThreshold targets roughly the dearest quarter', () => {
     { minEx: 1000, count: 260 }, // 26% — closest to the 25% target
     { minEx: 5000, count: 30 }, // 3%, and below the minimum stratum size
   ];
-  assert.deepEqual(pickTopThreshold(rungs), { minEx: 1000, count: 260 });
+  assert.deepEqual(pickDearThreshold(rungs), { minEx: 1000, count: 260 });
 });
 
-test('pickTopThreshold refuses a stratum too thin to sample', () => {
+test('pickDearThreshold refuses a stratum too thin to sample', () => {
   const rungs = [
     { minEx: 1, count: 100 },
     { minEx: 50, count: 10 },
     { minEx: 200, count: 2 },
   ];
-  assert.equal(pickTopThreshold(rungs), null);
+  assert.equal(pickDearThreshold(rungs), null);
 });
 
-test('pickTopThreshold returns null on an empty market', () => {
-  assert.equal(pickTopThreshold([{ minEx: 1, count: 0 }]), null);
+test('pickDearThreshold returns null on an empty market', () => {
+  assert.equal(pickDearThreshold([{ minEx: 1, count: 0 }]), null);
+});
+
+test('ranking by the interval floor beats ranking by the point estimate', () => {
+  // The trap: both mods show a similar lift, but one is backed by 40 sightings and the
+  // other by 6. Sorting on lift alone puts the fluke first, because small samples have
+  // the widest variance and therefore the most extreme point estimates — the ranking
+  // would systematically recommend the least-evidenced affixes.
+  const solid = liftCI(40, 200, 25, 200); // 1.6x from a lot of data
+  const fluke = liftCI(6, 200, 3, 200); // 2.0x from almost none
+
+  assert.ok(fluke.lift > solid.lift, 'the fluke does look better on the point estimate');
+  assert.ok(solid.ciLow > fluke.ciLow, 'but the interval floor ranks the evidenced one first');
+  assert.ok(solid.ciLow > 1, 'and only the evidenced one clears 1.0');
+  assert.ok(fluke.ciLow < 1);
+});
+
+test('affixes split on the tier letter, which is what a crafter needs', () => {
+  // Trade encodes the affix in the tier: P1 = prefix tier 1, S3 = suffix tier 3.
+  // The mod names corroborate it — "Celestial" precedes the base name, "of the
+  // Proficient" follows it.
+  assert.equal(affixOf('P1'), 'prefix');
+  assert.equal(affixOf('P12'), 'prefix');
+  assert.equal(affixOf('S3'), 'suffix');
+  assert.equal(affixOf('?'), 'other', 'unknown tiers must not be miscounted as either');
 });
 
 /** Builds a minimal trade result carrying the given explicitMods. */
