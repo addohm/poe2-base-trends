@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T22:38:31.126Z",
+  "generatedAt": "2026-07-18T02:28:40.298Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 440,
@@ -549,6 +549,83 @@
           "inDear": 12,
           "inBase": 19,
           "shareDear": 0.12,
+          "shareBase": 0.19,
+          "significant": false
+        }
+      ],
+      "prefixes": [],
+      "suffixes": []
+    },
+    {
+      "key": "armour.helmet/ar",
+      "label": "Helmet — Armour",
+      "group": "Helmet / ar",
+      "section": "Armour",
+      "at": "2026-07-18T02:27:50.739Z",
+      "minIlvl": 70,
+      "total": 1329,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 1329
+        },
+        {
+          "minEx": 50,
+          "count": 739
+        },
+        {
+          "minEx": 200,
+          "count": 561
+        },
+        {
+          "minEx": 1000,
+          "count": 240
+        },
+        {
+          "minEx": 5000,
+          "count": 90
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 240,
+      "nDear": 100,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Imperial Greathelm",
+          "label": "Imperial Greathelm",
+          "lift": 1.4166666666666667,
+          "ciLow": 0.909678672722768,
+          "ciHigh": 2.206212484280235,
+          "inDear": 34,
+          "inBase": 24,
+          "shareDear": 0.34,
+          "shareBase": 0.24,
+          "significant": false
+        },
+        {
+          "key": "Masked Greathelm",
+          "label": "Masked Greathelm",
+          "lift": 0.8571428571428571,
+          "ciLow": 0.48703717381824213,
+          "ciHigh": 1.5084965112441322,
+          "inDear": 18,
+          "inBase": 21,
+          "shareDear": 0.18,
+          "shareBase": 0.21,
+          "significant": false
+        },
+        {
+          "key": "Paragon Greathelm",
+          "label": "Paragon Greathelm",
+          "lift": 1.1052631578947367,
+          "ciLow": 0.6343490299589374,
+          "ciHigh": 1.9257641936940022,
+          "inDear": 21,
+          "inBase": 19,
+          "shareDear": 0.21,
           "shareBase": 0.19,
           "significant": false
         }
