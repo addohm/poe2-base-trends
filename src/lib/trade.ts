@@ -202,54 +202,100 @@ export function toListing(r: RawResult, toEx: (amount: number, currency: string)
 }
 
 export interface ItemMod {
-  /** Stable identity: origin + mod family name + tier, e.g. "exp|Unassailable|P1". */
+  /** Stable identity: origin + the stat signature, e.g. "exp|#% increased Armour". */
   key: string;
-  /** The mod family's name as the game shows it, e.g. "Unassailable", "of the Proficient". */
-  name: string;
-  /** Tier within that family's own ladder, e.g. "P1" (prefix 1) or "S3" (suffix 3). */
-  tier: string;
+  /** Mod names seen for this signature. Each name is really one tier's label. */
+  names: string[];
+  /** Tiers of this signature present on the item, e.g. ["P1"]. */
+  tiers: string[];
   desecrated: boolean;
-  /** Stat lines this one mod grants. Hybrids grant more than one. */
+  /** Stat lines this mod grants, numbers blanked. Hybrids grant more than one. */
   stats: string[];
 }
 
+/** Trade wraps game terms as [Display|Link]. */
+const clean = (s: string) => s.replace(/\[([^\]|]*)\|?([^\]]*)\]/g, (_, a: string, b: string) => b || a);
+/** Blank the rolled numbers so a stat describes the mod, not one item's roll. */
+const generic = (s: string) => clean(s).replace(/[+-]?\d+(\.\d+)?/g, '#');
+/** P# = prefix, S# = suffix. The letter is the affix. */
+const affixLetter = (tier: string): 'p' | 's' | 'x' => (tier[0] === 'P' ? 'p' : tier[0] === 'S' ? 's' : 'x');
+
 /**
- * Extracts the distinct **mods** on an item.
+ * Extracts the distinct **mods** on an item, keyed by what they grant.
  *
- * The unit here is the mod family + tier, not the stat line, and the distinction is
- * not cosmetic — it's the difference between a real measurement and nonsense.
+ * Getting this key right took two wrong turns worth recording.
  *
- * Trade reports one entry per *stat*, each naming the mod that granted it. Two facts
- * make stat-level keys useless:
+ * **First wrong turn: keying on stat hash + tier.** Trade reports one entry per stat,
+ * each naming the mod that granted it. Several unrelated mods grant the same stat, so
+ * `stat_4015621042|P1` merged "Unassailable" (92-100% increased ES) with "Celestial"
+ * (41%, a hybrid) — a bucket matching no real mod, which is how "[P2] increased Energy
+ * Shield" once ranked as a top result.
  *
- *  - **Hybrids grant several stats.** "Celestial" P3 emits both `29% increased Energy
- *    Shield` and `+21 to maximum Mana` as separate entries. It is one mod, and a
- *    crafter hits it once.
- *  - **Unrelated families share stat hashes, and each has its own tier ladder.**
- *    `stat_4015621042` (increased ES) is granted by "Unassailable" (P1 = 92-100%),
- *    by "Celestial" (P3 = 27-32%, hybrid), and by desecrated "Dauntless" (P3 = 68-79%).
- *    Keying on hash+tier merges these into a bucket that corresponds to no mod at all —
- *    which is exactly how "[P2] increased Energy Shield" became a top result.
+ * **Second wrong turn: keying on mod name + tier.** This is coherent but shatters the
+ * data. The mod *name is essentially the tier's label* — "Unassailable" IS P1 of
+ * increased ES — so name+tier splits one stat across its whole ladder. On a 100-item
+ * sample, `+ to Spirit` fragmented into eight slivers of 1-8 sightings, every one below
+ * the evidence floor: a stat present on 22% of items vanished from the page entirely.
+ * Worse, the slivers manufactured fake winners — "S2 Cold Resistance, 2.4x, significant"
+ * was small-sample noise, where the stat pooled across tiers is a sober 1.3x.
  *
- * So we key on the family name and its own tier, and keep desecrated mods separate
- * since they come from a different mechanic and cannot be crafted the same way.
+ * So the key is **affix + stat signature**: every stat the mod grants, numbers
+ * blanked, joined, tagged prefix or suffix. That pools a tier ladder into the thing a
+ * crafter actually targets, while three things stay correctly separate:
+ *
+ *  - hybrids ("#% increased Armour / # to maximum Life" vs "#% increased Armour"),
+ *    because their signatures differ;
+ *  - the same stat as a prefix vs a suffix — "+ to Spirit" exists as both, and they
+ *    occupy different affix slots, so an item can carry one of each; folding them
+ *    together would both mislabel the column and let a mod appear twice on one item;
+ *  - desecrated mods, a different mechanic not craftable the same way.
+ *
+ * Tiers are kept alongside rather than in the key, so we can still report which tier
+ * the expensive items actually carry.
  */
 export function itemMods(r: RawResult): ItemMod[] {
-  const byKey = new Map<string, ItemMod>();
+  // Group a hybrid's stat lines under (origin, name, affix) first, so its signature is
+  // the whole mod. Name alone isn't enough: a stat can be both prefix and suffix.
+  const byMod = new Map<string, ItemMod>();
   for (const entry of r.item.explicitMods ?? []) {
     const desecrated = Boolean(entry.flags?.desecrated) || (entry.hash ?? '').includes('.desecrated.');
+    const stat = generic(entry.description ?? entry.hash ?? '');
+    if (!stat) continue;
+
     for (const mod of entry.mods ?? []) {
       if (!mod?.name) continue;
-      const tier = mod.tier ?? '?';
-      const key = `${desecrated ? 'des' : 'exp'}|${mod.name}|${tier}`;
-      const existing = byKey.get(key);
-      const stat = entry.description ?? entry.hash ?? '';
+      const aff = affixLetter(mod.tier ?? '');
+      const id = `${desecrated ? 'des' : 'exp'}|${aff}|${mod.name}`;
+      const existing = byMod.get(id);
       if (existing) {
-        if (stat && !existing.stats.includes(stat)) existing.stats.push(stat);
+        if (!existing.stats.includes(stat)) existing.stats.push(stat);
       } else {
-        byKey.set(key, { key, name: mod.name, tier, desecrated, stats: stat ? [stat] : [] });
+        byMod.set(id, {
+          key: id,
+          names: [mod.name],
+          tiers: mod.tier ? [mod.tier] : [],
+          desecrated,
+          stats: [stat],
+        });
       }
     }
   }
-  return [...byKey.values()];
+
+  // Re-key by affix + stat signature, pooling the tier ladder.
+  const bySignature = new Map<string, ItemMod>();
+  for (const m of byMod.values()) {
+    const aff = affixLetter(m.tiers[0] ?? '');
+    // Sort the stats for the KEY so a hybrid folds together regardless of the order
+    // trade listed its lines in; `m.stats` keeps its natural display order.
+    const sig = [...m.stats].sort().join(' / ');
+    const key = `${m.desecrated ? 'des' : 'exp'}|${aff}|${sig}`;
+    const existing = bySignature.get(key);
+    if (!existing) {
+      bySignature.set(key, { ...m, key });
+      continue;
+    }
+    for (const n of m.names) if (!existing.names.includes(n)) existing.names.push(n);
+    for (const t of m.tiers) existing.tiers.push(t);
+  }
+  return [...bySignature.values()];
 }

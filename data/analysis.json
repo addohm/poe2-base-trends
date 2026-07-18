@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-18T02:35:53.605Z",
+  "generatedAt": "2026-07-18T02:38:47.223Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 440,
@@ -80,7 +80,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|#% increased Armour and Evasion",
+          "key": "exp|p|#% increased Armour and Evasion",
           "label": "#% increased Armour and Evasion",
           "lift": 1.3888888888888888,
           "ciLow": 1.0018390893596416,
@@ -96,7 +96,7 @@
           "tierMarket": "P3"
         },
         {
-          "key": "exp|# to Armour / # to Evasion Rating / #% increased Armour and Evasion",
+          "key": "exp|p|# to Armour / # to Evasion Rating / #% increased Armour and Evasion",
           "label": "# to Armour / # to Evasion Rating / #% increased Armour and Evasion",
           "lift": 1.3333333333333333,
           "ciLow": 0.8805220392260807,
@@ -112,7 +112,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to Armour / # to Evasion Rating",
+          "key": "exp|p|# to Armour / # to Evasion Rating",
           "label": "# to Armour / # to Evasion Rating",
           "lift": 1.0952380952380953,
           "ciLow": 0.8006642597237928,
@@ -128,7 +128,7 @@
           "tierMarket": "P3"
         },
         {
-          "key": "exp|# to maximum Life / #% increased Armour and Evasion",
+          "key": "exp|p|# to maximum Life / #% increased Armour and Evasion",
           "label": "#% increased Armour and Evasion / # to maximum Life",
           "lift": 1,
           "ciLow": 0.6339563831287481,
@@ -144,7 +144,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to maximum Life",
+          "key": "exp|p|# to maximum Life",
           "label": "# to maximum Life",
           "lift": 0.8444444444444444,
           "ciLow": 0.606419675818141,
@@ -160,25 +160,25 @@
           "tierMarket": "P4"
         },
         {
-          "key": "exp|# to # Physical Thorns damage",
-          "label": "# to # Physical Thorns damage",
-          "lift": 0.6470588235294117,
-          "ciLow": 0.3194102344651639,
-          "ciHigh": 1.310806843144313,
-          "inDear": 11,
-          "inBase": 17,
-          "shareDear": 0.11,
-          "shareBase": 0.17,
+          "key": "exp|p|# to Spirit",
+          "label": "# to Spirit",
+          "lift": 0.7777777777777777,
+          "ciLow": 0.47251082639070663,
+          "ciHigh": 1.280263303649112,
+          "inDear": 21,
+          "inBase": 27,
+          "shareDear": 0.21,
+          "shareBase": 0.27,
           "significant": false,
           "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P2",
-          "tierMarket": "P2"
+          "tierRange": "P1-P7",
+          "tierDear": "P3",
+          "tierMarket": "P4"
         }
       ],
       "suffixes": [
         {
-          "key": "exp|Gain Deflection Rating equal to #% of Evasion Rating",
+          "key": "exp|s|Gain Deflection Rating equal to #% of Evasion Rating",
           "label": "Gain Deflection Rating equal to #% of Evasion Rating",
           "lift": 3,
           "ciLow": 1.2426142600221073,
@@ -194,7 +194,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1.2580645161290323,
           "ciLow": 0.8589949327761829,
@@ -210,7 +210,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Cold Resistance",
+          "key": "exp|s|#% to Cold Resistance",
           "label": "#% to Cold Resistance",
           "lift": 1.0263157894736843,
           "ciLow": 0.7229586071633449,
@@ -226,7 +226,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|# to Stun Threshold",
+          "key": "exp|s|# to Stun Threshold",
           "label": "# to Stun Threshold",
           "lift": 1.0526315789473684,
           "ciLow": 0.5992223167523283,
@@ -242,7 +242,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|# to Strength",
+          "key": "exp|s|# to Strength",
           "label": "# to Strength",
           "lift": 1.3,
           "ciLow": 0.5980621033558006,
@@ -258,7 +258,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 0.9062499999999999,
           "ciLow": 0.5959548542395166,
@@ -351,7 +351,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|Adds # to # Lightning damage to Attacks",
+          "key": "exp|p|Adds # to # Lightning damage to Attacks",
           "label": "Adds # to # Lightning damage to Attacks",
           "lift": 1.7,
           "ciLow": 1.054311017346476,
@@ -367,7 +367,7 @@
           "tierMarket": "P3"
         },
         {
-          "key": "exp|#% increased Armour",
+          "key": "exp|p|#% increased Armour",
           "label": "#% increased Armour",
           "lift": 1.380952380952381,
           "ciLow": 0.8473315724488756,
@@ -383,7 +383,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|Adds # to # Cold damage to Attacks",
+          "key": "exp|p|Adds # to # Cold damage to Attacks",
           "label": "Adds # to # Cold damage to Attacks",
           "lift": 1.4999999999999998,
           "ciLow": 0.8094641502055334,
@@ -399,7 +399,7 @@
           "tierMarket": "P4"
         },
         {
-          "key": "exp|Adds # to # Physical Damage to Attacks",
+          "key": "exp|p|Adds # to # Physical Damage to Attacks",
           "label": "Adds # to # Physical Damage to Attacks",
           "lift": 1.1142857142857143,
           "ciLow": 0.7754436587640863,
@@ -415,7 +415,7 @@
           "tierMarket": "P4"
         },
         {
-          "key": "exp|# to maximum Life",
+          "key": "exp|p|# to maximum Life",
           "label": "# to maximum Life",
           "lift": 0.8571428571428572,
           "ciLow": 0.5738567539698343,
@@ -431,7 +431,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to Accuracy Rating",
+          "key": "exp|p|# to Accuracy Rating",
           "label": "# to Accuracy Rating",
           "lift": 0.8947368421052632,
           "ciLow": 0.4946227491310862,
@@ -449,7 +449,7 @@
       ],
       "suffixes": [
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 1.2692307692307692,
           "ciLow": 0.8233203412470633,
@@ -465,7 +465,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1,
           "ciLow": 0.6187215230044476,
@@ -481,7 +481,7 @@
           "tierMarket": "S4"
         },
         {
-          "key": "exp|#% of Armour also applies to Elemental Damage",
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 1.0526315789473684,
           "ciLow": 0.5992223167523283,
@@ -497,7 +497,7 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|#% increased Attack Speed",
+          "key": "exp|s|#% increased Attack Speed",
           "label": "#% increased Attack Speed",
           "lift": 1.3,
           "ciLow": 0.5980621033558006,
@@ -513,7 +513,7 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|#% to Chaos Resistance",
+          "key": "exp|s|#% to Chaos Resistance",
           "label": "#% to Chaos Resistance",
           "lift": 1.3,
           "ciLow": 0.5980621033558006,
@@ -529,7 +529,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|Leech #% of Physical Attack Damage as Life",
+          "key": "exp|s|Leech #% of Physical Attack Damage as Life",
           "label": "Leech #% of Physical Attack Damage as Life",
           "lift": 1.2222222222222223,
           "ciLow": 0.5296492481131941,
@@ -622,121 +622,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|#% increased Armour and Energy Shield",
-          "label": "#% increased Armour and Energy Shield",
-          "lift": 1.1842105263157894,
-          "ciLow": 0.8504154041078501,
-          "ciHigh": 1.6490230114167492,
-          "inDear": 45,
-          "inBase": 38,
-          "shareDear": 0.45,
-          "shareBase": 0.38,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P7",
-          "tierDear": "P3",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|# to maximum Life",
-          "label": "# to maximum Life",
-          "lift": 0.9787234042553192,
-          "ciLow": 0.7269798440126879,
-          "ciHigh": 1.317642448998081,
-          "inDear": 46,
-          "inBase": 47,
-          "shareDear": 0.46,
-          "shareBase": 0.47,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P13",
-          "tierDear": "P4",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|# to Armour / # to maximum Energy Shield",
-          "label": "# to Armour / # to maximum Energy Shield",
-          "lift": 1,
-          "ciLow": 0.6964959400071032,
-          "ciHigh": 1.4357585486999414,
-          "inDear": 37,
-          "inBase": 37,
-          "shareDear": 0.37,
-          "shareBase": 0.37,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P8",
-          "tierDear": "P3",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|# to maximum Life / #% increased Armour and Energy Shield",
-          "label": "#% increased Armour and Energy Shield / # to maximum Life",
-          "lift": 0.9642857142857143,
-          "ciLow": 0.6147536232364346,
-          "ciHigh": 1.5125521894124576,
-          "inDear": 27,
-          "inBase": 28,
-          "shareDear": 0.27,
-          "shareBase": 0.28,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P2",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|# to Armour / # to maximum Energy Shield / #% increased Armour and Energy Shield",
-          "label": "# to Armour / # to maximum Energy Shield / #% increased Armour and Energy Shield",
-          "lift": 0.7857142857142857,
-          "ciLow": 0.4838812323993153,
-          "ciHigh": 1.275823275299205,
-          "inDear": 22,
-          "inBase": 28,
-          "shareDear": 0.22,
-          "shareBase": 0.28,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P1",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|# to # Physical Thorns damage",
-          "label": "# to # Physical Thorns damage",
-          "lift": 0.4,
-          "ciLow": 0.20285686474039127,
-          "ciHigh": 0.7887334757182711,
-          "inDear": 10,
-          "inBase": 25,
-          "shareDear": 0.1,
-          "shareBase": 0.25,
-          "significant": true,
-          "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P2",
-          "tierMarket": "P3"
-        }
-      ],
-      "suffixes": [
-        {
-          "key": "exp|#% to Cold Resistance",
-          "label": "#% to Cold Resistance",
-          "lift": 1.8181818181818183,
-          "ciLow": 1.1706744678793135,
-          "ciHigh": 2.8238295227839045,
-          "inDear": 40,
-          "inBase": 22,
-          "shareDear": 0.4,
-          "shareBase": 0.22,
-          "significant": true,
-          "desecrated": false,
-          "tierRange": "S1-S6",
-          "tierDear": "S3",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|# to Spirit",
+          "key": "exp|p|# to Spirit",
           "label": "# to Spirit",
           "lift": 1.6666666666666667,
           "ciLow": 1.0913519311095856,
@@ -752,7 +638,105 @@
           "tierMarket": "P4"
         },
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|p|#% increased Armour and Energy Shield",
+          "label": "#% increased Armour and Energy Shield",
+          "lift": 1.1842105263157894,
+          "ciLow": 0.8504154041078501,
+          "ciHigh": 1.6490230114167492,
+          "inDear": 45,
+          "inBase": 38,
+          "shareDear": 0.45,
+          "shareBase": 0.38,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P7",
+          "tierDear": "P3",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|# to maximum Life",
+          "label": "# to maximum Life",
+          "lift": 0.9787234042553192,
+          "ciLow": 0.7269798440126879,
+          "ciHigh": 1.317642448998081,
+          "inDear": 46,
+          "inBase": 47,
+          "shareDear": 0.46,
+          "shareBase": 0.47,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P13",
+          "tierDear": "P4",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to Armour / # to maximum Energy Shield",
+          "label": "# to Armour / # to maximum Energy Shield",
+          "lift": 1,
+          "ciLow": 0.6964959400071032,
+          "ciHigh": 1.4357585486999414,
+          "inDear": 37,
+          "inBase": 37,
+          "shareDear": 0.37,
+          "shareBase": 0.37,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P3",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to maximum Life / #% increased Armour and Energy Shield",
+          "label": "#% increased Armour and Energy Shield / # to maximum Life",
+          "lift": 0.9642857142857143,
+          "ciLow": 0.6147536232364346,
+          "ciHigh": 1.5125521894124576,
+          "inDear": 27,
+          "inBase": 28,
+          "shareDear": 0.27,
+          "shareBase": 0.28,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P6",
+          "tierDear": "P2",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to Armour / # to maximum Energy Shield / #% increased Armour and Energy Shield",
+          "label": "# to Armour / # to maximum Energy Shield / #% increased Armour and Energy Shield",
+          "lift": 0.7857142857142857,
+          "ciLow": 0.4838812323993153,
+          "ciHigh": 1.275823275299205,
+          "inDear": 22,
+          "inBase": 28,
+          "shareDear": 0.22,
+          "shareBase": 0.28,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P6",
+          "tierDear": "P1",
+          "tierMarket": "P2"
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|s|#% to Cold Resistance",
+          "label": "#% to Cold Resistance",
+          "lift": 1.8181818181818183,
+          "ciLow": 1.1706744678793135,
+          "ciHigh": 2.8238295227839045,
+          "inDear": 40,
+          "inBase": 22,
+          "shareDear": 0.4,
+          "shareBase": 0.22,
+          "significant": true,
+          "desecrated": false,
+          "tierRange": "S1-S6",
+          "tierDear": "S3",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 1.303030303030303,
           "ciLow": 0.9099539544016365,
@@ -768,7 +752,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1.1875,
           "ciLow": 0.8121786864893337,
@@ -784,7 +768,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Chaos Resistance",
+          "key": "exp|s|#% to Chaos Resistance",
           "label": "#% to Chaos Resistance",
           "lift": 1.7500000000000002,
           "ciLow": 0.7682417044348651,
@@ -800,7 +784,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% of Armour also applies to Elemental Damage",
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 1.0625,
           "ciLow": 0.5693442738484297,
@@ -814,6 +798,22 @@
           "tierRange": "S1-S4",
           "tierDear": "S2",
           "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|# Life Regeneration per second",
+          "label": "# Life Regeneration per second",
+          "lift": 0.875,
+          "ciLow": 0.5223350105663442,
+          "ciHigh": 1.465773851095808,
+          "inDear": 21,
+          "inBase": 24,
+          "shareDear": 0.21,
+          "shareBase": 0.24,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S11",
+          "tierDear": "S3",
+          "tierMarket": "S4"
         }
       ]
     },
@@ -893,7 +893,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|#% increased Movement Speed",
+          "key": "exp|p|#% increased Movement Speed",
           "label": "#% increased Movement Speed",
           "lift": 1.1964285714285714,
           "ciLow": 0.9586240933543044,
@@ -909,7 +909,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to maximum Life",
+          "key": "exp|p|# to maximum Life",
           "label": "# to maximum Life",
           "lift": 1.2285714285714286,
           "ciLow": 0.8660473501456978,
@@ -925,7 +925,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to maximum Mana",
+          "key": "exp|p|# to maximum Mana",
           "label": "# to maximum Mana",
           "lift": 1.1153846153846152,
           "ciLow": 0.7104978108223476,
@@ -941,7 +941,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|#% increased Armour",
+          "key": "exp|p|#% increased Armour",
           "label": "#% increased Armour",
           "lift": 0.9743589743589743,
           "ciLow": 0.6863591247494214,
@@ -957,7 +957,7 @@
           "tierMarket": "P3"
         },
         {
-          "key": "exp|# to Stun Threshold / #% increased Armour",
+          "key": "exp|p|# to Stun Threshold / #% increased Armour",
           "label": "#% increased Armour / # to Stun Threshold",
           "lift": 0.9642857142857143,
           "ciLow": 0.6147536232364346,
@@ -973,7 +973,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to Armour",
+          "key": "exp|p|# to Armour",
           "label": "# to Armour",
           "lift": 0.7142857142857143,
           "ciLow": 0.4637381592521494,
@@ -991,7 +991,7 @@
       ],
       "suffixes": [
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1.7499999999999998,
           "ciLow": 1.2057478736500258,
@@ -1007,7 +1007,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Cold Resistance",
+          "key": "exp|s|#% to Cold Resistance",
           "label": "#% to Cold Resistance",
           "lift": 1.0810810810810811,
           "ciLow": 0.7612435368972568,
@@ -1023,7 +1023,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 1.0256410256410258,
           "ciLow": 0.7277687561700388,
@@ -1039,7 +1039,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Chaos Resistance",
+          "key": "exp|s|#% to Chaos Resistance",
           "label": "#% to Chaos Resistance",
           "lift": 1,
           "ciLow": 0.48818257397584236,
@@ -1055,7 +1055,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% of Armour also applies to Elemental Damage",
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 0.7857142857142857,
           "ciLow": 0.4838812323993153,
@@ -1071,7 +1071,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|# to Stun Threshold",
+          "key": "exp|s|# to Stun Threshold",
           "label": "# to Stun Threshold",
           "lift": 0.8333333333333334,
           "ciLow": 0.4453134441725656,
@@ -1164,7 +1164,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|#% increased Armour / # to maximum Mana",
+          "key": "exp|p|# to maximum Mana / #% increased Armour",
           "label": "#% increased Armour / # to maximum Mana",
           "lift": 1.5294117647058822,
           "ciLow": 0.8869199307582948,
@@ -1180,7 +1180,23 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to maximum Life",
+          "key": "exp|p|#% increased Rarity of Items found",
+          "label": "#% increased Rarity of Items found",
+          "lift": 1.4615384615384615,
+          "ciLow": 0.7639510253619186,
+          "ciHigh": 2.796114677042611,
+          "inDear": 19,
+          "inBase": 13,
+          "shareDear": 0.19,
+          "shareBase": 0.13,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P2",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|# to maximum Life",
           "label": "# to maximum Life",
           "lift": 1,
           "ciLow": 0.731463599063997,
@@ -1196,7 +1212,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to Armour",
+          "key": "exp|p|# to Armour",
           "label": "# to Armour",
           "lift": 1.0666666666666667,
           "ciLow": 0.7051738661894102,
@@ -1212,7 +1228,7 @@
           "tierMarket": "P1"
         },
         {
-          "key": "exp|# to maximum Mana",
+          "key": "exp|p|# to maximum Mana",
           "label": "# to maximum Mana",
           "lift": 0.9642857142857143,
           "ciLow": 0.6147536232364346,
@@ -1228,7 +1244,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|#% increased Armour",
+          "key": "exp|p|#% increased Armour",
           "label": "#% increased Armour",
           "lift": 0.8604651162790697,
           "ciLow": 0.611793341652783,
@@ -1242,27 +1258,11 @@
           "tierRange": "P1-P5",
           "tierDear": "P2",
           "tierMarket": "P3"
-        },
-        {
-          "key": "exp|#% increased Armour / # to maximum Life",
-          "label": "#% increased Armour / # to maximum Life",
-          "lift": 0.7999999999999999,
-          "ciLow": 0.5508369481464552,
-          "ciHigh": 1.1618683208408127,
-          "inDear": 32,
-          "inBase": 40,
-          "shareDear": 0.32,
-          "shareBase": 0.4,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P5",
-          "tierDear": "P1",
-          "tierMarket": "P2"
         }
       ],
       "suffixes": [
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 1.206896551724138,
           "ciLow": 0.803612552393468,
@@ -1278,7 +1278,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1.1379310344827587,
           "ciLow": 0.7515810154030231,
@@ -1294,7 +1294,7 @@
           "tierMarket": "S4"
         },
         {
-          "key": "exp|#% to Cold Resistance",
+          "key": "exp|s|#% to Cold Resistance",
           "label": "#% to Cold Resistance",
           "lift": 1.1379310344827587,
           "ciLow": 0.7515810154030231,
@@ -1310,7 +1310,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% of Armour also applies to Elemental Damage",
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 1.3333333333333335,
           "ciLow": 0.7249107810287672,
@@ -1326,23 +1326,7 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|#% increased Rarity of Items found",
-          "label": "#% increased Rarity of Items found",
-          "lift": 1.1363636363636365,
-          "ciLow": 0.688242031212959,
-          "ciHigh": 1.876261918752271,
-          "inDear": 25,
-          "inBase": 22,
-          "shareDear": 0.25,
-          "shareBase": 0.22,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-S3",
-          "tierDear": "P1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|#% increased Critical Hit Chance",
+          "key": "exp|s|#% increased Critical Hit Chance",
           "label": "#% increased Critical Hit Chance",
           "lift": 1.4444444444444446,
           "ciLow": 0.6468001639341238,
@@ -1356,6 +1340,22 @@
           "tierRange": "S1-S3",
           "tierDear": "S1",
           "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|#% to Chaos Resistance",
+          "label": "#% to Chaos Resistance",
+          "lift": 1.5,
+          "ciLow": 0.6407450061304109,
+          "ciHigh": 3.5115373174552023,
+          "inDear": 12,
+          "inBase": 8,
+          "shareDear": 0.12,
+          "shareBase": 0.08,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S5",
+          "tierDear": "S3",
+          "tierMarket": "S3"
         }
       ]
     },
@@ -1435,7 +1435,7 @@
       ],
       "prefixes": [
         {
-          "key": "exp|#% increased Armour",
+          "key": "exp|p|#% increased Armour",
           "label": "#% increased Armour",
           "lift": 1.1749999999999998,
           "ciLow": 0.8551751516030294,
@@ -1451,7 +1451,7 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to maximum Life",
+          "key": "exp|p|# to maximum Life",
           "label": "# to maximum Life",
           "lift": 1.0851063829787235,
           "ciLow": 0.817446046472619,
@@ -1467,7 +1467,7 @@
           "tierMarket": "P4"
         },
         {
-          "key": "exp|# to Armour",
+          "key": "exp|p|# to Armour",
           "label": "# to Armour",
           "lift": 1.0625,
           "ciLow": 0.8028384588958363,
@@ -1483,7 +1483,7 @@
           "tierMarket": "P3"
         },
         {
-          "key": "exp|# to maximum Life / #% increased Armour",
+          "key": "exp|p|# to maximum Life / #% increased Armour",
           "label": "#% increased Armour / # to maximum Life",
           "lift": 1.2,
           "ciLow": 0.7631344474440681,
@@ -1499,7 +1499,23 @@
           "tierMarket": "P2"
         },
         {
-          "key": "exp|# to Armour / #% increased Armour",
+          "key": "exp|p|# to Spirit",
+          "label": "# to Spirit",
+          "lift": 1,
+          "ciLow": 0.5933779595997004,
+          "ciHigh": 1.6852665048000965,
+          "inDear": 22,
+          "inBase": 22,
+          "shareDear": 0.22,
+          "shareBase": 0.22,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P3",
+          "tierMarket": "P4"
+        },
+        {
+          "key": "exp|p|# to Armour / #% increased Armour",
           "label": "# to Armour / #% increased Armour",
           "lift": 0.8620689655172414,
           "ciLow": 0.5455754173247971,
@@ -1513,27 +1529,11 @@
           "tierRange": "P1-P4",
           "tierDear": "P2",
           "tierMarket": "P2"
-        },
-        {
-          "key": "exp|# to # Physical Thorns damage",
-          "label": "# to # Physical Thorns damage",
-          "lift": 0.5882352941176471,
-          "ciLow": 0.28339736965245893,
-          "ciHigh": 1.2209737926291033,
-          "inDear": 10,
-          "inBase": 17,
-          "shareDear": 0.1,
-          "shareBase": 0.17,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P4",
-          "tierDear": "P2",
-          "tierMarket": "P2"
         }
       ],
       "suffixes": [
         {
-          "key": "exp|#% to Lightning Resistance",
+          "key": "exp|s|#% to Lightning Resistance",
           "label": "#% to Lightning Resistance",
           "lift": 1.310344827586207,
           "ciLow": 0.8819647237377828,
@@ -1549,7 +1549,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% to Cold Resistance",
+          "key": "exp|s|#% to Cold Resistance",
           "label": "#% to Cold Resistance",
           "lift": 1.3214285714285714,
           "ciLow": 0.8811772750109178,
@@ -1565,7 +1565,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% of Armour also applies to Elemental Damage",
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
           "label": "#% of Armour also applies to Elemental Damage",
           "lift": 1.2272727272727273,
           "ciLow": 0.7518844756721224,
@@ -1581,7 +1581,7 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|#% to Fire Resistance",
+          "key": "exp|s|#% to Fire Resistance",
           "label": "#% to Fire Resistance",
           "lift": 1.1818181818181819,
           "ciLow": 0.7200275005268533,
@@ -1597,7 +1597,7 @@
           "tierMarket": "S3"
         },
         {
-          "key": "exp|#% reduced Attribute Requirements",
+          "key": "exp|s|#% reduced Attribute Requirements",
           "label": "#% reduced Attribute Requirements",
           "lift": 1.4000000000000001,
           "ciLow": 0.6529604502296472,
@@ -1613,20 +1613,20 @@
           "tierMarket": "S2"
         },
         {
-          "key": "exp|# to Spirit",
-          "label": "# to Spirit",
-          "lift": 1,
-          "ciLow": 0.5933779595997004,
-          "ciHigh": 1.6852665048000965,
-          "inDear": 22,
-          "inBase": 22,
-          "shareDear": 0.22,
-          "shareBase": 0.22,
+          "key": "exp|s|#% reduced Poison Duration on you",
+          "label": "#% reduced Poison Duration on you",
+          "lift": 1.375,
+          "ciLow": 0.5774843135490343,
+          "ciHigh": 3.273898451684033,
+          "inDear": 11,
+          "inBase": 8,
+          "shareDear": 0.11,
+          "shareBase": 0.08,
           "significant": false,
           "desecrated": false,
-          "tierRange": "P1-P8",
-          "tierDear": "P3",
-          "tierMarket": "P4"
+          "tierRange": "S1-S4",
+          "tierDear": "S2",
+          "tierMarket": "S2"
         }
       ]
     }

@@ -41,11 +41,14 @@ const TOP_BASES = 3;
 const TOP_MODS = 6;
 
 export interface ModLabel {
-  name: string;
-  tier: string;
+  /** Names seen for this signature; each is really one tier's label. Diagnostic only. */
+  names: string[];
   desecrated: boolean;
   stats: string[];
 }
+
+/** Tier counts, e.g. {P1: 4, P3: 9}. Kept per stratum so we can compare them. */
+export type TierCounts = Record<string, number>;
 
 export interface HistoryRow {
   at: string;
@@ -65,7 +68,28 @@ export interface HistoryRow {
   bases: Record<string, [number, number]>;
   /** mod key -> [count in dear, count in baseline] */
   mods: Record<string, [number, number]>;
+  /** mod key -> tier counts, per stratum. Says which tier the dear items carry. */
+  tiersDear: Record<string, TierCounts>;
+  tiersBase: Record<string, TierCounts>;
   divineRate: number | null;
+}
+
+/** "P1" -> 1. Lower is better; the ladder is numbered from the top. */
+export const tierRank = (t: string): number => Number.parseInt(t.slice(1), 10) || 99;
+
+/**
+ * The median tier, weighted by how often each was seen.
+ *
+ * Comparing the dear median against the baseline median is what turns a pooled stat
+ * back into crafting advice: "increased Armour is on 40% of everything" is a fact,
+ * but "expensive ones carry P1-P2 where the market carries P4" is the instruction.
+ */
+export function medianTier(counts: TierCounts): string | null {
+  const flat: string[] = [];
+  for (const [t, n] of Object.entries(counts)) for (let i = 0; i < n; i++) flat.push(t);
+  if (!flat.length) return null;
+  flat.sort((a, b) => tierRank(a) - tierRank(b));
+  return flat[Math.floor(flat.length / 2)]!;
 }
 
 /** Trade wraps game terms as [Display|Link]; unwrap to plain text. */
@@ -158,14 +182,25 @@ async function main(): Promise<void> {
 
     for (const it of [...snap.dearSample, ...snap.baseSample]) {
       for (const m of it.mods) {
-        labelUpdates[m.key] ??= {
-          name: m.name,
-          tier: m.tier,
+        const l = (labelUpdates[m.key] ??= {
+          names: [],
           desecrated: m.desecrated,
           stats: m.stats.map(genericLabel),
-        };
+        });
+        for (const n of m.names ?? []) if (!l.names.includes(n)) l.names.push(n);
       }
     }
+
+    const tiersOf = (items: SampledItem[]) => {
+      const out: Record<string, TierCounts> = {};
+      for (const it of items) {
+        for (const m of it.mods) {
+          const c = (out[m.key] ??= {});
+          for (const t of m.tiers ?? []) c[t] = (c[t] ?? 0) + 1;
+        }
+      }
+      return out;
+    };
 
     const baseKey = (i: SampledItem) => [i.baseName];
     const modKey = (i: SampledItem) => i.mods.map((m) => m.key);
@@ -191,6 +226,8 @@ async function main(): Promise<void> {
       nBase: snap.baseSample.length,
       bases: pair(countBy(snap.dearSample, baseKey), countBy(snap.baseSample, baseKey)),
       mods: pair(countBy(snap.dearSample, modKey), countBy(snap.baseSample, modKey)),
+      tiersDear: tiersOf(snap.dearSample),
+      tiersBase: tiersOf(snap.baseSample),
       divineRate: snap.rates.divine ?? null,
     };
 
@@ -228,9 +265,12 @@ export interface Ranked {
 }
 
 export interface RankedMod extends Ranked {
-  name: string;
-  tier: string;
   desecrated: boolean;
+  /** Tier range across the whole ladder, e.g. "P1-P8". */
+  tierRange: string | null;
+  /** Median tier on expensive items vs on the market — the crafting instruction. */
+  tierDear: string | null;
+  tierMarket: string | null;
 }
 
 export interface CategoryAnalysis {
@@ -303,8 +343,17 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
 
     const aggBases = new Map<string, [number, number]>();
     const aggMods = new Map<string, [number, number]>();
+    const aggTiersDear = new Map<string, TierCounts>();
+    const aggTiersBase = new Map<string, TierCounts>();
     let nDear = 0;
     let nBase = 0;
+    const addTiers = (into: Map<string, TierCounts>, from: Record<string, TierCounts>) => {
+      for (const [k, counts] of Object.entries(from)) {
+        const c = into.get(k) ?? {};
+        for (const [t, n] of Object.entries(counts)) c[t] = (c[t] ?? 0) + n;
+        into.set(k, c);
+      }
+    };
     for (const r of pool) {
       nDear += r.nDear;
       nBase += r.nBase;
@@ -316,6 +365,8 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
         const c = aggMods.get(k) ?? [0, 0];
         aggMods.set(k, [c[0] + a, c[1] + b]);
       }
+      addTiers(aggTiersDear, r.tiersDear ?? {});
+      addTiers(aggTiersBase, r.tiersBase ?? {});
     }
 
     // Bases are ordered by how much of the market they are: that IS "popular", and a
@@ -326,12 +377,31 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
       const l = labels[k];
       return l?.stats.length ? l.stats.join(' / ') : k;
     };
-    const mods: RankedMod[] = rankFeatures(aggMods, nDear, nBase, modLabel).map((r) => ({
-      ...r,
-      name: labels[r.key]?.name ?? '?',
-      tier: labels[r.key]?.tier ?? '?',
-      desecrated: labels[r.key]?.desecrated ?? false,
-    }));
+    const tierSpread = (counts: TierCounts | undefined): string | null => {
+      const ts = Object.keys(counts ?? {}).sort((a, b) => tierRank(a) - tierRank(b));
+      if (!ts.length) return null;
+      return ts.length > 1 ? `${ts[0]}-${ts[ts.length - 1]}` : ts[0]!;
+    };
+    const mods: RankedMod[] = rankFeatures(aggMods, nDear, nBase, modLabel).map((r) => {
+      const dearTiers = aggTiersDear.get(r.key);
+      const baseTiers = aggTiersBase.get(r.key);
+      return {
+        ...r,
+        desecrated: labels[r.key]?.desecrated ?? false,
+        // Spread over the ladder, plus the typical tier each stratum carries — the
+        // difference between the two is the actual crafting instruction.
+        tierRange: tierSpread(baseTiers) ?? tierSpread(dearTiers),
+        tierDear: medianTier(dearTiers ?? {}),
+        tierMarket: medianTier(baseTiers ?? {}),
+      };
+    });
+
+    // The affix is the middle segment of the key ("exp|p|..."), so it's authoritative
+    // per mod and can't be contaminated by the same stat's other-affix twin elsewhere.
+    const affixFor = (k: string): 'prefix' | 'suffix' | 'other' => {
+      const seg = k.split('|')[1];
+      return seg === 'p' ? 'prefix' : seg === 's' ? 'suffix' : 'other';
+    };
 
     // Order by the LOWER bound of the interval, not the point estimate.
     //
@@ -359,8 +429,8 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
       snapshots: pool.length,
       trendPct: trend(rows, (r) => r.total),
       bases: bases.slice(0, TOP_BASES),
-      prefixes: mods.filter((m) => affixOf(m.tier) === 'prefix').sort(byEvidence).slice(0, TOP_MODS),
-      suffixes: mods.filter((m) => affixOf(m.tier) === 'suffix').sort(byEvidence).slice(0, TOP_MODS),
+      prefixes: mods.filter((m) => affixFor(m.key) === 'prefix').sort(byEvidence).slice(0, TOP_MODS),
+      suffixes: mods.filter((m) => affixFor(m.key) === 'suffix').sort(byEvidence).slice(0, TOP_MODS),
     });
   }
 

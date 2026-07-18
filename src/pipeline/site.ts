@@ -113,24 +113,29 @@ function baseRows(bases: Ranked[], statOf: (name: string) => string): string {
 }
 
 /**
- * A mod row is the stat line and its tier — what you actually craft toward.
+ * A mod row is the stat line and the tier you're aiming for.
  *
- * The mod family name ("Celestial", "of the Proficient") stays out of the display: it
- * names the mod for the game's benefit, not the crafter's, and "#% increased Energy
- * Shield P1" is the useful sentence. The name is kept on the tooltip because it's what
- * makes the identity unambiguous underneath — several families grant the same stat.
+ * The mod family name ("Celestial", "of the Proficient") stays out of the display — it
+ * names the mod for the game's benefit, not the crafter's. The stat line is the useful
+ * sentence. Where the expensive items carry a better tier than the market at large,
+ * that gap is shown ("aim P1, market runs P3") — that difference is the actual craft.
  */
 function modRows(mods: RankedMod[]): string {
   if (!mods.length) return '<div class="empty">Not enough evidence yet.</div>';
   return mods
-    .map(
-      (m) => `<div class="row">
-      <span class="grow" title="${esc(m.name)}"><span class="name">${esc(m.label)}</span>
-        <span class="tier">${esc(m.tier)}</span>${m.desecrated ? ' <span class="pill">desecrated</span>' : ''}</span>
+    .map((m) => {
+      const aim =
+        m.tierDear && m.tierMarket && m.tierDear !== m.tierMarket
+          ? `<span class="tier">aim ${esc(m.tierDear)}</span> <span class="stat">market ${esc(m.tierMarket)}</span>`
+          : m.tierRange
+            ? `<span class="tier">${esc(m.tierRange)}</span>`
+            : '';
+      return `<div class="row">
+      <span class="grow"><span class="name">${esc(m.label)}</span> ${aim}${m.desecrated ? ' <span class="pill">desecrated</span>' : ''}</span>
       <span class="num">${pct(m.shareBase)}</span>
       ${liftCell(m)}
-    </div>`,
-    )
+    </div>`;
+    })
     .join('');
 }
 

@@ -71,7 +71,7 @@ export interface SampledItem {
   baseName: string;
   priceEx: number | null;
   ilvl: number;
-  mods: { key: string; name: string; tier: string; desecrated: boolean; stats: string[] }[];
+  mods: { key: string; names: string[]; tiers: string[]; desecrated: boolean; stats: string[] }[];
 }
 
 export interface RawSnapshot {

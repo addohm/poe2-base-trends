@@ -5,7 +5,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { liftCI, affixOf } from '../pipeline/analyze.ts';
+import { liftCI, affixOf, medianTier } from '../pipeline/analyze.ts';
 import { pickDearThreshold } from '../pipeline/collect.ts';
 import { itemMods, type RawResult } from './trade.ts';
 
@@ -84,6 +84,13 @@ test('affixes split on the tier letter, which is what a crafter needs', () => {
   assert.equal(affixOf('?'), 'other', 'unknown tiers must not be miscounted as either');
 });
 
+test('median tier reflects what the stratum mostly carries', () => {
+  // Expensive items skewing to P1-P2 while the market runs P4 is the crafting signal.
+  assert.equal(medianTier({ P1: 3, P2: 5, P4: 1 }), 'P2');
+  assert.equal(medianTier({ P4: 8, P3: 1 }), 'P4');
+  assert.equal(medianTier({}), null, 'no tiers seen -> no claim');
+});
+
 /** Builds a minimal trade result carrying the given explicitMods. */
 function fake(explicitMods: unknown[]): RawResult {
   return { id: 'x', listing: {}, item: { explicitMods } } as RawResult;
@@ -98,27 +105,64 @@ test('a hybrid mod granting two stats counts as ONE mod', () => {
     ]),
   );
   assert.equal(mods.length, 1);
-  assert.equal(mods[0]!.key, 'exp|Celestial|P3');
   assert.deepEqual(mods[0]!.stats.length, 2, 'both granted stats are kept on the one mod');
+  assert.deepEqual(mods[0]!.tiers, ['P3']);
 });
 
-test('different families sharing a stat hash stay separate', () => {
-  // The bug this replaces: keying on hash+tier merged these into one bucket.
+test('one stat across its tier ladder pools into a single mod', () => {
+  // The bug addohm caught: "+ to Spirit" arrives as P1..P8 under different family
+  // names ("Unassailable" etc). Keyed by name+tier it shattered into eight slivers,
+  // each below the evidence floor, so a stat on 22% of items vanished. Keyed by stat
+  // signature the ladder is one mod, which is what a crafter targets.
   const mods = itemMods(
     fake([
-      { description: '94% increased Energy Shield', hash: 'stat.explicit.stat_4015621042', mods: [{ name: 'Unassailable', tier: 'P1', level: 65 }] },
-      { description: '41% increased Energy Shield', hash: 'stat.explicit.stat_4015621042', mods: [{ name: 'Celestial', tier: 'P1', level: 46 }] },
+      { description: '+61 to Spirit', hash: 'stat.explicit.stat_spirit', mods: [{ name: 'Emperor’s', tier: 'P1', level: 60 }] },
+      { description: '+50 to Spirit', hash: 'stat.explicit.stat_spirit', mods: [{ name: 'Regal', tier: 'P4', level: 40 }] },
     ]),
   );
-  assert.equal(mods.length, 2);
-  assert.deepEqual(mods.map((m) => m.key).sort(), ['exp|Celestial|P1', 'exp|Unassailable|P1']);
+  assert.equal(mods.length, 1, 'both tiers are the same craftable target');
+  assert.equal(mods[0]!.stats[0], '# to Spirit', 'numbers blanked to the signature');
+  assert.deepEqual(mods[0]!.tiers.sort(), ['P1', 'P4'], 'but the tiers are retained for reporting');
 });
 
-test('desecrated mods are distinct from explicit ones of the same family', () => {
+test('a hybrid keeps its own identity, distinct from the pure stat', () => {
+  // "#% increased Armour / # to maximum Life" must not fold into "#% increased Armour".
   const mods = itemMods(
     fake([
-      { description: '71% increased Energy Shield', hash: 'stat.desecrated.stat_4015621042', flags: { desecrated: true }, mods: [{ name: 'Dauntless', tier: 'P3', level: 54 }] },
-      { description: '30% increased Energy Shield', hash: 'stat.explicit.stat_4015621042', mods: [{ name: 'Dauntless', tier: 'P3', level: 54 }] },
+      { description: '20% increased Armour', hash: 'stat.explicit.stat_armour', mods: [{ name: 'Plated', tier: 'P2', level: 30 }] },
+      { description: '18% increased Armour', hash: 'stat.explicit.stat_armour', mods: [{ name: 'Athlete’s', tier: 'P1', level: 40 }] },
+      { description: '+40 to maximum Life', hash: 'stat.explicit.stat_life', mods: [{ name: 'Athlete’s', tier: 'P1', level: 40 }] },
+    ]),
+  );
+  assert.equal(mods.length, 2, 'the hybrid and the pure stat are distinct mods');
+  // Display keeps natural order (primary stat first); the KEY is order-independent.
+  const sigs = mods.map((m) => m.stats.join(' / ')).sort();
+  assert.deepEqual(sigs, ['#% increased Armour', '#% increased Armour / # to maximum Life']);
+  assert.deepEqual(mods.map((m) => m.key).sort(), [
+    'exp|p|# to maximum Life / #% increased Armour', // key: origin|affix|sorted stats
+    'exp|p|#% increased Armour',
+  ]);
+});
+
+test('the same stat as a prefix and a suffix stays separate', () => {
+  // "+ to Spirit" exists as both a prefix and a suffix in PoE2, and an item can carry
+  // one of each. Folding them by stat alone would mislabel the affix column and let
+  // one mod appear twice on a single item.
+  const mods = itemMods(
+    fake([
+      { description: '+40 to Spirit', hash: 'stat.explicit.stat_spirit', mods: [{ name: "Queen's", tier: 'P1', level: 60 }] },
+      { description: '+12 to Spirit', hash: 'stat.explicit.stat_spirit', mods: [{ name: 'of the Stars', tier: 'S2', level: 40 }] },
+    ]),
+  );
+  assert.equal(mods.length, 2, 'prefix spirit and suffix spirit are different craftable slots');
+  assert.deepEqual(mods.map((m) => m.key).sort(), ['exp|p|# to Spirit', 'exp|s|# to Spirit']);
+});
+
+test('desecrated mods stay separate from explicit ones of the same stat', () => {
+  const mods = itemMods(
+    fake([
+      { description: '71% increased Energy Shield', hash: 'stat.desecrated.stat_es', flags: { desecrated: true }, mods: [{ name: 'Dauntless', tier: 'P3', level: 54 }] },
+      { description: '30% increased Energy Shield', hash: 'stat.explicit.stat_es', mods: [{ name: 'Sapphire', tier: 'P5', level: 20 }] },
     ]),
   );
   assert.equal(mods.length, 2);
