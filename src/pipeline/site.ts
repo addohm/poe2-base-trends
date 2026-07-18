@@ -45,28 +45,57 @@ code { background:var(--panel); padding:1px 5px; border-radius:4px; font-size:0.
 .pill { display:inline-block; background:var(--panel); border:1px solid var(--line);
   border-radius:999px; padding:2px 10px; font-size:0.76rem; color:var(--dim); margin:0 6px 4px 0; }
 .card { background:var(--panel); border:1px solid var(--line); border-radius:10px;
-  padding:14px 16px; margin-bottom:14px; }
+  padding:14px 16px; margin-bottom:14px; scroll-margin-top:96px; }
 .cardhead { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px;
   border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:12px; }
 .cardhead h3 { margin:0; }
 .cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
 @media (max-width:860px) { .cols { grid-template-columns:1fr; } }
-.col h4 { margin:0 0 8px; font-size:0.74rem; text-transform:uppercase;
+.col h4 { margin:0 0 6px; font-size:0.74rem; text-transform:uppercase;
   letter-spacing:0.06em; color:var(--dim); font-weight:600; }
+.rowhead { display:flex; gap:8px; padding:2px 0 4px; border-bottom:1px solid var(--line);
+  font-size:0.66rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--dim); }
+.rowhead .grow { flex:1; }
+.rowhead .num, .rowhead .lift { width:auto; text-align:right; }
 .row { display:flex; align-items:baseline; gap:8px; padding:4px 0;
   border-bottom:1px solid var(--line); font-size:0.88rem; }
 .row:last-child { border-bottom:none; }
 .row .grow { flex:1; min-width:0; }
-.row .num { font-variant-numeric:tabular-nums; color:var(--dim); font-size:0.8rem; white-space:nowrap; }
+.row .num { font-variant-numeric:tabular-nums; color:var(--dim); font-size:0.8rem; white-space:nowrap; text-align:right; }
 .name { font-weight:600; }
 .tier { color:var(--accent); font-weight:600; font-size:0.78rem; }
 .stat { color:var(--dim); font-size:0.8rem; display:block; }
-.lift { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; }
+.lift { font-variant-numeric:tabular-nums; font-weight:600; white-space:nowrap; min-width:2.6em; text-align:right; }
 .up { color:var(--good); } .down { color:var(--bad); } .flat { color:var(--dim); font-weight:400; }
 .note { border-left:3px solid var(--accent); padding:10px 14px; background:var(--panel);
   border-radius:0 8px 8px 0; margin:16px 0; }
 .note strong { color:var(--accent); }
 .empty { color:var(--dim); font-size:0.85rem; padding:6px 0; }
+
+/* Sticky navigation: section tabs + live filter. */
+.nav { position:sticky; top:0; z-index:10; background:var(--bg); padding:10px 0;
+  border-bottom:1px solid var(--line); margin-bottom:18px;
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.tab { background:var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding:6px 12px; font-size:0.85rem; color:var(--text); cursor:pointer; font-family:inherit; }
+.tab:hover { border-color:var(--accent); }
+.tab[aria-selected="true"] { background:var(--accent); color:#141414; border-color:var(--accent); font-weight:600; }
+.tab .cnt { opacity:0.6; font-size:0.78em; margin-left:4px; }
+.filter { flex:1; min-width:140px; background:var(--panel); border:1px solid var(--line);
+  border-radius:8px; padding:6px 12px; font-size:0.85rem; color:var(--text); font-family:inherit; }
+.filter:focus { outline:none; border-color:var(--accent); }
+.sec[hidden] { display:none; }
+.nomatch { color:var(--dim); font-size:0.9rem; padding:20px 4px; }
+
+/* Legend key. */
+.legend { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px 20px;
+  background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:16px 0; }
+.legend .k { font-size:0.84rem; }
+.legend .k b { color:var(--text); }
+.legend .k span { color:var(--dim); }
+.legend .swatch { display:inline-block; font-variant-numeric:tabular-nums; font-weight:600;
+  padding:0 5px; border-radius:4px; }
+.chiprow { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:0.82rem; color:var(--dim); margin-top:4px; }
 .scroll { overflow-x:auto; }
 table { border-collapse:collapse; width:100%; font-size:0.85rem; }
 th,td { text-align:right; padding:6px 8px; border-bottom:1px solid var(--line); white-space:nowrap; }
@@ -81,6 +110,45 @@ footer { margin-top:50px; padding-top:18px; border-top:1px solid var(--line);
 a { color:var(--accent); }
 `;
 
+/**
+ * Client script for the tab + filter navigation.
+ *
+ * Kept tiny and dependency-free — it only shows/hides pre-rendered cards, so the page
+ * is fully usable with JS off (everything is visible, just unfiltered). Tabs pick a
+ * section; the filter narrows by group label across whatever section is active.
+ */
+const NAV_JS = `
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab'));
+  var secs=[].slice.call(document.querySelectorAll('.sec'));
+  var cards=[].slice.call(document.querySelectorAll('.card[data-label]'));
+  var filter=document.getElementById('filter');
+  var nomatch=document.getElementById('nomatch');
+  var section='all';
+  function apply(){
+    var q=(filter.value||'').trim().toLowerCase();
+    var shown=0;
+    secs.forEach(function(sec){
+      var secOn = section==='all' || sec.getAttribute('data-section')===section;
+      var any=false;
+      [].slice.call(sec.querySelectorAll('.card[data-label]')).forEach(function(c){
+        var on = secOn && (!q || c.getAttribute('data-label').indexOf(q)>-1);
+        c.hidden=!on; if(on){any=true;shown++;}
+      });
+      sec.hidden = !any;
+    });
+    nomatch.hidden = shown>0;
+  }
+  tabs.forEach(function(t){ t.addEventListener('click',function(){
+    section=t.getAttribute('data-section');
+    tabs.forEach(function(x){x.setAttribute('aria-selected', x===t?'true':'false');});
+    apply(); window.scrollTo(0,0);
+  });});
+  filter.addEventListener('input', apply);
+  apply();
+})();
+`;
+
 function page(title: string, body: string): string {
   return `<!doctype html>
 <html lang="en"><head>
@@ -88,7 +156,7 @@ function page(title: string, body: string): string {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>
 <style>${CSS}</style>
-</head><body><div class="wrap">${body}</div></body></html>`;
+</head><body><div class="wrap">${body}</div><script>${NAV_JS}</script></body></html>`;
 }
 
 /** Lift with its interval. A CI spanning 1 means we can't tell it from chance. */
@@ -98,18 +166,24 @@ function liftCell(r: Ranked): string {
   return `<span class="lift ${cls}" title="${esc(title)}">${r.lift.toFixed(1)}&times;</span>`;
 }
 
+const ROWHEAD = (first: string) =>
+  `<div class="rowhead"><span class="grow">${first}</span><span class="num">Share</span><span class="lift">Lift</span></div>`;
+
 function baseRows(bases: Ranked[], statOf: (name: string) => string): string {
   if (!bases.length) return '<div class="empty">Not enough listings sampled yet.</div>';
-  return bases
-    .map(
-      (b) => `<div class="row">
+  return (
+    ROWHEAD('Base') +
+    bases
+      .map(
+        (b) => `<div class="row">
       <span class="grow"><span class="name">${esc(b.label)}</span>
         <span class="stat">${esc(statOf(b.label))}</span></span>
-      <span class="num">${pct(b.shareBase)} of market</span>
+      <span class="num">${pct(b.shareBase)}</span>
       ${liftCell(b)}
     </div>`,
-    )
-    .join('');
+      )
+      .join('')
+  );
 }
 
 /**
@@ -122,21 +196,24 @@ function baseRows(bases: Ranked[], statOf: (name: string) => string): string {
  */
 function modRows(mods: RankedMod[]): string {
   if (!mods.length) return '<div class="empty">Not enough evidence yet.</div>';
-  return mods
-    .map((m) => {
-      const aim =
-        m.tierDear && m.tierMarket && m.tierDear !== m.tierMarket
-          ? `<span class="tier">aim ${esc(m.tierDear)}</span> <span class="stat">market ${esc(m.tierMarket)}</span>`
-          : m.tierRange
-            ? `<span class="tier">${esc(m.tierRange)}</span>`
-            : '';
-      return `<div class="row">
+  return (
+    ROWHEAD('Mod &amp; tier to aim for') +
+    mods
+      .map((m) => {
+        const aim =
+          m.tierDear && m.tierMarket && m.tierDear !== m.tierMarket
+            ? `<span class="tier">aim ${esc(m.tierDear)}</span> <span class="stat">market has ${esc(m.tierMarket)}</span>`
+            : m.tierRange
+              ? `<span class="tier">tiers ${esc(m.tierRange)}</span>`
+              : '';
+        return `<div class="row">
       <span class="grow"><span class="name">${esc(m.label)}</span> ${aim}${m.desecrated ? ' <span class="pill">desecrated</span>' : ''}</span>
       <span class="num">${pct(m.shareBase)}</span>
       ${liftCell(m)}
     </div>`;
-    })
-    .join('');
+      })
+      .join('')
+  );
 }
 
 function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): string {
@@ -147,13 +224,14 @@ function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): st
     return hrs < 48 ? `${hrs}h ago` : `${Math.round(hrs / 24)}d ago`;
   })();
 
-  return `<div class="card">
+  const anchor = c.key.replace(/[^a-z0-9]/gi, '-');
+  return `<div class="card" id="c-${anchor}" data-label="${esc(c.label.toLowerCase())}">
   <div class="cardhead">
     <h3>${esc(c.label)}</h3>
-    <span class="pill">${c.total.toLocaleString()} listed</span>
-    <span class="pill">dear = ≥${c.dearThresholdEx ?? '?'} ex (${c.dearCount && c.total ? pct(c.dearCount / c.total) : '?'})</span>
-    <span class="pill">n = ${c.nDear} vs ${c.nBase}</span>
-    <span class="pill">${esc(age)}</span>
+    <span class="pill" title="Rare listings of this type at item level ≥ floor">${c.total.toLocaleString()} listed</span>
+    <span class="pill" title="'Expensive' = listings at or above this price. The % is that slice of the market.">expensive ≥ ${c.dearThresholdEx ?? '?'} ex (${c.dearCount && c.total ? pct(c.dearCount / c.total) : '?'})</span>
+    <span class="pill" title="Sample sizes: expensive items vs the whole market">n = ${c.nDear} vs ${c.nBase}</span>
+    <span class="pill" title="When this group was last collected">${esc(age)}</span>
   </div>
   <div class="cols">
     <div class="col"><h4>Craft on</h4>${baseRows(c.bases, statOf)}</div>
@@ -225,31 +303,59 @@ async function main(): Promise<void> {
   <span class="pill">Updated ${esc((analysis?.generatedAt ?? basesDoc.generatedAt).slice(0, 16).replace('T', ' '))} UTC</span>
 </div>
 
-<p>For each equipment category: the bases the market actually uses, and the prefixes and
-suffixes worth chasing on them.</p>
+<p>For each equipment group: the bases the market actually uses, and the prefixes and
+suffixes worth chasing on them. Pick a section or type to filter.</p>
 
-<div class="note">
-<p><strong>Share</strong> is how much of the market a base or mod is — popularity, and a
-liquidity check: a base nobody lists is a base nobody buys.</p>
-<p><strong>Lift</strong> is how much more often it appears on the dearest quarter of
-listings than on the market overall. <strong>2.0×</strong> means twice as common on
-expensive items — someone is paying for it. <strong>1.0×</strong> means it's along for
-the ride. Greyed-out means the 95% confidence interval spans 1.0: at this sample size we
-can't tell it from chance, so don't act on it. Hover any lift for the interval and counts.</p>
-<p>Bases are ordered by share (what people use), mods by lift (what earns the premium).
-Prices are Exalted Orb equivalent, converted by trade; listings are collapsed to one per
-seller so a single dumper can't tilt the numbers.</p>
+<details class="note" open>
+<summary style="font-weight:600;color:var(--accent)">How to read a card</summary>
+<div class="legend">
+  <div class="k"><b>Craft on</b><br><span>Bases ranked by <b>share</b> — how much of the
+    market lists them. A base nobody lists is a base nobody buys, so this doubles as a
+    liquidity check. Grey text is the base's game-file stat, for reference.</span></div>
+  <div class="k"><b>Target prefixes / suffixes</b><br><span>Mods ranked by <b>lift</b>. The
+    stat line is what you craft toward; the mod's internal name is omitted on purpose.</span></div>
+  <div class="k"><b><span class="swatch" style="color:var(--dim)">36%</span> Share</b><br>
+    <span>Fraction of listings that carry this base or mod.</span></div>
+  <div class="k"><b>Lift
+    <span class="swatch up">2.4×</span></b><br><span><span class="up">Green</span> = paid for:
+    this much more common on expensive items than on the market, and the evidence holds up.
+    <span class="down">Red</span> = actively avoided. <span class="flat">Grey</span> = can't
+    tell from chance yet at this sample size — don't act on it. Hover for the interval.</span></div>
+  <div class="k"><b>aim <span class="tier">P2</span> · market has <span style="color:var(--dim)">P3</span></b><br>
+    <span>Expensive items carry a better tier (P2) than the market average (P3). That gap is
+    the craft. <span class="tier">tiers P1-P8</span> alone means no clear tier premium.</span></div>
+  <div class="k"><b>Header pills</b><br><span><b>listed</b> = rare listings at endgame item
+    level · <b>expensive ≥ N ex</b> = the price cutoff for the "paid-for" comparison ·
+    <b>n = A vs B</b> = sample sizes.</span></div>
 </div>
+<div class="chiprow">
+  Prices are Exalted Orb equivalent, converted by trade · listings collapsed to one per seller ·
+  item level ≥ ${analysis?.minIlvl ?? '—'} · asks, not sales.
+</div>
+</details>
 
 ${
   analysis && covered
-    ? SECTIONS.map((s) => {
-        const cats = bySection(s);
-        if (!cats.length) return '';
-        return `<h2>${esc(s)}</h2>${cats.map((c) => categoryCard(c, statOf)).join('\n')}`;
-      })
-        .filter(Boolean)
-        .join('\n')
+    ? `<nav class="nav" id="nav">
+    <button class="tab" data-section="all" aria-selected="true">All<span class="cnt">${covered}</span></button>
+    ${SECTIONS.filter((s) => bySection(s).length)
+      .map(
+        (s) =>
+          `<button class="tab" data-section="${esc(s)}" aria-selected="false">${esc(s)}<span class="cnt">${bySection(s).length}</span></button>`,
+      )
+      .join('')}
+    <input class="filter" id="filter" type="search" placeholder="Filter… e.g. helmet, energy shield, ring" aria-label="Filter groups">
+  </nav>
+  <div id="results">
+  ${SECTIONS.map((s) => {
+    const cats = bySection(s);
+    if (!cats.length) return '';
+    return `<section class="sec" data-section="${esc(s)}"><h2>${esc(s)}</h2>${cats.map((c) => categoryCard(c, statOf)).join('\n')}</section>`;
+  })
+    .filter(Boolean)
+    .join('\n')}
+  <div class="nomatch" id="nomatch" hidden>No group matches that filter.</div>
+  </div>`
     : `<div class="card"><div class="empty">No market data collected yet. The rotation gathers one
        group per tick — see <code>docs/collection.md</code>. The reference tables below need no
        market data and are complete.</div></div>`
