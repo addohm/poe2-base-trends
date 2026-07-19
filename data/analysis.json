@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T10:36:06.902Z",
+  "generatedAt": "2026-07-19T11:35:36.501Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 445,
@@ -5885,6 +5885,46 @@
       "group": "Two Hand Axe",
       "section": "Weapons",
       "at": "2026-07-19T09:35:15.032Z",
+      "minIlvl": 70,
+      "total": 0,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 0
+        },
+        {
+          "minEx": 50,
+          "count": 0
+        },
+        {
+          "minEx": 200,
+          "count": 0
+        },
+        {
+          "minEx": 1000,
+          "count": 0
+        },
+        {
+          "minEx": 5000,
+          "count": 0
+        }
+      ],
+      "dearThresholdEx": null,
+      "dearCount": null,
+      "nDear": 0,
+      "nBase": 0,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [],
+      "prefixes": [],
+      "suffixes": []
+    },
+    {
+      "key": "weapon.twosword",
+      "label": "Two Hand Sword",
+      "group": "Two Hand Sword",
+      "section": "Weapons",
+      "at": "2026-07-19T11:35:14.460Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
