@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-20T13:35:42.278Z",
+  "generatedAt": "2026-07-20T14:37:58.561Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 445,
@@ -8602,6 +8602,46 @@
       "group": "Boots / ar/ev/es",
       "section": "Armour",
       "at": "2026-07-20T13:35:18.806Z",
+      "minIlvl": 70,
+      "total": 0,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 0
+        },
+        {
+          "minEx": 50,
+          "count": 0
+        },
+        {
+          "minEx": 200,
+          "count": 0
+        },
+        {
+          "minEx": 1000,
+          "count": 0
+        },
+        {
+          "minEx": 5000,
+          "count": 0
+        }
+      ],
+      "dearThresholdEx": null,
+      "dearCount": null,
+      "nDear": 0,
+      "nBase": 0,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [],
+      "prefixes": [],
+      "suffixes": []
+    },
+    {
+      "key": "armour.gloves/ar/ev/es",
+      "label": "Gloves — Armour + Evasion + ES",
+      "group": "Gloves / ar/ev/es",
+      "section": "Armour",
+      "at": "2026-07-20T14:37:34.807Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
