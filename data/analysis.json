@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-20T11:43:18.799Z",
+  "generatedAt": "2026-07-20T12:35:56.920Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 445,
@@ -8346,6 +8346,253 @@
           "tierRange": "S1-S5",
           "tierDear": "S2",
           "tierMarket": "S3"
+        }
+      ]
+    },
+    {
+      "key": "armour.chest/ar/ev/es",
+      "label": "Body Armour — Armour + Evasion + ES",
+      "group": "Body Armour / ar/ev/es",
+      "section": "Armour",
+      "at": "2026-07-20T12:35:17.074Z",
+      "minIlvl": 70,
+      "total": 195,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 195
+        },
+        {
+          "minEx": 50,
+          "count": 146
+        },
+        {
+          "minEx": 200,
+          "count": 108
+        },
+        {
+          "minEx": 1000,
+          "count": 56
+        },
+        {
+          "minEx": 5000,
+          "count": 39
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 56,
+      "nDear": 41,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Sacrificial Regalia",
+          "label": "Sacrificial Regalia",
+          "lift": 0.9485094850948509,
+          "ciLow": 0.8224645508154406,
+          "ciHigh": 1.093871149124801,
+          "inDear": 35,
+          "inBase": 90,
+          "shareDear": 0.8536585365853658,
+          "shareBase": 0.9,
+          "significant": false
+        }
+      ],
+      "prefixes": [
+        {
+          "key": "exp|p|#% increased Armour, Evasion and Energy Shield",
+          "label": "#% increased Armour, Evasion and Energy Shield",
+          "lift": 1.0787992495309568,
+          "ciLow": 0.7757043377855789,
+          "ciHigh": 1.5003239818290883,
+          "inDear": 23,
+          "inBase": 52,
+          "shareDear": 0.5609756097560976,
+          "shareBase": 0.52,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P4",
+          "tierMarket": "P4"
+        },
+        {
+          "key": "des|p|# to Spirit",
+          "label": "# to Spirit",
+          "lift": 2.090592334494773,
+          "ciLow": 0.7477887152866363,
+          "ciHigh": 5.844667376898048,
+          "inDear": 6,
+          "inBase": 7,
+          "shareDear": 0.14634146341463414,
+          "shareBase": 0.07,
+          "significant": false,
+          "desecrated": true,
+          "tierRange": "P1-P8",
+          "tierDear": "P2",
+          "tierMarket": "P5"
+        },
+        {
+          "key": "exp|p|# to Armour / # to Evasion Rating",
+          "label": "# to Armour / # to Evasion Rating",
+          "lift": 2.032520325203252,
+          "ciLow": 0.6566957021439827,
+          "ciHigh": 6.290796268160392,
+          "inDear": 5,
+          "inBase": 6,
+          "shareDear": 0.12195121951219512,
+          "shareBase": 0.06,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P4",
+          "tierDear": "P3",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|# to maximum Life",
+          "label": "# to maximum Life",
+          "lift": 0.9380863039399624,
+          "ciLow": 0.650665615323617,
+          "ciHigh": 1.352470290291976,
+          "inDear": 20,
+          "inBase": 52,
+          "shareDear": 0.4878048780487805,
+          "shareBase": 0.52,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P12",
+          "tierDear": "P6",
+          "tierMarket": "P6"
+        },
+        {
+          "key": "exp|p|# to Spirit",
+          "label": "# to Spirit",
+          "lift": 0.9291521486643438,
+          "ciLow": 0.448344301482164,
+          "ciHigh": 1.925581996946406,
+          "inDear": 8,
+          "inBase": 21,
+          "shareDear": 0.1951219512195122,
+          "shareBase": 0.21,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P3",
+          "tierMarket": "P4"
+        },
+        {
+          "key": "exp|p|# to Armour",
+          "label": "# to Armour",
+          "lift": 1.2195121951219512,
+          "ciLow": 0.4441109087898419,
+          "ciHigh": 3.348735562708107,
+          "inDear": 5,
+          "inBase": 10,
+          "shareDear": 0.12195121951219512,
+          "shareBase": 0.1,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P10",
+          "tierDear": "P4",
+          "tierMarket": "P5"
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|s|#% to Cold Resistance",
+          "label": "#% to Cold Resistance",
+          "lift": 1.1134676564156947,
+          "ciLow": 0.771795813899336,
+          "ciHigh": 1.6063966654858868,
+          "inDear": 21,
+          "inBase": 46,
+          "shareDear": 0.5121951219512195,
+          "shareBase": 0.46,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S7",
+          "tierDear": "S4",
+          "tierMarket": "S4"
+        },
+        {
+          "key": "exp|s|# to Intelligence",
+          "label": "# to Intelligence",
+          "lift": 1.5521064301552108,
+          "ciLow": 0.6469041369831109,
+          "ciHigh": 3.72394336781316,
+          "inDear": 7,
+          "inBase": 11,
+          "shareDear": 0.17073170731707318,
+          "shareBase": 0.11,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S8",
+          "tierDear": "S3",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|#% to Fire Resistance",
+          "label": "#% to Fire Resistance",
+          "lift": 1.2195121951219512,
+          "ciLow": 0.626267814174898,
+          "ciHigh": 2.374718866896498,
+          "inDear": 10,
+          "inBase": 20,
+          "shareDear": 0.24390243902439024,
+          "shareBase": 0.2,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S8",
+          "tierDear": "S6",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|# Life Regeneration per second",
+          "label": "# Life Regeneration per second",
+          "lift": 1.0452961672473868,
+          "ciLow": 0.5237020820497106,
+          "ciHigh": 2.086384825864338,
+          "inDear": 9,
+          "inBase": 21,
+          "shareDear": 0.21951219512195122,
+          "shareBase": 0.21,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S10",
+          "tierDear": "S2",
+          "tierMarket": "S4"
+        },
+        {
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
+          "label": "#% of Armour also applies to Elemental Damage",
+          "lift": 1.2195121951219512,
+          "ciLow": 0.49083291985015876,
+          "ciHigh": 3.0299719800888143,
+          "inDear": 6,
+          "inBase": 12,
+          "shareDear": 0.14634146341463414,
+          "shareBase": 0.12,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S4",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|# to Strength",
+          "label": "# to Strength",
+          "lift": 1.3550135501355014,
+          "ciLow": 0.4832446967304054,
+          "ciHigh": 3.7994451537150034,
+          "inDear": 5,
+          "inBase": 9,
+          "shareDear": 0.12195121951219512,
+          "shareBase": 0.09,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S7",
+          "tierDear": "S1",
+          "tierMarket": "S2"
         }
       ]
     },
