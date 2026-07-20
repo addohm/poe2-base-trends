@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-20T10:36:06.063Z",
+  "generatedAt": "2026-07-20T11:43:18.799Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 445,
@@ -8114,6 +8114,237 @@
           "desecrated": false,
           "tierRange": "S1-S7",
           "tierDear": "S4",
+          "tierMarket": "S3"
+        }
+      ]
+    },
+    {
+      "key": "armour.shield/ar/ev",
+      "label": "Shield — Armour + Evasion",
+      "group": "Shield / ar/ev",
+      "section": "Armour",
+      "at": "2026-07-20T11:42:41.790Z",
+      "minIlvl": 70,
+      "total": 268,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 268
+        },
+        {
+          "minEx": 50,
+          "count": 141
+        },
+        {
+          "minEx": 200,
+          "count": 116
+        },
+        {
+          "minEx": 1000,
+          "count": 64
+        },
+        {
+          "minEx": 5000,
+          "count": 26
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 64,
+      "nDear": 21,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Golden Targe",
+          "label": "Golden Targe",
+          "lift": 1.1111111111111112,
+          "ciLow": 0.565780067982978,
+          "ciHigh": 2.1820632629138697,
+          "inDear": 7,
+          "inBase": 30,
+          "shareDear": 0.3333333333333333,
+          "shareBase": 0.3,
+          "significant": false
+        }
+      ],
+      "prefixes": [
+        {
+          "key": "exp|p|# to Armour / # to Evasion Rating",
+          "label": "# to Armour / # to Evasion Rating",
+          "lift": 1.287001287001287,
+          "ciLow": 0.7679314580427934,
+          "ciHigh": 2.1569272822401646,
+          "inDear": 10,
+          "inBase": 37,
+          "shareDear": 0.47619047619047616,
+          "shareBase": 0.37,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P7",
+          "tierDear": "P2",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|#% increased Block chance",
+          "label": "#% increased Block chance",
+          "lift": 1.7006802721088432,
+          "ciLow": 0.6871060095117432,
+          "ciHigh": 4.209413609983535,
+          "inDear": 5,
+          "inBase": 14,
+          "shareDear": 0.23809523809523808,
+          "shareBase": 0.14,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P2",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|# to maximum Life",
+          "label": "# to maximum Life",
+          "lift": 1.020408163265306,
+          "ciLow": 0.6777863286631506,
+          "ciHigh": 1.536225762641418,
+          "inDear": 12,
+          "inBase": 56,
+          "shareDear": 0.5714285714285714,
+          "shareBase": 0.56,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P10",
+          "tierDear": "P2",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|#% increased Armour and Evasion",
+          "label": "#% increased Armour and Evasion",
+          "lift": 0.9316770186335402,
+          "ciLow": 0.5442405961869147,
+          "ciHigh": 1.5949234091162274,
+          "inDear": 9,
+          "inBase": 46,
+          "shareDear": 0.42857142857142855,
+          "shareBase": 0.46,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P2",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to Stun Threshold / #% increased Armour and Evasion",
+          "label": "#% increased Armour and Evasion / # to Stun Threshold",
+          "lift": 0.8403361344537814,
+          "ciLow": 0.4052415898011888,
+          "ciHigh": 1.742577357904374,
+          "inDear": 6,
+          "inBase": 34,
+          "shareDear": 0.2857142857142857,
+          "shareBase": 0.34,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P5",
+          "tierDear": "P2",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|# to # Physical Thorns damage",
+          "label": "# to # Physical Thorns damage",
+          "lift": 0.8210180623973727,
+          "ciLow": 0.36005753117274264,
+          "ciHigh": 1.872119315452789,
+          "inDear": 5,
+          "inBase": 29,
+          "shareDear": 0.23809523809523808,
+          "shareBase": 0.29,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P6",
+          "tierDear": "P2",
+          "tierMarket": "P2"
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|s|#% to Cold Resistance",
+          "label": "#% to Cold Resistance",
+          "lift": 1.7460317460317463,
+          "ciLow": 1.0527861757466113,
+          "ciHigh": 2.8957702222758135,
+          "inDear": 11,
+          "inBase": 30,
+          "shareDear": 0.5238095238095238,
+          "shareBase": 0.3,
+          "significant": true,
+          "desecrated": false,
+          "tierRange": "S1-S7",
+          "tierDear": "S3",
+          "tierMarket": "S4"
+        },
+        {
+          "key": "exp|s|#% to Lightning Resistance",
+          "label": "#% to Lightning Resistance",
+          "lift": 1.0452961672473868,
+          "ciLow": 0.6049044205865804,
+          "ciHigh": 1.8063086333581948,
+          "inDear": 9,
+          "inBase": 41,
+          "shareDear": 0.42857142857142855,
+          "shareBase": 0.41,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S7",
+          "tierDear": "S3",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|#% to Fire Resistance",
+          "label": "#% to Fire Resistance",
+          "lift": 1.0582010582010581,
+          "ciLow": 0.5002928312535321,
+          "ciHigh": 2.2382680894549267,
+          "inDear": 6,
+          "inBase": 27,
+          "shareDear": 0.2857142857142857,
+          "shareBase": 0.27,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S6",
+          "tierDear": "S3",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|# to Stun Threshold",
+          "label": "# to Stun Threshold",
+          "lift": 1.0822510822510822,
+          "ciLow": 0.46281834185352755,
+          "ciHigh": 2.5307281477714656,
+          "inDear": 5,
+          "inBase": 22,
+          "shareDear": 0.23809523809523808,
+          "shareBase": 0.22,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S9",
+          "tierDear": "S2",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|Hits against you have #% reduced Critical Damage Bonus",
+          "label": "Hits against you have #% reduced Critical Damage Bonus",
+          "lift": 0.9920634920634921,
+          "ciLow": 0.42791817142078215,
+          "ciHigh": 2.299949004309595,
+          "inDear": 5,
+          "inBase": 24,
+          "shareDear": 0.23809523809523808,
+          "shareBase": 0.24,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S5",
+          "tierDear": "S2",
           "tierMarket": "S3"
         }
       ]
