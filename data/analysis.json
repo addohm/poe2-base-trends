@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T12:36:04.625Z",
+  "generatedAt": "2026-07-23T14:38:11.126Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -12004,6 +12004,49 @@
       "group": "Helmet / ar/ev/es",
       "section": "Armour",
       "at": "2026-07-20T18:37:37.878Z",
+      "minIlvl": 70,
+      "total": 0,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 0
+        },
+        {
+          "minEx": 50,
+          "count": 0
+        },
+        {
+          "minEx": 200,
+          "count": 0
+        },
+        {
+          "minEx": 1000,
+          "count": 0
+        },
+        {
+          "minEx": 5000,
+          "count": 0
+        }
+      ],
+      "dearThresholdEx": null,
+      "dearCount": null,
+      "nDear": 0,
+      "nBase": 0,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [],
+      "prefixes": [],
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
+    },
+    {
+      "key": "map.tablet/expedition",
+      "label": "Expedition Tablet",
+      "group": "Expedition Tablet",
+      "section": "Maps",
+      "kind": "tablet",
+      "at": "2026-07-23T14:37:48.717Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
