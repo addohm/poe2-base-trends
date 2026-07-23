@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T06:53:24.207Z",
+  "generatedAt": "2026-07-23T07:35:47.161Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -12109,7 +12109,7 @@
       "label": "One Hand Axe",
       "group": "One Hand Axe",
       "section": "Weapons",
-      "at": "2026-07-18T22:37:59.105Z",
+      "at": "2026-07-23T07:35:21.838Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
@@ -12138,7 +12138,7 @@
       "dearCount": null,
       "nDear": 0,
       "nBase": 0,
-      "snapshots": 1,
+      "snapshots": 2,
       "trendPct": null,
       "bases": [],
       "prefixes": [],
