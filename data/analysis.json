@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T08:35:58.426Z",
+  "generatedAt": "2026-07-23T09:35:40.103Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -12133,7 +12133,7 @@
       "label": "One Hand Sword",
       "group": "One Hand Sword",
       "section": "Weapons",
-      "at": "2026-07-19T01:35:17.053Z",
+      "at": "2026-07-23T09:35:16.648Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
@@ -12162,7 +12162,7 @@
       "dearCount": null,
       "nDear": 0,
       "nBase": 0,
-      "snapshots": 1,
+      "snapshots": 2,
       "trendPct": null,
       "bases": [],
       "prefixes": [],
