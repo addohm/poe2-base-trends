@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T00:57:31.356Z",
+  "generatedAt": "2026-07-23T02:04:02.205Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -12069,7 +12069,7 @@
       "label": "Flail",
       "group": "Flail",
       "section": "Weapons",
-      "at": "2026-07-18T12:35:16.405Z",
+      "at": "2026-07-23T02:03:39.752Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
@@ -12098,7 +12098,7 @@
       "dearCount": null,
       "nDear": 0,
       "nBase": 0,
-      "snapshots": 1,
+      "snapshots": 2,
       "trendPct": null,
       "bases": [],
       "prefixes": [],
