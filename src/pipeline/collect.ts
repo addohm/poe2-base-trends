@@ -101,6 +101,9 @@ function spec(unit: WorkUnit, tag: string, extra: Partial<QuerySpec> = {}): Quer
   return {
     key: `${unit.id}:${tag}`,
     category: unit.category,
+    // Tablets filter to a single base type (affixes are type-specific); gear/waystones
+    // span their category.
+    type: unit.type,
     rarity: 'rare',
     sampling: 'recent',
     collapse: true,

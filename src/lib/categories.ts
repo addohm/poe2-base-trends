@@ -74,7 +74,7 @@ export const ARCHETYPE_LABEL: Record<string, string> = {
 export type UnitKind = 'gear' | 'tablet' | 'waystone';
 
 export interface WorkUnit {
-  /** Stable id, e.g. "armour.helmet/es", "weapon.bow", "map.tablet". */
+  /** Stable id, e.g. "armour.helmet/es", "weapon.bow", "map.tablet/ritual". */
   id: string;
   /** The group key in bases.json for gear; for maps, a synthetic label. */
   group: string;
@@ -83,6 +83,8 @@ export interface WorkUnit {
   kind: UnitKind;
   /** Null for non-armour: they have no defence split. */
   archetype: Archetype | null;
+  /** Exact base-name filter (tablets: one type per unit; affixes are type-specific). */
+  type?: string;
   /** Endgame item-level floor (gear) — maps use tier instead. */
   minIlvl?: number;
   /** Waystone tier floor. */
@@ -94,21 +96,33 @@ export interface WorkUnit {
 }
 
 /**
- * Map work units, added regardless of the static base tables (maps aren't gear).
- * Tablets flow through the standard base+mod path; the waystone is one unit over the
- * endgame tier band the user tracks (T14-16), where price is comparable across it.
+ * The tablet base types. Each is its own unit, not one pooled "tablet" category.
+ *
+ * The reason is that affixes are tied to the type — "Ritual Favours in Map" only rolls
+ * on a Ritual Tablet — so pooling would dilute a type-specific mod across eight types
+ * and mix their price ladders (a Ritual tablet and a Breach tablet aren't the same
+ * market). Per-type units give each its own dear/baseline split and its own mod lift.
+ */
+const TABLET_TYPES = ['Breach', 'Expedition', 'Delirium', 'Ritual', 'Irradiated', 'Overseer', 'Abyss', 'Temple'] as const;
+
+/**
+ * Map work units, added regardless of the static base tables (maps aren't gear). One
+ * unit per tablet type, plus the waystone over the T14-16 band the user tracks.
  */
 export const MAP_UNITS: WorkUnit[] = [
-  {
-    id: 'map.tablet',
-    group: 'Tablet',
-    category: 'map.tablet',
-    itemClass: 'Tablet',
-    kind: 'tablet',
-    archetype: null,
-    label: 'Tower Tablet',
-    section: 'Maps',
-  },
+  ...TABLET_TYPES.map(
+    (t): WorkUnit => ({
+      id: `map.tablet/${t.toLowerCase()}`,
+      group: `${t} Tablet`,
+      category: 'map.tablet',
+      itemClass: 'Tablet',
+      kind: 'tablet',
+      archetype: null,
+      type: `${t} Tablet`,
+      label: `${t} Tablet`,
+      section: 'Maps',
+    }),
+  ),
   {
     id: 'map.waystone/t14',
     group: 'Waystone (T14-16)',

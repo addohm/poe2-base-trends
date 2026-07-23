@@ -50,7 +50,8 @@ code { background:var(--panel); padding:1px 5px; border-radius:4px; font-size:0.
   border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:12px; }
 .cardhead h3 { margin:0; }
 .cols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; }
-@media (max-width:860px) { .cols { grid-template-columns:1fr; } }
+.cols2 { grid-template-columns:1fr 1fr; }
+@media (max-width:860px) { .cols, .cols2 { grid-template-columns:1fr; } }
 .col h4 { margin:0 0 6px; font-size:0.74rem; text-transform:uppercase;
   letter-spacing:0.06em; color:var(--dim); font-weight:600; }
 .rowhead { display:flex; gap:8px; padding:2px 0 4px; border-bottom:1px solid var(--line);
@@ -267,10 +268,20 @@ function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): st
 </div>`;
   }
 
-  const craftHead = c.kind === 'tablet' ? 'Best tablet' : 'Craft on';
+  // A tablet unit is one base type (affixes are type-specific), so there's no base to
+  // rank — just its own prefixes and suffixes.
+  if (c.kind === 'tablet') {
+    return `${open}
+  <div class="cols cols2">
+    <div class="col"><h4>Target prefixes</h4>${modRows(c.prefixes)}</div>
+    <div class="col"><h4>Target suffixes</h4>${modRows(c.suffixes)}</div>
+  </div>
+</div>`;
+  }
+
   return `${open}
   <div class="cols">
-    <div class="col"><h4>${craftHead}</h4>${baseRows(c.bases, statOf)}</div>
+    <div class="col"><h4>Craft on</h4>${baseRows(c.bases, statOf)}</div>
     <div class="col"><h4>Target prefixes</h4>${modRows(c.prefixes)}</div>
     <div class="col"><h4>Target suffixes</h4>${modRows(c.suffixes)}</div>
   </div>
