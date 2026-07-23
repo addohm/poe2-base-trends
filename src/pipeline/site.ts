@@ -216,25 +216,61 @@ function modRows(mods: RankedMod[]): string {
   );
 }
 
-function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): string {
-  const age = (() => {
-    const mins = Math.max(0, Math.round((Date.now() - Date.parse(c.at)) / 60_000));
-    if (mins < 90) return `${mins}m ago`;
-    const hrs = Math.round(mins / 60);
-    return hrs < 48 ? `${hrs}h ago` : `${Math.round(hrs / 24)}d ago`;
-  })();
+/** Reward-property rows for a waystone: the magnitude to aim above, and the premium. */
+function rewardRows(rewards: CategoryAnalysis['rewards']): string {
+  if (!rewards.length) return '<div class="empty">Not enough sampled yet.</div>';
+  return (
+    `<div class="rowhead"><span class="grow">Property</span><span class="num">Aim &gt;</span><span class="lift">Premium</span></div>` +
+    rewards
+      .map((r) => {
+        const gap = r.dearMedian - r.marketMedian;
+        const cls = gap > 0 ? 'up' : 'flat';
+        return `<div class="row" title="Expensive median ${r.dearMedian} vs market median ${r.marketMedian}">
+      <span class="grow"><span class="name">${esc(r.label)}</span></span>
+      <span class="num">${r.marketP75}</span>
+      <span class="lift ${cls}">${gap > 0 ? '+' : ''}${gap}</span>
+    </div>`;
+      })
+      .join('')
+  );
+}
 
-  const anchor = c.key.replace(/[^a-z0-9]/gi, '-');
-  return `<div class="card" id="c-${anchor}" data-label="${esc(c.label.toLowerCase())}">
-  <div class="cardhead">
+function cardHead(c: CategoryAnalysis): string {
+  const mins = Math.max(0, Math.round((Date.now() - Date.parse(c.at)) / 60_000));
+  const age = mins < 90 ? `${mins}m ago` : mins < 2880 ? `${Math.round(mins / 60)}h ago` : `${Math.round(mins / 1440)}d ago`;
+  return `<div class="cardhead">
     <h3>${esc(c.label)}</h3>
-    <span class="pill" title="Rare listings of this type at item level ≥ floor">${c.total.toLocaleString()} listed</span>
+    <span class="pill" title="Rare listings of this type at the tracked item level / tier">${c.total.toLocaleString()} listed</span>
     <span class="pill" title="'Expensive' = listings at or above this price. The % is that slice of the market.">expensive ≥ ${c.dearThresholdEx ?? '?'} ex (${c.dearCount && c.total ? pct(c.dearCount / c.total) : '?'})</span>
     <span class="pill" title="Sample sizes: expensive items vs the whole market">n = ${c.nDear} vs ${c.nBase}</span>
     <span class="pill" title="When this group was last collected">${esc(age)}</span>
-  </div>
+  </div>`;
+}
+
+function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): string {
+  const anchor = c.key.replace(/[^a-z0-9]/gi, '-');
+  const open = `<div class="card" id="c-${anchor}" data-label="${esc(c.label.toLowerCase())}">\n  ${cardHead(c)}`;
+
+  // Waystones invert the model: no base variety (the tier IS the base), value comes
+  // from reward magnitudes you want high and mods you want to avoid. The card is
+  // "aim above these numbers · these mods ride along on premium ones · avoid these".
+  if (c.kind === 'waystone') {
+    // Only mods that genuinely ride on premium waystones (lift ≥ 1); the price-sinkers
+    // have their own column and shouldn't double-appear here at the bottom.
+    const premium = [...c.prefixes, ...c.suffixes].filter((m) => m.lift >= 1).sort((a, b) => b.lift - a.lift).slice(0, 6);
+    return `${open}
   <div class="cols">
-    <div class="col"><h4>Craft on</h4>${baseRows(c.bases, statOf)}</div>
+    <div class="col"><h4>Aim for (reward)</h4>${rewardRows(c.rewards)}</div>
+    <div class="col"><h4>Common on premium</h4>${modRows(premium)}</div>
+    <div class="col"><h4>Sinks resale — avoid</h4>${modRows(c.sinks)}</div>
+  </div>
+</div>`;
+  }
+
+  const craftHead = c.kind === 'tablet' ? 'Best tablet' : 'Craft on';
+  return `${open}
+  <div class="cols">
+    <div class="col"><h4>${craftHead}</h4>${baseRows(c.bases, statOf)}</div>
     <div class="col"><h4>Target prefixes</h4>${modRows(c.prefixes)}</div>
     <div class="col"><h4>Target suffixes</h4>${modRows(c.suffixes)}</div>
   </div>
@@ -288,7 +324,7 @@ async function main(): Promise<void> {
 
   const UNITS = workUnits(basesDoc.groups, basesDoc.families);
   const bySection = (s: string) => (analysis?.categories ?? []).filter((c) => c.section === s);
-  const SECTIONS = ['Armour', 'Weapons', 'Caster weapons', 'Jewellery'] as const;
+  const SECTIONS = ['Armour', 'Weapons', 'Caster weapons', 'Jewellery', 'Maps'] as const;
 
   const covered = analysis?.categories.length ?? 0;
   const pending = UNITS.length - covered;
@@ -327,6 +363,10 @@ suffixes worth chasing on them. Pick a section or type to filter.</p>
   <div class="k"><b>Header pills</b><br><span><b>listed</b> = rare listings at endgame item
     level · <b>expensive ≥ N ex</b> = the price cutoff for the "paid-for" comparison ·
     <b>n = A vs B</b> = sample sizes.</span></div>
+  <div class="k"><b>Waystones read differently</b><br><span>They have no base variety, so instead
+    of "craft on" you get <b>Aim for</b> (reward magnitudes to beat — the number is the market's
+    75th percentile, the <span class="up">green</span> is how much higher expensive ones run) and
+    <b>Sinks resale</b> (mods concentrated on cheap listings — the build-breakers to avoid).</span></div>
 </div>
 <div class="chiprow">
   Prices are Exalted Orb equivalent, converted by trade · listings collapsed to one per seller ·

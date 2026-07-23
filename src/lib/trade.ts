@@ -174,6 +174,29 @@ function quality(r: RawResult): number {
 }
 
 /**
+ * The numeric reward properties trade exposes for a waystone.
+ *
+ * Unlike gear, a waystone's value is largely these magnitudes — buyers filter for high
+ * pack size / rarity / quantity — so they're extracted as numbers rather than parsed
+ * out of mod text. The keys match trade's own property labels.
+ */
+export const WAYSTONE_PROPS = ['Item Quantity', 'Item Rarity', 'Pack Size', 'Monster Rarity', 'Waystone Drop Chance', 'Waystone Experience', 'Waystone Gold'] as const;
+
+export function waystoneProps(r: RawResult): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const p of r.item.properties ?? []) {
+    // Match on the plain label; values look like "+23%" or "23".
+    const label = WAYSTONE_PROPS.find((w) => p.name.includes(w));
+    if (!label) continue;
+    const raw = p.values?.[0]?.[0];
+    if (raw == null) continue;
+    const n = Number(String(raw).replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(n)) out[label] = n;
+  }
+  return out;
+}
+
+/**
  * Flattens a trade result into our Listing shape.
  * `toEx` converts a listed currency amount into exalted-equivalent; it returns
  * null for currencies we have no rate for, which keeps unpriceable listings out

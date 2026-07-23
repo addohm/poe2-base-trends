@@ -61,20 +61,66 @@ export const ARCHETYPE_LABEL: Record<string, string> = {
   'ar/ev/es': 'Armour + Evasion + ES',
 };
 
+/**
+ * What kind of thing a unit is, which decides how it's queried and rendered.
+ *
+ *  - `gear`     — armour/weapons/jewellery: ilvl floor, optional defence archetype,
+ *                 ranked by base share + mod lift.
+ *  - `tablet`   — tower tablets: real base variety (Breach, Ritual, …), explicit mods
+ *                 all rewards, so the gear model applies unchanged.
+ *  - `waystone` — one "base" per tier and value inverts (numeric reward properties you
+ *                 want, danger mods you avoid); needs its own extraction and card.
+ */
+export type UnitKind = 'gear' | 'tablet' | 'waystone';
+
 export interface WorkUnit {
-  /** Stable id, e.g. "armour.helmet/es" or "weapon.bow". */
+  /** Stable id, e.g. "armour.helmet/es", "weapon.bow", "map.tablet". */
   id: string;
-  /** The group key in bases.json, e.g. "Helmet / es". */
+  /** The group key in bases.json for gear; for maps, a synthetic label. */
   group: string;
   category: string;
   itemClass: string;
+  kind: UnitKind;
   /** Null for non-armour: they have no defence split. */
   archetype: Archetype | null;
+  /** Endgame item-level floor (gear) — maps use tier instead. */
+  minIlvl?: number;
+  /** Waystone tier floor. */
+  minTier?: number;
   /** Display, e.g. "Helmet — Energy Shield". */
   label: string;
   /** Page grouping. */
   section: string;
 }
+
+/**
+ * Map work units, added regardless of the static base tables (maps aren't gear).
+ * Tablets flow through the standard base+mod path; the waystone is one unit over the
+ * endgame tier band the user tracks (T14-16), where price is comparable across it.
+ */
+export const MAP_UNITS: WorkUnit[] = [
+  {
+    id: 'map.tablet',
+    group: 'Tablet',
+    category: 'map.tablet',
+    itemClass: 'Tablet',
+    kind: 'tablet',
+    archetype: null,
+    label: 'Tower Tablet',
+    section: 'Maps',
+  },
+  {
+    id: 'map.waystone/t14',
+    group: 'Waystone (T14-16)',
+    category: 'map.waystone',
+    itemClass: 'Waystone',
+    kind: 'waystone',
+    archetype: null,
+    minTier: 14,
+    label: 'Waystone (Tier 14–16)',
+    section: 'Maps',
+  },
+];
 
 const SECTION_OF: Record<string, string> = {
   armour: 'Armour',
@@ -103,12 +149,18 @@ export function workUnits(groups: Record<string, string[] | unknown[]>, families
       group,
       category,
       itemClass,
+      kind: 'gear',
       archetype: (archetype as Archetype) ?? null,
+      minIlvl: 70,
       label: archetype ? `${itemClass} — ${ARCHETYPE_LABEL[archetype] ?? archetype}` : itemClass,
       section: SECTION_OF[family] ?? 'Other',
     });
   }
-  return interleave(out);
+  // Maps lead the order. The collector does one unit per tick and the queue follows
+  // this order, so with ~28 gear classes even round-robin leaves maps a day out. Only
+  // two map units exist, so putting them first costs gear almost nothing and gets the
+  // freshly-added feature visible in the next couple of ticks.
+  return [...MAP_UNITS, ...interleave(out)];
 }
 
 /**

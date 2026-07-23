@@ -44,6 +44,8 @@ export interface QuerySpec {
    * single build would ever consider together.
    */
   defence?: Record<string, { min?: number; max?: number }> | null;
+  /** Waystone tier floor, e.g. 14 — the map equivalent of the ilvl floor. */
+  mapTier?: number;
 }
 
 export function buildQuery(spec: QuerySpec): unknown {
@@ -70,6 +72,7 @@ export function buildQuery(spec: QuerySpec): unknown {
   };
   if (Object.keys(tradeFilters).length) filters.trade_filters = { filters: tradeFilters };
   if (spec.defence) filters.equipment_filters = { filters: spec.defence };
+  if (spec.mapTier !== undefined) filters.map_filters = { filters: { map_tier: { min: spec.mapTier } } };
 
   const query: Record<string, unknown> = {
     status: { option: 'online' },

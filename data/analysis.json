@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-23T09:35:40.103Z",
+  "generatedAt": "2026-07-23T10:51:22.111Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -273,7 +273,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "accessory.ring",
@@ -544,7 +546,9 @@
           "tierDear": "S1",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "accessory.belt",
@@ -815,7 +819,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.wand",
@@ -1086,7 +1092,9 @@
           "tierDear": "S3",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.warstaff",
@@ -1357,7 +1365,9 @@
           "tierDear": "S3",
           "tierMarket": "S5"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.staff",
@@ -1628,7 +1638,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.sceptre",
@@ -1899,7 +1911,9 @@
           "tierDear": "S1",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/es",
@@ -2170,7 +2184,9 @@
           "tierDear": "S1",
           "tierMarket": "S1"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.talisman",
@@ -2441,7 +2457,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.spear",
@@ -2712,7 +2730,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/es",
@@ -2983,7 +3003,9 @@
           "tierDear": "S3",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.quiver",
@@ -3254,7 +3276,9 @@
           "tierDear": "S1",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/es",
@@ -3525,7 +3549,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/es",
@@ -3796,7 +3822,9 @@
           "tierDear": "S3",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/ev/es",
@@ -4067,7 +4095,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/ev/es",
@@ -4338,7 +4368,9 @@
           "tierDear": "S3",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ev",
@@ -4609,7 +4641,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.crossbow",
@@ -4880,7 +4914,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.bow",
@@ -5151,7 +5187,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/ar/ev",
@@ -5422,7 +5460,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ev/es",
@@ -5693,7 +5733,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/ar/es",
@@ -5964,7 +6006,9 @@
           "tierDear": "S3",
           "tierMarket": "S4"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/ar/es",
@@ -6235,7 +6279,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.focus/es",
@@ -6506,7 +6552,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/ev",
@@ -6777,7 +6825,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ev/es",
@@ -7048,7 +7098,9 @@
           "tierDear": "S1",
           "tierMarket": "S1"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ar/es",
@@ -7319,7 +7371,9 @@
           "tierDear": "S2",
           "tierMarket": "S4"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ev",
@@ -7590,7 +7644,9 @@
           "tierDear": "S1",
           "tierMarket": "S1"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ar/es",
@@ -7861,7 +7917,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/ev",
@@ -8132,278 +8190,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
-    },
-    {
-      "key": "armour.chest/ar",
-      "label": "Body Armour — Armour",
-      "group": "Body Armour / ar",
-      "section": "Armour",
-      "at": "2026-07-22T03:35:17.209Z",
-      "minIlvl": 70,
-      "total": 1021,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 1021
-        },
-        {
-          "minEx": 50,
-          "count": 628
-        },
-        {
-          "minEx": 200,
-          "count": 457
-        },
-        {
-          "minEx": 1000,
-          "count": 247
-        },
-        {
-          "minEx": 5000,
-          "count": 84
-        }
       ],
-      "dearThresholdEx": 1000,
-      "dearCount": 247,
-      "nDear": 185,
-      "nBase": 200,
-      "snapshots": 2,
-      "trendPct": -21.762452107279692,
-      "bases": [
-        {
-          "key": "Soldier Cuirass",
-          "label": "Soldier Cuirass",
-          "lift": 1.1446740858505564,
-          "ciLow": 0.8259571116601548,
-          "ciHigh": 1.586376271019904,
-          "inDear": 54,
-          "inBase": 51,
-          "shareDear": 0.2918918918918919,
-          "shareBase": 0.255,
-          "significant": false
-        },
-        {
-          "key": "Warlord Cuirass",
-          "label": "Warlord Cuirass",
-          "lift": 1.1771771771771773,
-          "ciLow": 0.8280129590886907,
-          "ciHigh": 1.6735802154497397,
-          "inDear": 49,
-          "inBase": 45,
-          "shareDear": 0.2648648648648649,
-          "shareBase": 0.225,
-          "significant": false
-        },
-        {
-          "key": "Ornate Plate",
-          "label": "Ornate Plate",
-          "lift": 0.7012417823228635,
-          "ciLow": 0.4368765119736809,
-          "ciHigh": 1.1255813114186617,
-          "inDear": 24,
-          "inBase": 37,
-          "shareDear": 0.12972972972972974,
-          "shareBase": 0.185,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|#% increased Armour",
-          "label": "#% increased Armour",
-          "lift": 1.1701112877583466,
-          "ciLow": 0.9420978137365421,
-          "ciHigh": 1.4533102675497582,
-          "inDear": 92,
-          "inBase": 85,
-          "shareDear": 0.4972972972972973,
-          "shareBase": 0.425,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P8",
-          "tierDear": "P2",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|p|# to Armour",
-          "label": "# to Armour",
-          "lift": 1.117522016398421,
-          "ciLow": 0.9040291198136218,
-          "ciHigh": 1.3814327766263341,
-          "inDear": 92,
-          "inBase": 89,
-          "shareDear": 0.4972972972972973,
-          "shareBase": 0.445,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P11",
-          "tierDear": "P2",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|p|# to maximum Life",
-          "label": "# to maximum Life",
-          "lift": 0.9919197548063529,
-          "ciLow": 0.8065559425871721,
-          "ciHigh": 1.2198841370123006,
-          "inDear": 89,
-          "inBase": 97,
-          "shareDear": 0.4810810810810811,
-          "shareBase": 0.485,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P12",
-          "tierDear": "P3",
-          "tierMarket": "P4"
-        },
-        {
-          "key": "exp|p|# to maximum Life / #% increased Armour",
-          "label": "#% increased Armour / # to maximum Life",
-          "lift": 1.0810810810810811,
-          "ciLow": 0.7818720860125485,
-          "ciHigh": 1.4947922106183003,
-          "inDear": 53,
-          "inBase": 53,
-          "shareDear": 0.2864864864864865,
-          "shareBase": 0.265,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P2",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|p|# to Spirit",
-          "label": "# to Spirit",
-          "lift": 0.9045780474351903,
-          "ciLow": 0.6289046926698333,
-          "ciHigh": 1.301089741321485,
-          "inDear": 41,
-          "inBase": 49,
-          "shareDear": 0.22162162162162163,
-          "shareBase": 0.245,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P8",
-          "tierDear": "P3",
-          "tierMarket": "P4"
-        },
-        {
-          "key": "exp|p|# to Armour / #% increased Armour",
-          "label": "# to Armour / #% increased Armour",
-          "lift": 0.8648648648648648,
-          "ciLow": 0.6141586635400528,
-          "ciHigh": 1.2179120459951633,
-          "inDear": 44,
-          "inBase": 55,
-          "shareDear": 0.23783783783783785,
-          "shareBase": 0.275,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P6",
-          "tierDear": "P2",
-          "tierMarket": "P2"
-        }
-      ],
-      "suffixes": [
-        {
-          "key": "exp|s|#% to Lightning Resistance",
-          "label": "#% to Lightning Resistance",
-          "lift": 1.3192853870819974,
-          "ciLow": 0.9969271147486883,
-          "ciHigh": 1.7458788178380076,
-          "inDear": 72,
-          "inBase": 59,
-          "shareDear": 0.3891891891891892,
-          "shareBase": 0.295,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S8",
-          "tierDear": "S3",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% to Cold Resistance",
-          "label": "#% to Cold Resistance",
-          "lift": 1.2728857890148213,
-          "ciLow": 0.9686360144645162,
-          "ciHigh": 1.6727007954289086,
-          "inDear": 73,
-          "inBase": 62,
-          "shareDear": 0.3945945945945946,
-          "shareBase": 0.31,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S7",
-          "tierDear": "S2",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% to Chaos Resistance",
-          "label": "#% to Chaos Resistance",
-          "lift": 1.6216216216216217,
-          "ciLow": 0.9245277769607285,
-          "ciHigh": 2.844324150384547,
-          "inDear": 27,
-          "inBase": 18,
-          "shareDear": 0.14594594594594595,
-          "shareBase": 0.09,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S4",
-          "tierDear": "S2",
-          "tierMarket": "S2"
-        },
-        {
-          "key": "exp|s|#% of Armour also applies to Elemental Damage",
-          "label": "#% of Armour also applies to Elemental Damage",
-          "lift": 1.1302211302211302,
-          "ciLow": 0.7871654026794394,
-          "ciHigh": 1.6227844857639533,
-          "inDear": 46,
-          "inBase": 44,
-          "shareDear": 0.24864864864864866,
-          "shareBase": 0.22,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S6",
-          "tierDear": "S2",
-          "tierMarket": "S2"
-        },
-        {
-          "key": "exp|s|#% to Fire Resistance",
-          "label": "#% to Fire Resistance",
-          "lift": 0.9845559845559845,
-          "ciLow": 0.7132091749898727,
-          "ciHigh": 1.359139114746762,
-          "inDear": 51,
-          "inBase": 56,
-          "shareDear": 0.2756756756756757,
-          "shareBase": 0.28,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S8",
-          "tierDear": "S2",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% reduced Poison Duration on you",
-          "label": "#% reduced Poison Duration on you",
-          "lift": 1.2837837837837838,
-          "ciLow": 0.6808099385030711,
-          "ciHigh": 2.4207942779595224,
-          "inDear": 19,
-          "inBase": 16,
-          "shareDear": 0.10270270270270271,
-          "shareBase": 0.08,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S4",
-          "tierDear": "S2",
-          "tierMarket": "S2"
-        }
-      ]
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.twomace",
@@ -8674,7 +8463,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ar/ev",
@@ -8945,7 +8736,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ar/ev",
@@ -9216,7 +9009,283 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
+    },
+    {
+      "key": "armour.chest/ar",
+      "label": "Body Armour — Armour",
+      "group": "Body Armour / ar",
+      "section": "Armour",
+      "kind": "gear",
+      "at": "2026-07-23T10:34:41.400Z",
+      "minIlvl": 70,
+      "total": 875,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 875
+        },
+        {
+          "minEx": 50,
+          "count": 499
+        },
+        {
+          "minEx": 200,
+          "count": 409
+        },
+        {
+          "minEx": 1000,
+          "count": 208
+        },
+        {
+          "minEx": 5000,
+          "count": 64
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 208,
+      "nDear": 257,
+      "nBase": 300,
+      "snapshots": 3,
+      "trendPct": -32.95019157088122,
+      "bases": [
+        {
+          "key": "Warlord Cuirass",
+          "label": "Warlord Cuirass",
+          "lift": 1.1976350497751278,
+          "ciLow": 0.9178978616757814,
+          "ciHigh": 1.5626245275604582,
+          "inDear": 79,
+          "inBase": 77,
+          "shareDear": 0.30739299610894943,
+          "shareBase": 0.25666666666666665,
+          "significant": false
+        },
+        {
+          "key": "Soldier Cuirass",
+          "label": "Soldier Cuirass",
+          "lift": 1.1673151750972761,
+          "ciLow": 0.8742175798107847,
+          "ciHigh": 1.5586791543442882,
+          "inDear": 69,
+          "inBase": 69,
+          "shareDear": 0.26848249027237353,
+          "shareBase": 0.23,
+          "significant": false
+        },
+        {
+          "key": "Ornate Plate",
+          "label": "Ornate Plate",
+          "lift": 0.6758140487405283,
+          "ciLow": 0.4552649052869125,
+          "ciHigh": 1.0032063160836715,
+          "inDear": 33,
+          "inBase": 57,
+          "shareDear": 0.12840466926070038,
+          "shareBase": 0.19,
+          "significant": false
+        }
+      ],
+      "prefixes": [
+        {
+          "key": "exp|p|#% increased Armour",
+          "label": "#% increased Armour",
+          "lift": 1.1496285815351963,
+          "ciLow": 0.9643058478160929,
+          "ciHigh": 1.3705671063551246,
+          "inDear": 130,
+          "inBase": 132,
+          "shareDear": 0.5058365758754864,
+          "shareBase": 0.44,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P2",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to Armour",
+          "label": "# to Armour",
+          "lift": 1.0488918964642193,
+          "ciLow": 0.8793970587689679,
+          "ciHigh": 1.251055139993754,
+          "inDear": 124,
+          "inBase": 138,
+          "shareDear": 0.48249027237354086,
+          "shareBase": 0.46,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P11",
+          "tierDear": "P2",
+          "tierMarket": "P3"
+        },
+        {
+          "key": "exp|p|# to maximum Life / #% increased Armour",
+          "label": "#% increased Armour / # to maximum Life",
+          "lift": 1.1058775343026828,
+          "ciLow": 0.839194111998449,
+          "ciHigh": 1.4573089865502318,
+          "inDear": 72,
+          "inBase": 76,
+          "shareDear": 0.2801556420233463,
+          "shareBase": 0.25333333333333335,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P6",
+          "tierDear": "P1",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|# to maximum Life",
+          "label": "# to maximum Life",
+          "lift": 0.9970817120622569,
+          "ciLow": 0.8381312518677552,
+          "ciHigh": 1.1861769124030552,
+          "inDear": 123,
+          "inBase": 144,
+          "shareDear": 0.4785992217898833,
+          "shareBase": 0.48,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P12",
+          "tierDear": "P3",
+          "tierMarket": "P4"
+        },
+        {
+          "key": "exp|p|# to Armour / #% increased Armour",
+          "label": "# to Armour / #% increased Armour",
+          "lift": 0.9511456982274101,
+          "ciLow": 0.7195293534365621,
+          "ciHigh": 1.2573192948079905,
+          "inDear": 66,
+          "inBase": 81,
+          "shareDear": 0.25680933852140075,
+          "shareBase": 0.27,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P6",
+          "tierDear": "P2",
+          "tierMarket": "P2"
+        },
+        {
+          "key": "exp|p|# to Spirit",
+          "label": "# to Spirit",
+          "lift": 0.8916990920881971,
+          "ciLow": 0.6547015556110308,
+          "ciHigh": 1.21448813435127,
+          "inDear": 55,
+          "inBase": 72,
+          "shareDear": 0.2140077821011673,
+          "shareBase": 0.24,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1-P8",
+          "tierDear": "P3",
+          "tierMarket": "P4"
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|s|#% to Lightning Resistance",
+          "label": "#% to Lightning Resistance",
+          "lift": 1.2294064078152165,
+          "ciLow": 0.978899981834869,
+          "ciHigh": 1.5440189433286553,
+          "inDear": 99,
+          "inBase": 94,
+          "shareDear": 0.3852140077821012,
+          "shareBase": 0.31333333333333335,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S8",
+          "tierDear": "S3",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|#% to Cold Resistance",
+          "label": "#% to Cold Resistance",
+          "lift": 1.2016479743648432,
+          "ciLow": 0.9685686734825263,
+          "ciHigh": 1.4908161845698809,
+          "inDear": 105,
+          "inBase": 102,
+          "shareDear": 0.4085603112840467,
+          "shareBase": 0.34,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S7",
+          "tierDear": "S2",
+          "tierMarket": "S3"
+        },
+        {
+          "key": "exp|s|#% of Armour also applies to Elemental Damage",
+          "label": "#% of Armour also applies to Elemental Damage",
+          "lift": 1.1142553944110363,
+          "ciLow": 0.8235025495961307,
+          "ciHigh": 1.5076639223315011,
+          "inDear": 63,
+          "inBase": 66,
+          "shareDear": 0.245136186770428,
+          "shareBase": 0.22,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S6",
+          "tierDear": "S2",
+          "tierMarket": "S2"
+        },
+        {
+          "key": "exp|s|#% to Chaos Resistance",
+          "label": "#% to Chaos Resistance",
+          "lift": 1.234018899388549,
+          "ciLow": 0.8018704284226976,
+          "ciHigh": 1.8990632277630224,
+          "inDear": 37,
+          "inBase": 35,
+          "shareDear": 0.14396887159533073,
+          "shareBase": 0.11666666666666667,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S4",
+          "tierDear": "S2",
+          "tierMarket": "S2"
+        },
+        {
+          "key": "exp|s|#% reduced Poison Duration on you",
+          "label": "#% reduced Poison Duration on you",
+          "lift": 1.3340744858254585,
+          "ciLow": 0.7609172576337497,
+          "ciHigh": 2.338959612067448,
+          "inDear": 24,
+          "inBase": 21,
+          "shareDear": 0.0933852140077821,
+          "shareBase": 0.07,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S4",
+          "tierDear": "S2",
+          "tierMarket": "S2"
+        },
+        {
+          "key": "exp|s|#% to Fire Resistance",
+          "label": "#% to Fire Resistance",
+          "lift": 0.94138320572361,
+          "ciLow": 0.7298504477013874,
+          "ciHigh": 1.2142245617708292,
+          "inDear": 75,
+          "inBase": 93,
+          "shareDear": 0.2918287937743191,
+          "shareBase": 0.31,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1-S8",
+          "tierDear": "S2",
+          "tierMarket": "S3"
+        }
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ar",
@@ -9487,7 +9556,9 @@
           "tierDear": "S1",
           "tierMarket": "S1"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/ar/ev",
@@ -9758,7 +9829,9 @@
           "tierDear": "S3",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ar",
@@ -10029,278 +10102,9 @@
           "tierDear": "S1",
           "tierMarket": "S2"
         }
-      ]
-    },
-    {
-      "key": "armour.boots/ar",
-      "label": "Boots — Armour",
-      "group": "Boots / ar",
-      "section": "Armour",
-      "at": "2026-07-22T04:35:14.520Z",
-      "minIlvl": 70,
-      "total": 753,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 753
-        },
-        {
-          "minEx": 50,
-          "count": 452
-        },
-        {
-          "minEx": 200,
-          "count": 360
-        },
-        {
-          "minEx": 1000,
-          "count": 190
-        },
-        {
-          "minEx": 5000,
-          "count": 103
-        }
       ],
-      "dearThresholdEx": 1000,
-      "dearCount": 190,
-      "nDear": 179,
-      "nBase": 200,
-      "snapshots": 2,
-      "trendPct": -45.276162790697676,
-      "bases": [
-        {
-          "key": "Tasalian Greaves",
-          "label": "Tasalian Greaves",
-          "lift": 1.0172600683732176,
-          "ciLow": 0.7671280881285194,
-          "ciHigh": 1.3489507980749584,
-          "inDear": 61,
-          "inBase": 67,
-          "shareDear": 0.3407821229050279,
-          "shareBase": 0.335,
-          "significant": false
-        },
-        {
-          "key": "Ornate Greaves",
-          "label": "Ornate Greaves",
-          "lift": 0.6916733173716415,
-          "ciLow": 0.44297931345560365,
-          "ciHigh": 1.0799871764482272,
-          "inDear": 26,
-          "inBase": 42,
-          "shareDear": 0.1452513966480447,
-          "shareBase": 0.21,
-          "significant": false
-        },
-        {
-          "key": "Vaal Greaves",
-          "label": "Vaal Greaves",
-          "lift": 1.0585122022934432,
-          "ciLow": 0.7033090666622761,
-          "ciHigh": 1.5931091116477047,
-          "inDear": 36,
-          "inBase": 38,
-          "shareDear": 0.2011173184357542,
-          "shareBase": 0.19,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|#% increased Movement Speed",
-          "label": "#% increased Movement Speed",
-          "lift": 1.1663236303048123,
-          "ciLow": 0.9947755300603298,
-          "ciHigh": 1.367455038349102,
-          "inDear": 119,
-          "inBase": 114,
-          "shareDear": 0.664804469273743,
-          "shareBase": 0.57,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P5",
-          "tierDear": "P2",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|p|# to maximum Life",
-          "label": "# to maximum Life",
-          "lift": 1.1330553151310097,
-          "ciLow": 0.8750048097176735,
-          "ciHigh": 1.4672083317586144,
-          "inDear": 72,
-          "inBase": 71,
-          "shareDear": 0.4022346368715084,
-          "shareBase": 0.355,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P9",
-          "tierDear": "P2",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|p|# to maximum Mana",
-          "label": "# to maximum Mana",
-          "lift": 1.1392266403768212,
-          "ciLow": 0.8194730526657671,
-          "ciHigh": 1.5837462060800662,
-          "inDear": 52,
-          "inBase": 51,
-          "shareDear": 0.2905027932960894,
-          "shareBase": 0.255,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P9",
-          "tierDear": "P3",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|p|#% increased Armour",
-          "label": "#% increased Armour",
-          "lift": 0.9464344396976668,
-          "ciLow": 0.7440559044456919,
-          "ciHigh": 1.2038586661215263,
-          "inDear": 72,
-          "inBase": 85,
-          "shareDear": 0.4022346368715084,
-          "shareBase": 0.425,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P7",
-          "tierDear": "P2",
-          "tierMarket": "P3"
-        },
-        {
-          "key": "exp|p|# to Stun Threshold / #% increased Armour",
-          "label": "#% increased Armour / # to Stun Threshold",
-          "lift": 0.9275851164751765,
-          "ciLow": 0.6568417072513657,
-          "ciHigh": 1.3099261797896096,
-          "inDear": 44,
-          "inBase": 53,
-          "shareDear": 0.24581005586592178,
-          "shareBase": 0.265,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P5",
-          "tierDear": "P2",
-          "tierMarket": "P2"
-        },
-        {
-          "key": "exp|p|# to Armour",
-          "label": "# to Armour",
-          "lift": 0.74487895716946,
-          "ciLow": 0.5388422604255602,
-          "ciHigh": 1.0296977456735927,
-          "inDear": 44,
-          "inBase": 66,
-          "shareDear": 0.24581005586592178,
-          "shareBase": 0.33,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1-P7",
-          "tierDear": "P2",
-          "tierMarket": "P1"
-        }
-      ],
-      "suffixes": [
-        {
-          "key": "exp|s|#% to Lightning Resistance",
-          "label": "#% to Lightning Resistance",
-          "lift": 1.3966480446927374,
-          "ciLow": 1.0773530038637769,
-          "ciHigh": 1.8105725363445395,
-          "inDear": 80,
-          "inBase": 64,
-          "shareDear": 0.44692737430167595,
-          "shareBase": 0.32,
-          "significant": true,
-          "desecrated": false,
-          "tierRange": "S1-S6",
-          "tierDear": "S2",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% to Fire Resistance",
-          "label": "#% to Fire Resistance",
-          "lift": 1.1497044773702536,
-          "ciLow": 0.8839202014850499,
-          "ciHigh": 1.4954069191590533,
-          "inDear": 71,
-          "inBase": 69,
-          "shareDear": 0.39664804469273746,
-          "shareBase": 0.345,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S8",
-          "tierDear": "S2",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% to Cold Resistance",
-          "label": "#% to Cold Resistance",
-          "lift": 1.0335195530726256,
-          "ciLow": 0.8102016668183225,
-          "ciHigh": 1.3183910998086872,
-          "inDear": 74,
-          "inBase": 80,
-          "shareDear": 0.4134078212290503,
-          "shareBase": 0.4,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S8",
-          "tierDear": "S2",
-          "tierMarket": "S3"
-        },
-        {
-          "key": "exp|s|#% to Chaos Resistance",
-          "label": "#% to Chaos Resistance",
-          "lift": 1.2237297153498272,
-          "ciLow": 0.7017099730823346,
-          "ciHigh": 2.1340931063758153,
-          "inDear": 23,
-          "inBase": 21,
-          "shareDear": 0.12849162011173185,
-          "shareBase": 0.105,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S4",
-          "tierDear": "S2",
-          "tierMarket": "S2"
-        },
-        {
-          "key": "exp|s|#% of Armour also applies to Elemental Damage",
-          "label": "#% of Armour also applies to Elemental Damage",
-          "lift": 0.9858692080184029,
-          "ciLow": 0.6972036568499134,
-          "ciHigh": 1.3940519183594324,
-          "inDear": 45,
-          "inBase": 51,
-          "shareDear": 0.25139664804469275,
-          "shareBase": 0.255,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S5",
-          "tierDear": "S2",
-          "tierMarket": "S2"
-        },
-        {
-          "key": "exp|s|# to Stun Threshold",
-          "label": "# to Stun Threshold",
-          "lift": 0.7795244900610627,
-          "ciLow": 0.5119870149426363,
-          "ciHigh": 1.1868629728295799,
-          "inDear": 30,
-          "inBase": 43,
-          "shareDear": 0.16759776536312848,
-          "shareBase": 0.215,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1-S8",
-          "tierDear": "S3",
-          "tierMarket": "S3"
-        }
-      ]
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.onemace",
@@ -10555,7 +10359,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.buckler/ev",
@@ -10826,7 +10632,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.shield/ar/es",
@@ -11097,7 +10905,9 @@
           "tierDear": "S4",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.shield/ar/ev",
@@ -11328,7 +11138,9 @@
           "tierDear": "S2",
           "tierMarket": "S3"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.shield/ar",
@@ -11599,7 +11411,9 @@
           "tierDear": "S2",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.chest/ar/ev/es",
@@ -11846,7 +11660,9 @@
           "tierDear": "S1",
           "tierMarket": "S2"
         }
-      ]
+      ],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.boots/ar/ev/es",
@@ -11886,7 +11702,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.gloves/ar/ev/es",
@@ -11926,7 +11744,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "armour.helmet/ar/ev/es",
@@ -11966,7 +11786,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.claw",
@@ -12006,7 +11828,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.dagger",
@@ -12046,7 +11870,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.flail",
@@ -12086,7 +11912,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.oneaxe",
@@ -12126,7 +11954,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.onesword",
@@ -12166,7 +11996,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.twoaxe",
@@ -12206,7 +12038,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     },
     {
       "key": "weapon.twosword",
@@ -12246,7 +12080,9 @@
       "trendPct": null,
       "bases": [],
       "prefixes": [],
-      "suffixes": []
+      "suffixes": [],
+      "rewards": [],
+      "sinks": []
     }
   ]
 }

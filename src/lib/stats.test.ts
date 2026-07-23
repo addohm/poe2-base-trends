@@ -5,9 +5,9 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { liftCI, affixOf, medianTier } from '../pipeline/analyze.ts';
+import { liftCI, affixOf, medianTier, quantile } from '../pipeline/analyze.ts';
 import { pickDearThreshold } from '../pipeline/collect.ts';
-import { itemMods, type RawResult } from './trade.ts';
+import { itemMods, waystoneProps, type RawResult } from './trade.ts';
 
 test('lift is 1.0 when a mod is equally common in both strata', () => {
   const { lift, ciLow, ciHigh } = liftCI(20, 100, 20, 100);
@@ -89,6 +89,35 @@ test('median tier reflects what the stratum mostly carries', () => {
   assert.equal(medianTier({ P1: 3, P2: 5, P4: 1 }), 'P2');
   assert.equal(medianTier({ P4: 8, P3: 1 }), 'P4');
   assert.equal(medianTier({}), null, 'no tiers seen -> no claim');
+});
+
+test('waystone reward properties are pulled from the properties block as numbers', () => {
+  // Real shape: values like "+23%" / "+48%". We want the bare numbers, keyed by label.
+  const r = {
+    id: 'w',
+    listing: {},
+    item: {
+      properties: [
+        { name: 'Pack Size', values: [['+23%', 1]] },
+        { name: 'Item Rarity', values: [['+10%', 1]] },
+        { name: 'Monster Rarity', values: [['+48%', 1]] },
+        { name: 'Revives Available', values: [['0', 1]] }, // not a tracked reward
+      ],
+    },
+  } as unknown as RawResult;
+  const p = waystoneProps(r);
+  assert.equal(p['Pack Size'], 23);
+  assert.equal(p['Item Rarity'], 10);
+  assert.equal(p['Monster Rarity'], 48);
+  assert.equal('Revives Available' in p, false, 'only tracked reward props are kept');
+});
+
+test('quantile interpolates and handles the edges', () => {
+  const s = [10, 20, 30, 40];
+  assert.equal(quantile(s, 0.5), 25);
+  assert.equal(quantile(s, 0), 10);
+  assert.equal(quantile(s, 1), 40);
+  assert.equal(quantile([], 0.5), null);
 });
 
 /** Builds a minimal trade result carrying the given explicitMods. */

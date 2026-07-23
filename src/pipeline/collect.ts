@@ -32,7 +32,7 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { TradeClient, toListing, itemMods, RateLimitedError, type RawResult } from '../lib/trade.ts';
+import { TradeClient, toListing, itemMods, waystoneProps, RateLimitedError, type RawResult } from '../lib/trade.ts';
 import { RatesClient, converter } from '../lib/rates.ts';
 import { buildQuery, type QuerySpec } from '../lib/query.ts';
 import { take, complete, peek } from '../lib/queue.ts';
@@ -72,6 +72,8 @@ export interface SampledItem {
   priceEx: number | null;
   ilvl: number;
   mods: { key: string; names: string[]; tiers: string[]; desecrated: boolean; stats: string[] }[];
+  /** Waystone reward magnitudes (Pack Size, Rarity, …). Absent for non-maps. */
+  props?: Record<string, number>;
 }
 
 export interface RawSnapshot {
@@ -84,6 +86,7 @@ export interface RawSnapshot {
   /** The bases.json group this unit corresponds to, e.g. "Helmet / es". */
   group: string;
   section: string;
+  kind: import('../lib/categories.ts').UnitKind;
   rates: Record<string, number>;
   ladder: LadderRung[];
   dearThresholdEx: number | null;
@@ -100,9 +103,13 @@ function spec(unit: WorkUnit, tag: string, extra: Partial<QuerySpec> = {}): Quer
     category: unit.category,
     rarity: 'rare',
     sampling: 'recent',
-    minIlvl: MIN_ILVL,
     collapse: true,
-    defence: archetypeFilter(unit.archetype),
+    // Gear uses an item-level floor and a defence archetype; maps use neither, and
+    // waystones substitute a tier floor. Applying an ilvl filter to a tablet returns
+    // nothing, so these are strictly per-kind.
+    minIlvl: unit.kind === 'gear' ? (unit.minIlvl ?? MIN_ILVL) : undefined,
+    defence: unit.kind === 'gear' ? archetypeFilter(unit.archetype) : null,
+    mapTier: unit.minTier,
     ...extra,
   };
 }
@@ -134,12 +141,15 @@ async function sample(
   trade: TradeClient,
   s: QuerySpec,
   toEx: (a: number, c: string) => number | null,
+  withProps = false,
 ): Promise<SampledItem[]> {
   const res = await trade.search(buildQuery(s));
   const results: RawResult[] = await trade.fetchAll(res.result.slice(0, 100), res.id);
   return results.map((r) => {
     const l = toListing(r, toEx);
-    return { id: l.id, baseName: l.baseName, priceEx: l.priceEx, ilvl: l.ilvl, mods: itemMods(r) };
+    const item: SampledItem = { id: l.id, baseName: l.baseName, priceEx: l.priceEx, ilvl: l.ilvl, mods: itemMods(r) };
+    if (withProps) item.props = waystoneProps(r);
+    return item;
   });
 }
 
@@ -150,11 +160,23 @@ async function main(): Promise<void> {
   const UNITS = workUnits(basesDoc.groups, basesDoc.families);
   const byId = new Map(UNITS.map((u) => [u.id, u]));
 
-  const { batch, state } = take(
-    UNITS.map((u) => u.id),
-    BATCH,
-  );
-  const queue = batch.map((id) => byId.get(id)!).filter(Boolean);
+  // POE2_ONLY targets specific unit ids (comma-separated), bypassing the queue. For a
+  // deliberate backfill or validating one unit — not the scheduled path.
+  const only = (process.env.POE2_ONLY ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  let queue: WorkUnit[];
+  let state: { pending: string[]; done: string[]; cycles: number };
+  if (only.length) {
+    queue = only.map((id) => byId.get(id)).filter((u): u is WorkUnit => Boolean(u)).slice(0, BATCH);
+    state = { pending: [], done: [], cycles: 0 };
+    console.log(`POE2_ONLY: ${queue.map((u) => u.id).join(', ')}`);
+  } else {
+    const taken = take(
+      UNITS.map((u) => u.id),
+      BATCH,
+    );
+    queue = taken.batch.map((id) => byId.get(id)!).filter(Boolean);
+    state = taken.state;
+  }
 
   console.log(`League: ${LEAGUE} | ilvl >= ${MIN_ILVL}`);
   console.log(`${UNITS.length} units tracked; ${state.pending.length} left this cycle (cycle ${state.cycles + 1}).`);
@@ -187,10 +209,11 @@ async function main(): Promise<void> {
     if (existsSync(rawPath)) await rename(rawPath, path.join(PREV, file));
 
     try {
+      const wantProps = unit.kind === 'waystone';
       const rungs = await ladder(trade, unit);
       const dear = pickDearThreshold(rungs);
-      const baseSample = await sample(trade, spec(unit, 'base', { priceMin: 1 }), toEx);
-      const dearSample = dear ? await sample(trade, spec(unit, 'dear', { priceMin: dear.minEx }), toEx) : [];
+      const baseSample = await sample(trade, spec(unit, 'base', { priceMin: 1 }), toEx, wantProps);
+      const dearSample = dear ? await sample(trade, spec(unit, 'dear', { priceMin: dear.minEx }), toEx, wantProps) : [];
 
       const snap: RawSnapshot = {
         at,
@@ -200,6 +223,7 @@ async function main(): Promise<void> {
         label: unit.label,
         group: unit.group,
         section: unit.section,
+        kind: unit.kind,
         rates,
         ladder: rungs,
         dearThresholdEx: dear?.minEx ?? null,
@@ -210,7 +234,7 @@ async function main(): Promise<void> {
       };
       // Written per unit, so a ban partway through keeps what's already gathered.
       await writeFile(rawPath, JSON.stringify(snap));
-      complete([unit.id]);
+      if (!only.length) complete([unit.id]);
       done++;
 
       const pct = dear && snap.total ? ((dear.count / snap.total) * 100).toFixed(0) : '?';

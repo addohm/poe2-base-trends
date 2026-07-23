@@ -57,6 +57,7 @@ export interface HistoryRow {
   /** bases.json group, e.g. "Helmet / es" — links a unit to its static stats. */
   group: string;
   section: string;
+  kind: 'gear' | 'tablet' | 'waystone';
   minIlvl: number;
   ladder: LadderRung[];
   total: number;
@@ -71,11 +72,23 @@ export interface HistoryRow {
   /** mod key -> tier counts, per stratum. Says which tier the dear items carry. */
   tiersDear: Record<string, TierCounts>;
   tiersBase: Record<string, TierCounts>;
+  /** Waystone reward magnitudes per stratum: property -> observed values. */
+  propsDear?: Record<string, number[]>;
+  propsBase?: Record<string, number[]>;
   divineRate: number | null;
 }
 
 /** "P1" -> 1. Lower is better; the ladder is numbered from the top. */
 export const tierRank = (t: string): number => Number.parseInt(t.slice(1), 10) || 99;
+
+/** Linear-interpolated quantile of a pre-sorted array. */
+export function quantile(sorted: number[], q: number): number | null {
+  if (!sorted.length) return null;
+  const pos = (sorted.length - 1) * q;
+  const lo = Math.floor(pos);
+  const hi = Math.ceil(pos);
+  return lo === hi ? sorted[lo]! : sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (pos - lo);
+}
 
 /**
  * The median tier, weighted by how often each was seen.
@@ -211,12 +224,21 @@ async function main(): Promise<void> {
       return out;
     };
 
+    /** Collect each reward property's observed values across a stratum. */
+    const propsOf = (items: SampledItem[]): Record<string, number[]> => {
+      const out: Record<string, number[]> = {};
+      for (const it of items) for (const [k, v] of Object.entries(it.props ?? {})) (out[k] ??= []).push(v);
+      return out;
+    };
+    const isWaystone = snap.kind === 'waystone';
+
     const row: HistoryRow = {
       at: snap.at,
       key: snap.key,
       label: snap.label,
       group: snap.group,
       section: snap.section,
+      kind: snap.kind,
       minIlvl: snap.minIlvl,
       ladder: snap.ladder,
       total: snap.total,
@@ -228,6 +250,8 @@ async function main(): Promise<void> {
       mods: pair(countBy(snap.dearSample, modKey), countBy(snap.baseSample, modKey)),
       tiersDear: tiersOf(snap.dearSample),
       tiersBase: tiersOf(snap.baseSample),
+      propsDear: isWaystone ? propsOf(snap.dearSample) : undefined,
+      propsBase: isWaystone ? propsOf(snap.baseSample) : undefined,
       divineRate: snap.rates.divine ?? null,
     };
 
@@ -273,11 +297,22 @@ export interface RankedMod extends Ranked {
   tierMarket: string | null;
 }
 
+/** A waystone reward property: what the expensive stratum carries vs the market. */
+export interface RewardStat {
+  label: string;
+  dearMedian: number;
+  marketMedian: number;
+  /** 75th percentile of the market — a concrete "aim above this" number. */
+  marketP75: number;
+  n: number;
+}
+
 export interface CategoryAnalysis {
   key: string;
   label: string;
   group: string;
   section: string;
+  kind: 'gear' | 'tablet' | 'waystone';
   at: string;
   minIlvl: number;
   total: number;
@@ -292,6 +327,10 @@ export interface CategoryAnalysis {
   bases: Ranked[];
   prefixes: RankedMod[];
   suffixes: RankedMod[];
+  /** Waystone reward-property targets — the magnitudes that command a premium. */
+  rewards: RewardStat[];
+  /** Waystone mods that sink resale — over-represented on the cheap stratum. */
+  sinks: RankedMod[];
 }
 
 function rankFeatures(
@@ -413,11 +452,49 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
     // idea as a Wilson lower bound for rating sorts.
     const byEvidence = (x: RankedMod, y: RankedMod) => y.ciLow - x.ciLow || y.lift - x.lift;
 
+    // Waystone reward properties: pool each property's values across snapshots and
+    // compare the expensive stratum's median to the market's. The market 75th
+    // percentile is the concrete "aim above this to sell high" number.
+    const rewards: RewardStat[] = [];
+    if (latest.kind === 'waystone') {
+      const dearVals: Record<string, number[]> = {};
+      const baseVals: Record<string, number[]> = {};
+      for (const r of pool) {
+        for (const [k, vs] of Object.entries(r.propsDear ?? {})) (dearVals[k] ??= []).push(...vs);
+        for (const [k, vs] of Object.entries(r.propsBase ?? {})) (baseVals[k] ??= []).push(...vs);
+      }
+      for (const k of Object.keys(baseVals)) {
+        const b = [...baseVals[k]!].sort((x, y) => x - y);
+        const d = [...(dearVals[k] ?? [])].sort((x, y) => x - y);
+        if (b.length < MIN_IN_STRATUM) continue;
+        rewards.push({
+          label: k,
+          dearMedian: Math.round(quantile(d, 0.5) ?? 0),
+          marketMedian: Math.round(quantile(b, 0.5) ?? 0),
+          marketP75: Math.round(quantile(b, 0.75) ?? 0),
+          n: b.length,
+        });
+      }
+      // Show the properties whose premium is largest first (biggest dear-vs-market gap).
+      rewards.sort((a, b) => b.dearMedian - b.marketMedian - (a.dearMedian - a.marketMedian));
+    }
+
+    // Waystone mods that SINK resale: over-represented on the cheap stratum, i.e. lift
+    // clearly below 1. These are the "affixes you don't want" — the build-breakers.
+    const sinks =
+      latest.kind === 'waystone'
+        ? mods
+            .filter((m) => m.significant && m.lift < 1)
+            .sort((a, b) => a.ciHigh - b.ciHigh)
+            .slice(0, TOP_MODS)
+        : [];
+
     out.push({
       key: latest.key,
       label: latest.label,
       group: latest.group,
       section: latest.section,
+      kind: latest.kind,
       at: latest.at,
       minIlvl: latest.minIlvl,
       total: latest.total,
@@ -429,8 +506,12 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
       snapshots: pool.length,
       trendPct: trend(rows, (r) => r.total),
       bases: bases.slice(0, TOP_BASES),
+      // For waystones, mods sorted by lift descending are the "tolerated / profitable"
+      // ones; gear/tablets keep the evidence sort. Both use the same field.
       prefixes: mods.filter((m) => affixFor(m.key) === 'prefix').sort(byEvidence).slice(0, TOP_MODS),
       suffixes: mods.filter((m) => affixFor(m.key) === 'suffix').sort(byEvidence).slice(0, TOP_MODS),
+      rewards,
+      sinks,
     });
   }
 
