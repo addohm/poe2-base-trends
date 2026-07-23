@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-22T22:38:19.601Z",
+  "generatedAt": "2026-07-23T00:57:31.356Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -12029,7 +12029,7 @@
       "label": "Dagger",
       "group": "Dagger",
       "section": "Weapons",
-      "at": "2026-07-18T11:35:16.959Z",
+      "at": "2026-07-23T00:57:08.826Z",
       "minIlvl": 70,
       "total": 0,
       "ladder": [
@@ -12058,7 +12058,7 @@
       "dearCount": null,
       "nDear": 0,
       "nBase": 0,
-      "snapshots": 1,
+      "snapshots": 2,
       "trendPct": null,
       "bases": [],
       "prefixes": [],
