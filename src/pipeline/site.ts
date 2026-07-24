@@ -271,26 +271,31 @@ function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): st
 </div>`;
   }
 
-  // The pooled prefix card: map prefixes are the same generic pool on every tablet
-  // type, so they're estimated once across all of them rather than eight times thinly.
+  // The shared card: the generic pool that rolls on every tablet type — most prefixes
+  // and a handful of suffixes — estimated once across all types for far more evidence
+  // than any single type could give.
   if (c.kind === 'tablet-shared') {
     return `${open}
-  <p class="stat" style="margin:0 0 10px">Map prefixes are generic — the same pool rolls on every tablet
-  type — so they're pooled across all types for ~8&times; the evidence. Type-specific mods are suffixes,
-  shown on each tablet's own card.</p>
+  <p class="stat" style="margin:0 0 10px">These roll on <em>every</em> tablet type, so they're pooled
+  across all of them for ${c.snapshots}&times; the evidence. Mods unique to one type appear on that
+  tablet's own card below.</p>
   <div class="cols cols2">
-    <div class="col"><h4>Target prefixes (all tablets)</h4>${modRows(c.prefixes)}</div>
+    <div class="col"><h4>Shared prefixes</h4>${modRows(c.prefixes)}</div>
+    <div class="col"><h4>Shared suffixes</h4>${modRows(c.suffixes)}</div>
   </div>
 </div>`;
   }
 
-  // A tablet unit shows only its suffixes: that's where the type identity lives
-  // (Wombgifts on Breach, Ritual Favours on Ritual). Prefixes live on the shared card.
+  // A per-type tablet card shows only the mods unique to that type — where its identity
+  // lives (Wombgifts on Breach, Abysses on Abyss). Columns with none are dropped, so a
+  // type with only specific suffixes shows a single column.
   if (c.kind === 'tablet') {
+    const cols = [
+      c.prefixes.length ? `<div class="col"><h4>Type-specific prefixes</h4>${modRows(c.prefixes)}</div>` : '',
+      c.suffixes.length ? `<div class="col"><h4>Type-specific suffixes</h4>${modRows(c.suffixes)}</div>` : '',
+    ].filter(Boolean);
     return `${open}
-  <div class="cols cols2">
-    <div class="col"><h4>Target suffixes (type-specific)</h4>${modRows(c.suffixes)}</div>
-  </div>
+  <div class="cols cols2">${cols.join('')}</div>
 </div>`;
   }
 

@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-24T07:19:18.718Z",
+  "generatedAt": "2026-07-24T07:37:05.270Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
   "categories": [
     {
       "key": "map.tablet/_shared",
-      "label": "Tablet prefixes — shared by every type",
+      "label": "Shared by every tablet",
       "group": "Tablet (shared)",
       "section": "Maps",
       "kind": "tablet-shared",
@@ -18,7 +18,7 @@
       "dearCount": null,
       "nDear": 333,
       "nBase": 700,
-      "snapshots": 8,
+      "snapshots": 7,
       "trendPct": null,
       "bases": [],
       "prefixes": [
@@ -119,7 +119,104 @@
           "tierMarket": null
         }
       ],
-      "suffixes": [],
+      "suffixes": [
+        {
+          "key": "exp|s|Map has # additional random Modifiers",
+          "label": "Map has # additional random Modifiers",
+          "lift": 1.9339339339339339,
+          "ciLow": 1.1146021018417251,
+          "ciHigh": 3.3555476475786152,
+          "inDear": 23,
+          "inBase": 25,
+          "shareDear": 0.06906906906906907,
+          "shareBase": 0.03571428571428571,
+          "significant": true,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        },
+        {
+          "key": "exp|s|Unique Monsters have # additional Rare Modifier",
+          "label": "Unique Monsters have # additional Rare Modifier",
+          "lift": 1.8279148713931324,
+          "ciLow": 1.0184667915192767,
+          "ciHigh": 3.2806889776699526,
+          "inDear": 20,
+          "inBase": 23,
+          "shareDear": 0.06006006006006006,
+          "shareBase": 0.032857142857142856,
+          "significant": true,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        },
+        {
+          "key": "exp|s|Map has #% increased chance to contain Essences",
+          "label": "Map has #% increased chance to contain Essences",
+          "lift": 1.3252382817600208,
+          "ciLow": 0.84835640953952,
+          "ciHigh": 2.070187109678976,
+          "inDear": 29,
+          "inBase": 46,
+          "shareDear": 0.08708708708708708,
+          "shareBase": 0.06571428571428571,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        },
+        {
+          "key": "exp|s|Map has #% increased chance to contain Shrines",
+          "label": "Map has #% increased chance to contain Shrines",
+          "lift": 1.0822703892010823,
+          "ciLow": 0.795345803777635,
+          "ciHigh": 1.4727043127380857,
+          "inDear": 52,
+          "inBase": 101,
+          "shareDear": 0.15615615615615616,
+          "shareBase": 0.1442857142857143,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        },
+        {
+          "key": "exp|s|#% increased Quantity of Waystones found in Map",
+          "label": "#% increased Quantity of Waystones found in Map",
+          "lift": 0.9692327057596519,
+          "ciLow": 0.7651990734083732,
+          "ciHigh": 1.227670119528266,
+          "inDear": 77,
+          "inBase": 167,
+          "shareDear": 0.23123123123123124,
+          "shareBase": 0.23857142857142857,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        },
+        {
+          "key": "exp|s|Map has #% increased chance to contain Azmeri Spirits",
+          "label": "Map has #% increased chance to contain Azmeri Spirits",
+          "lift": 1.0872941907424667,
+          "ciLow": 0.7136700908751628,
+          "ciHigh": 1.6565198294531172,
+          "inDear": 30,
+          "inBase": 58,
+          "shareDear": 0.09009009009009009,
+          "shareBase": 0.08285714285714285,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": null,
+          "tierDear": null,
+          "tierMarket": null
+        }
+      ],
       "rewards": [],
       "sinks": []
     },
@@ -1228,148 +1325,17 @@
       "section": "Maps",
       "kind": "tablet",
       "at": "2026-07-23T18:37:44.455Z",
-      "minIlvl": 70,
+      "minIlvl": 0,
       "total": 6172,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 6172
-        },
-        {
-          "minEx": 50,
-          "count": 5849
-        },
-        {
-          "minEx": 200,
-          "count": 5389
-        },
-        {
-          "minEx": 1000,
-          "count": 2312
-        },
-        {
-          "minEx": 5000,
-          "count": 1376
-        }
-      ],
+      "ladder": [],
       "dearThresholdEx": 5000,
-      "dearCount": 1376,
+      "dearCount": null,
       "nDear": 45,
       "nBase": 100,
       "snapshots": 1,
       "trendPct": null,
-      "bases": [
-        {
-          "key": "Delirium Tablet",
-          "label": "Delirium Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 45,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|Map has #% increased Magic Monsters",
-          "label": "Map has #% increased Magic Monsters",
-          "lift": 1.8518518518518519,
-          "ciLow": 0.8643954586100115,
-          "ciHigh": 3.967345324467226,
-          "inDear": 10,
-          "inBase": 12,
-          "shareDear": 0.2222222222222222,
-          "shareBase": 0.12,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased number of Rare Monsters",
-          "label": "Map has #% increased number of Rare Monsters",
-          "lift": 1.5204678362573099,
-          "ciLow": 0.8249226998404663,
-          "ciHigh": 2.802471603145452,
-          "inDear": 13,
-          "inBase": 19,
-          "shareDear": 0.28888888888888886,
-          "shareBase": 0.19,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.241830065359477,
-          "ciLow": 0.801798058267441,
-          "ciHigh": 1.9233545096916895,
-          "inDear": 19,
-          "inBase": 34,
-          "shareDear": 0.4222222222222222,
-          "shareBase": 0.34,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Pack Size in Map",
-          "label": "#% increased Pack Size in Map",
-          "lift": 1.2121212121212122,
-          "ciLow": 0.4780366554653863,
-          "ciHigh": 3.0734836253170577,
-          "inDear": 6,
-          "inBase": 11,
-          "shareDear": 0.13333333333333333,
-          "shareBase": 0.11,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 0.8230452674897119,
-          "ciLow": 0.4363562186021706,
-          "ciHigh": 1.5524094385711171,
-          "inDear": 10,
-          "inBase": 27,
-          "shareDear": 0.2222222222222222,
-          "shareBase": 0.27,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Monster Rarity",
-          "label": "Map has #% increased Monster Rarity",
-          "lift": 0.7407407407407408,
-          "ciLow": 0.36103829024366785,
-          "ciHigh": 1.5197746605292783,
-          "inDear": 8,
-          "inBase": 24,
-          "shareDear": 0.17777777777777778,
-          "shareBase": 0.24,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
+      "bases": [],
+      "prefixes": [],
       "suffixes": [
         {
           "key": "exp|s|Delirium Fog in Map spawns #% increased MirrorShards",
@@ -1382,22 +1348,6 @@
           "shareDear": 0.15555555555555556,
           "shareBase": 0.05,
           "significant": true,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|Map has #% increased chance to contain Shrines",
-          "label": "Map has #% increased chance to contain Shrines",
-          "lift": 1.9753086419753088,
-          "ciLow": 0.8152219576568426,
-          "ciHigh": 4.786235447186974,
-          "inDear": 8,
-          "inBase": 9,
-          "shareDear": 0.17777777777777778,
-          "shareBase": 0.09,
-          "significant": false,
           "desecrated": false,
           "tierRange": "S1",
           "tierDear": "S1",
@@ -1452,15 +1402,15 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|s|#% increased Quantity of Waystones found in Map",
-          "label": "#% increased Quantity of Waystones found in Map",
-          "lift": 1.0526315789473684,
-          "ciLow": 0.5171018507165788,
-          "ciHigh": 2.142775624302567,
-          "inDear": 9,
-          "inBase": 19,
-          "shareDear": 0.2,
-          "shareBase": 0.19,
+          "key": "exp|s|Delirium Monsters in Map have #% increased Pack Size",
+          "label": "Delirium Monsters in Map have #% increased Pack Size",
+          "lift": 0.8547008547008547,
+          "ciLow": 0.45119599148581013,
+          "ciHigh": 1.6190603746738865,
+          "inDear": 10,
+          "inBase": 26,
+          "shareDear": 0.2222222222222222,
+          "shareBase": 0.26,
           "significant": false,
           "desecrated": false,
           "tierRange": "S1",
@@ -1739,256 +1689,6 @@
           "tierRange": "S2-S3",
           "tierDear": "S3",
           "tierMarket": "S2"
-        }
-      ],
-      "rewards": [],
-      "sinks": []
-    },
-    {
-      "key": "map.tablet/irradiated",
-      "label": "Irradiated Tablet",
-      "group": "Irradiated Tablet",
-      "section": "Maps",
-      "kind": "tablet",
-      "at": "2026-07-24T00:52:58.739Z",
-      "minIlvl": 70,
-      "total": 4597,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 4597
-        },
-        {
-          "minEx": 50,
-          "count": 4428
-        },
-        {
-          "minEx": 200,
-          "count": 4136
-        },
-        {
-          "minEx": 1000,
-          "count": 1523
-        },
-        {
-          "minEx": 5000,
-          "count": 673
-        }
-      ],
-      "dearThresholdEx": 1000,
-      "dearCount": 1523,
-      "nDear": 86,
-      "nBase": 100,
-      "snapshots": 1,
-      "trendPct": null,
-      "bases": [
-        {
-          "key": "Irradiated Tablet",
-          "label": "Irradiated Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 86,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.1627906976744187,
-          "ciLow": 0.8036855779170997,
-          "ciHigh": 1.68235220806417,
-          "inDear": 35,
-          "inBase": 35,
-          "shareDear": 0.4069767441860465,
-          "shareBase": 0.35,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Monster Rarity",
-          "label": "Map has #% increased Monster Rarity",
-          "lift": 1.1627906976744187,
-          "ciLow": 0.6469498623619582,
-          "ciHigh": 2.0899335253922553,
-          "inDear": 18,
-          "inBase": 18,
-          "shareDear": 0.20930232558139536,
-          "shareBase": 0.18,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 0.9161381254404509,
-          "ciLow": 0.5986229612447206,
-          "ciHigh": 1.4020662741375016,
-          "inDear": 26,
-          "inBase": 33,
-          "shareDear": 0.3023255813953488,
-          "shareBase": 0.33,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Gold found in Map",
-          "label": "#% increased Gold found in Map",
-          "lift": 1.0111223458038423,
-          "ciLow": 0.5979097760920071,
-          "ciHigh": 1.709904134476874,
-          "inDear": 20,
-          "inBase": 23,
-          "shareDear": 0.23255813953488372,
-          "shareBase": 0.23,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Magic Monsters",
-          "label": "Map has #% increased Magic Monsters",
-          "lift": 1.495016611295681,
-          "ciLow": 0.5812258228621062,
-          "ciHigh": 3.8454497032563624,
-          "inDear": 9,
-          "inBase": 7,
-          "shareDear": 0.10465116279069768,
-          "shareBase": 0.07,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Experience gain in Map",
-          "label": "#% increased Experience gain in Map",
-          "lift": 0.8627156789197299,
-          "ciLow": 0.5468449683243582,
-          "ciHigh": 1.3610408539271148,
-          "inDear": 23,
-          "inBase": 31,
-          "shareDear": 0.26744186046511625,
-          "shareBase": 0.31,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
-      "suffixes": [
-        {
-          "key": "exp|s|Map has # additional random Modifiers",
-          "label": "Map has # additional random Modifiers",
-          "lift": 1.744186046511628,
-          "ciLow": 0.8268288881807029,
-          "ciHigh": 3.679340439519083,
-          "inDear": 15,
-          "inBase": 10,
-          "shareDear": 0.1744186046511628,
-          "shareBase": 0.1,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|Map has #% increased chance to contain Essences",
-          "label": "Map has #% increased chance to contain Essences",
-          "lift": 1.3953488372093024,
-          "ciLow": 0.7493860194413141,
-          "ciHigh": 2.5981247674634864,
-          "inDear": 18,
-          "inBase": 15,
-          "shareDear": 0.20930232558139536,
-          "shareBase": 0.15,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|Unique Monsters have # additional Rare Modifier",
-          "label": "Unique Monsters have # additional Rare Modifier",
-          "lift": 1.7441860465116281,
-          "ciLow": 0.6468165798638975,
-          "ciHigh": 4.703319394635798,
-          "inDear": 9,
-          "inBase": 6,
-          "shareDear": 0.10465116279069768,
-          "shareBase": 0.06,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|#% increased Quantity of Waystones found in Map",
-          "label": "#% increased Quantity of Waystones found in Map",
-          "lift": 0.8336989907854322,
-          "ciLow": 0.6171138643425665,
-          "ciHigh": 1.1262978315632464,
-          "inDear": 38,
-          "inBase": 53,
-          "shareDear": 0.4418604651162791,
-          "shareBase": 0.53,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|Map has #% increased chance to contain Shrines",
-          "label": "Map has #% increased chance to contain Shrines",
-          "lift": 0.7973421926910299,
-          "ciLow": 0.5175720066409437,
-          "ciHigh": 1.2283403354277287,
-          "inDear": 24,
-          "inBase": 35,
-          "shareDear": 0.27906976744186046,
-          "shareBase": 0.35,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|Map has #% increased chance to contain Strongboxes",
-          "label": "Map has #% increased chance to contain Strongboxes",
-          "lift": 0.9179926560587516,
-          "ciLow": 0.49752470331944393,
-          "ciHigh": 1.6938063797743228,
-          "inDear": 15,
-          "inBase": 19,
-          "shareDear": 0.1744186046511628,
-          "shareBase": 0.19,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
         }
       ],
       "rewards": [],
@@ -3093,148 +2793,17 @@
       "section": "Maps",
       "kind": "tablet",
       "at": "2026-07-24T06:51:08.382Z",
-      "minIlvl": 70,
+      "minIlvl": 0,
       "total": 2784,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 2784
-        },
-        {
-          "minEx": 50,
-          "count": 2728
-        },
-        {
-          "minEx": 200,
-          "count": 2678
-        },
-        {
-          "minEx": 1000,
-          "count": 701
-        },
-        {
-          "minEx": 5000,
-          "count": 320
-        }
-      ],
+      "ladder": [],
       "dearThresholdEx": 1000,
-      "dearCount": 701,
+      "dearCount": null,
       "nDear": 63,
       "nBase": 100,
       "snapshots": 1,
       "trendPct": -32.7536231884058,
-      "bases": [
-        {
-          "key": "Breach Tablet",
-          "label": "Breach Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 63,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 1.518288474810214,
-          "ciLow": 0.9281092843177668,
-          "ciHigh": 2.4837591129540617,
-          "inDear": 22,
-          "inBase": 23,
-          "shareDear": 0.3492063492063492,
-          "shareBase": 0.23,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.343101343101343,
-          "ciLow": 0.8375918465760958,
-          "ciHigh": 2.1536995915309975,
-          "inDear": 22,
-          "inBase": 26,
-          "shareDear": 0.3492063492063492,
-          "shareBase": 0.26,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Pack Size in Map",
-          "label": "#% increased Pack Size in Map",
-          "lift": 1.3227513227513228,
-          "ciLow": 0.6077212420098891,
-          "ciHigh": 2.8790684624644123,
-          "inDear": 10,
-          "inBase": 12,
-          "shareDear": 0.15873015873015872,
-          "shareBase": 0.12,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased number of Rare Monsters",
-          "label": "Map has #% increased number of Rare Monsters",
-          "lift": 1.2471655328798184,
-          "ciLow": 0.6046094416087384,
-          "ciHigh": 2.572605982243266,
-          "inDear": 11,
-          "inBase": 14,
-          "shareDear": 0.1746031746031746,
-          "shareBase": 0.14,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Gold found in Map",
-          "label": "#% increased Gold found in Map",
-          "lift": 0.7662835249042146,
-          "ciLow": 0.44012016231563406,
-          "ciHigh": 1.3341593746812304,
-          "inDear": 14,
-          "inBase": 29,
-          "shareDear": 0.2222222222222222,
-          "shareBase": 0.29,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Experience gain in Map",
-          "label": "#% increased Experience gain in Map",
-          "lift": 0.744047619047619,
-          "ciLow": 0.43966912235021327,
-          "ciHigh": 1.25914427752209,
-          "inDear": 15,
-          "inBase": 32,
-          "shareDear": 0.23809523809523808,
-          "shareBase": 0.32,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
+      "bases": [],
+      "prefixes": [],
       "suffixes": [
         {
           "key": "exp|s|#% increased Quantity of Wombgifts found in Map",
@@ -3285,22 +2854,6 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|s|Map has #% increased chance to contain Shrines",
-          "label": "Map has #% increased chance to contain Shrines",
-          "lift": 1.2345679012345678,
-          "ciLow": 0.48414947557084576,
-          "ciHigh": 3.14811433176012,
-          "inDear": 7,
-          "inBase": 9,
-          "shareDear": 0.1111111111111111,
-          "shareBase": 0.09,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
           "key": "exp|s|#% increased Effectiveness of Rare Breach Monsters in Map",
           "label": "#% increased Effectiveness of Rare Breach Monsters in Map",
           "lift": 0.8658008658008658,
@@ -3319,6 +2872,22 @@
         {
           "key": "exp|s|Wombgifts have #% chance to drop one Level higher in Map",
           "label": "Wombgifts have #% chance to drop one Level higher in Map",
+          "lift": 0.9070294784580497,
+          "ciLow": 0.40372213365487364,
+          "ciHigh": 2.0377938344474766,
+          "inDear": 8,
+          "inBase": 14,
+          "shareDear": 0.12698412698412698,
+          "shareBase": 0.14,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|Unstable Breaches in Map have #% increased chance to contain Vruun, Marshal of Xesht",
+          "label": "Unstable Breaches in Map have #% increased chance to contain Vruun, Marshal of Xesht",
           "lift": 0.9070294784580497,
           "ciLow": 0.40372213365487364,
           "ciHigh": 2.0377938344474766,
@@ -3889,148 +3458,17 @@
       "section": "Maps",
       "kind": "tablet",
       "at": "2026-07-24T02:35:14.279Z",
-      "minIlvl": 70,
+      "minIlvl": 0,
       "total": 2049,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 2049
-        },
-        {
-          "minEx": 50,
-          "count": 1976
-        },
-        {
-          "minEx": 200,
-          "count": 1944
-        },
-        {
-          "minEx": 1000,
-          "count": 1039
-        },
-        {
-          "minEx": 5000,
-          "count": 537
-        }
-      ],
+      "ladder": [],
       "dearThresholdEx": 5000,
-      "dearCount": 537,
+      "dearCount": null,
       "nDear": 40,
       "nBase": 100,
       "snapshots": 1,
       "trendPct": null,
-      "bases": [
-        {
-          "key": "Abyss Tablet",
-          "label": "Abyss Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 40,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|#% increased Gold found in Map",
-          "label": "#% increased Gold found in Map",
-          "lift": 1.102941176470588,
-          "ciLow": 0.6794884862299091,
-          "ciHigh": 1.790286757475272,
-          "inDear": 15,
-          "inBase": 34,
-          "shareDear": 0.375,
-          "shareBase": 0.34,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Experience gain in Map",
-          "label": "#% increased Experience gain in Map",
-          "lift": 1.09375,
-          "ciLow": 0.6568603046878143,
-          "ciHigh": 1.8212229510025872,
-          "inDear": 14,
-          "inBase": 32,
-          "shareDear": 0.35,
-          "shareBase": 0.32,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.0714285714285714,
-          "ciLow": 0.6069978138782295,
-          "ciHigh": 1.8912081022811769,
-          "inDear": 12,
-          "inBase": 28,
-          "shareDear": 0.3,
-          "shareBase": 0.28,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 1.0714285714285714,
-          "ciLow": 0.5377061977997994,
-          "ciHigh": 2.134919010364246,
-          "inDear": 9,
-          "inBase": 21,
-          "shareDear": 0.225,
-          "shareBase": 0.21,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased number of Rare Monsters",
-          "label": "Map has #% increased number of Rare Monsters",
-          "lift": 1.09375,
-          "ciLow": 0.48706145482792446,
-          "ciHigh": 2.456135772276706,
-          "inDear": 7,
-          "inBase": 16,
-          "shareDear": 0.175,
-          "shareBase": 0.16,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Magic Monsters",
-          "label": "Map has #% increased Magic Monsters",
-          "lift": 0.8823529411764705,
-          "ciLow": 0.37508270856778797,
-          "ciHigh": 2.075666766339517,
-          "inDear": 6,
-          "inBase": 17,
-          "shareDear": 0.15,
-          "shareBase": 0.17,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
+      "bases": [],
+      "prefixes": [],
       "suffixes": [
         {
           "key": "exp|s|#% increased chance for Abyssal monsters in Map to have Abyssal Modifiers",
@@ -4139,148 +3577,17 @@
       "section": "Maps",
       "kind": "tablet",
       "at": "2026-07-23T22:37:32.113Z",
-      "minIlvl": 70,
+      "minIlvl": 0,
       "total": 2036,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 2036
-        },
-        {
-          "minEx": 50,
-          "count": 1943
-        },
-        {
-          "minEx": 200,
-          "count": 1924
-        },
-        {
-          "minEx": 1000,
-          "count": 925
-        },
-        {
-          "minEx": 5000,
-          "count": 402
-        }
-      ],
+      "ladder": [],
       "dearThresholdEx": 5000,
-      "dearCount": 402,
+      "dearCount": null,
       "nDear": 41,
       "nBase": 100,
       "snapshots": 1,
       "trendPct": null,
-      "bases": [
-        {
-          "key": "Ritual Tablet",
-          "label": "Ritual Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 41,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|Map contains # additional Rare Chests",
-          "label": "Map contains # additional Rare Chests",
-          "lift": 1.5521064301552108,
-          "ciLow": 0.6469041369831109,
-          "ciHigh": 3.72394336781316,
-          "inDear": 7,
-          "inBase": 11,
-          "shareDear": 0.17073170731707318,
-          "shareBase": 0.11,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.0228166797797011,
-          "ciLow": 0.5984220239523697,
-          "ciHigh": 1.748187597652386,
-          "inDear": 13,
-          "inBase": 31,
-          "shareDear": 0.3170731707317073,
-          "shareBase": 0.31,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Pack Size in Map",
-          "label": "#% increased Pack Size in Map",
-          "lift": 1.2195121951219512,
-          "ciLow": 0.5978606095111915,
-          "ciHigh": 2.487553069045805,
-          "inDear": 9,
-          "inBase": 18,
-          "shareDear": 0.21951219512195122,
-          "shareBase": 0.18,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Monster Rarity",
-          "label": "Map has #% increased Monster Rarity",
-          "lift": 1.2195121951219512,
-          "ciLow": 0.5978606095111915,
-          "ciHigh": 2.487553069045805,
-          "inDear": 9,
-          "inBase": 18,
-          "shareDear": 0.21951219512195122,
-          "shareBase": 0.18,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 0.9325681492109038,
-          "ciLow": 0.5512681902396581,
-          "ciHigh": 1.5776048179826316,
-          "inDear": 13,
-          "inBase": 34,
-          "shareDear": 0.3170731707317073,
-          "shareBase": 0.34,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Gold found in Map",
-          "label": "#% increased Gold found in Map",
-          "lift": 1.0269576379974326,
-          "ciLow": 0.4890917575303429,
-          "ciHigh": 2.156327466172514,
-          "inDear": 8,
-          "inBase": 19,
-          "shareDear": 0.1951219512195122,
-          "shareBase": 0.19,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
+      "bases": [],
+      "prefixes": [],
       "suffixes": [
         {
           "key": "exp|s|Rerolling Favours at Ritual Altars in Map costs #% reduced Tribute",
@@ -4315,22 +3622,6 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|s|Map has #% increased chance to contain Essences",
-          "label": "Map has #% increased chance to contain Essences",
-          "lift": 2.032520325203252,
-          "ciLow": 0.6566957021439827,
-          "ciHigh": 6.290796268160392,
-          "inDear": 5,
-          "inBase": 6,
-          "shareDear": 0.12195121951219512,
-          "shareBase": 0.06,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
           "key": "exp|s|Ritual Favours in Map have #% increased chance to be Omens",
           "label": "Ritual Favours in Map have #% increased chance to be Omens",
           "lift": 1.1553273427471116,
@@ -4340,22 +3631,6 @@
           "inBase": 19,
           "shareDear": 0.21951219512195122,
           "shareBase": 0.19,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
-          "key": "exp|s|#% increased Quantity of Waystones found in Map",
-          "label": "#% increased Quantity of Waystones found in Map",
-          "lift": 1.0452961672473866,
-          "ciLow": 0.4315723729791847,
-          "ciHigh": 2.5317748439721743,
-          "inDear": 6,
-          "inBase": 14,
-          "shareDear": 0.14634146341463414,
-          "shareBase": 0.14,
           "significant": false,
           "desecrated": false,
           "tierRange": "S1",
@@ -6300,148 +5575,17 @@
       "section": "Maps",
       "kind": "tablet",
       "at": "2026-07-24T01:35:17.309Z",
-      "minIlvl": 70,
+      "minIlvl": 0,
       "total": 1557,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 1557
-        },
-        {
-          "minEx": 50,
-          "count": 1487
-        },
-        {
-          "minEx": 200,
-          "count": 1445
-        },
-        {
-          "minEx": 1000,
-          "count": 554
-        },
-        {
-          "minEx": 5000,
-          "count": 380
-        }
-      ],
+      "ladder": [],
       "dearThresholdEx": 5000,
-      "dearCount": 380,
+      "dearCount": null,
       "nDear": 29,
       "nBase": 100,
       "snapshots": 1,
       "trendPct": null,
-      "bases": [
-        {
-          "key": "Overseer Tablet",
-          "label": "Overseer Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 29,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|Map has #% increased number of Rare Monsters",
-          "label": "Map has #% increased number of Rare Monsters",
-          "lift": 1.6091954022988506,
-          "ciLow": 0.7257711801662657,
-          "ciHigh": 3.5679425052211817,
-          "inDear": 7,
-          "inBase": 15,
-          "shareDear": 0.2413793103448276,
-          "shareBase": 0.15,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Experience gain in Map",
-          "label": "#% increased Experience gain in Map",
-          "lift": 1.293103448275862,
-          "ciLow": 0.6784423398837145,
-          "ciHigh": 2.4646405886600875,
-          "inDear": 9,
-          "inBase": 24,
-          "shareDear": 0.3103448275862069,
-          "shareBase": 0.24,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map contains # additional Rare Chests",
-          "label": "Map contains # additional Rare Chests",
-          "lift": 1.4198782961460445,
-          "ciLow": 0.6527680600941412,
-          "ciHigh": 3.088469701743437,
-          "inDear": 7,
-          "inBase": 17,
-          "shareDear": 0.2413793103448276,
-          "shareBase": 0.17,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.0011123470522802,
-          "ciLow": 0.5405143992206473,
-          "ciHigh": 1.8542076452830991,
-          "inDear": 9,
-          "inBase": 31,
-          "shareDear": 0.3103448275862069,
-          "shareBase": 0.31,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Magic Monsters",
-          "label": "Map has #% increased Magic Monsters",
-          "lift": 1.2315270935960592,
-          "ciLow": 0.48409886332017354,
-          "ciHigh": 3.1329529919967363,
-          "inDear": 5,
-          "inBase": 14,
-          "shareDear": 0.1724137931034483,
-          "shareBase": 0.14,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 0.8620689655172413,
-          "ciLow": 0.4205738655810054,
-          "ciHigh": 1.7670211159728573,
-          "inDear": 7,
-          "inBase": 28,
-          "shareDear": 0.2413793103448276,
-          "shareBase": 0.28,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
+      "bases": [],
+      "prefixes": [],
       "suffixes": [
         {
           "key": "exp|s|#% increased Rarity of Items dropped by Map Bosses",
@@ -6476,22 +5620,6 @@
           "tierMarket": "S1"
         },
         {
-          "key": "exp|s|#% increased Quantity of Waystones found in Map",
-          "label": "#% increased Quantity of Waystones found in Map",
-          "lift": 0.9404388714733543,
-          "ciLow": 0.4215129994373836,
-          "ciHigh": 2.0982158845837895,
-          "inDear": 6,
-          "inBase": 22,
-          "shareDear": 0.20689655172413793,
-          "shareBase": 0.22,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        },
-        {
           "key": "exp|s|Map Bosses grant #% increased Experience",
           "label": "Map Bosses grant #% increased Experience",
           "lift": 0.7314524555903866,
@@ -6501,176 +5629,6 @@
           "inBase": 33,
           "shareDear": 0.2413793103448276,
           "shareBase": 0.33,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "S1",
-          "tierDear": "S1",
-          "tierMarket": "S1"
-        }
-      ],
-      "rewards": [],
-      "sinks": []
-    },
-    {
-      "key": "map.tablet/temple",
-      "label": "Temple Tablet",
-      "group": "Temple Tablet",
-      "section": "Maps",
-      "kind": "tablet",
-      "at": "2026-07-24T03:35:14.572Z",
-      "minIlvl": 70,
-      "total": 1542,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 1542
-        },
-        {
-          "minEx": 50,
-          "count": 1439
-        },
-        {
-          "minEx": 200,
-          "count": 1259
-        },
-        {
-          "minEx": 1000,
-          "count": 583
-        },
-        {
-          "minEx": 5000,
-          "count": 250
-        }
-      ],
-      "dearThresholdEx": 5000,
-      "dearCount": 250,
-      "nDear": 29,
-      "nBase": 100,
-      "snapshots": 1,
-      "trendPct": null,
-      "bases": [
-        {
-          "key": "Temple Tablet",
-          "label": "Temple Tablet",
-          "lift": 1,
-          "ciLow": 1,
-          "ciHigh": 1,
-          "inDear": 29,
-          "inBase": 100,
-          "shareDear": 1,
-          "shareBase": 1,
-          "significant": false
-        }
-      ],
-      "prefixes": [
-        {
-          "key": "exp|p|#% increased Rarity of Items found in Map",
-          "label": "#% increased Rarity of Items found in Map",
-          "lift": 1.5804597701149425,
-          "ciLow": 0.8833610151689132,
-          "ciHigh": 2.8276695960757863,
-          "inDear": 11,
-          "inBase": 24,
-          "shareDear": 0.3793103448275862,
-          "shareBase": 0.24,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased number of Rare Monsters",
-          "label": "Map has #% increased number of Rare Monsters",
-          "lift": 1.2315270935960592,
-          "ciLow": 0.48409886332017354,
-          "ciHigh": 3.1329529919967363,
-          "inDear": 5,
-          "inBase": 14,
-          "shareDear": 0.1724137931034483,
-          "shareBase": 0.14,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Monsters have #% increased Effectiveness",
-          "label": "Monsters have #% increased Effectiveness",
-          "lift": 1.0057471264367817,
-          "ciLow": 0.48299852261198756,
-          "ciHigh": 2.0942657896045884,
-          "inDear": 7,
-          "inBase": 24,
-          "shareDear": 0.2413793103448276,
-          "shareBase": 0.24,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Magic Monsters",
-          "label": "Map has #% increased Magic Monsters",
-          "lift": 1.0889292196007259,
-          "ciLow": 0.47984141412781417,
-          "ciHigh": 2.4711640354252458,
-          "inDear": 6,
-          "inBase": 19,
-          "shareDear": 0.20689655172413793,
-          "shareBase": 0.19,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|Map has #% increased Monster Rarity",
-          "label": "Map has #% increased Monster Rarity",
-          "lift": 0.8939974457215837,
-          "ciLow": 0.43461318973903346,
-          "ciHigh": 1.83894886723668,
-          "inDear": 7,
-          "inBase": 27,
-          "shareDear": 0.2413793103448276,
-          "shareBase": 0.27,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        },
-        {
-          "key": "exp|p|#% increased Gold found in Map",
-          "label": "#% increased Gold found in Map",
-          "lift": 0.8620689655172414,
-          "ciLow": 0.38992618510868876,
-          "ciHigh": 1.9059066297402318,
-          "inDear": 6,
-          "inBase": 24,
-          "shareDear": 0.20689655172413793,
-          "shareBase": 0.24,
-          "significant": false,
-          "desecrated": false,
-          "tierRange": "P1",
-          "tierDear": "P1",
-          "tierMarket": "P1"
-        }
-      ],
-      "suffixes": [
-        {
-          "key": "exp|s|#% increased Quantity of Waystones found in Map",
-          "label": "#% increased Quantity of Waystones found in Map",
-          "lift": 1.0217113665389526,
-          "ciLow": 0.5217690193305627,
-          "ciHigh": 2.000682443457883,
-          "inDear": 8,
-          "inBase": 27,
-          "shareDear": 0.27586206896551724,
-          "shareBase": 0.27,
           "significant": false,
           "desecrated": false,
           "tierRange": "S1",
@@ -14094,49 +13052,6 @@
       "nDear": 0,
       "nBase": 0,
       "snapshots": 1,
-      "trendPct": null,
-      "bases": [],
-      "prefixes": [],
-      "suffixes": [],
-      "rewards": [],
-      "sinks": []
-    },
-    {
-      "key": "map.tablet/expedition",
-      "label": "Expedition Tablet",
-      "group": "Expedition Tablet",
-      "section": "Maps",
-      "kind": "tablet",
-      "at": "2026-07-24T07:18:57.351Z",
-      "minIlvl": 70,
-      "total": 0,
-      "ladder": [
-        {
-          "minEx": 1,
-          "count": 0
-        },
-        {
-          "minEx": 50,
-          "count": 0
-        },
-        {
-          "minEx": 200,
-          "count": 0
-        },
-        {
-          "minEx": 1000,
-          "count": 0
-        },
-        {
-          "minEx": 5000,
-          "count": 0
-        }
-      ],
-      "dearThresholdEx": null,
-      "dearCount": null,
-      "nDear": 0,
-      "nBase": 0,
-      "snapshots": 2,
       "trendPct": null,
       "bases": [],
       "prefixes": [],

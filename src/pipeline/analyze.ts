@@ -173,11 +173,17 @@ async function main(): Promise<void> {
   for (const f of files) {
     const snap = JSON.parse(await readFile(path.join(RAW, f), 'utf8')) as RawSnapshot;
 
-    // One category refreshes per run, so most raw files are unchanged. Re-appending
-    // them would fabricate history: duplicate rows inflate pooled counts and make a
-    // flat market look like repeated observations.
+    // One unit refreshes per run, so most raw files are unchanged. Re-appending them
+    // would fabricate history: duplicate rows inflate pooled counts and fake a flat
+    // market as repeated observations.
+    //
+    // Match against the WHOLE history, not just its last row. History is shared across
+    // machines via git; cache/raw is local. So a machine can hold a stale raw snapshot
+    // whose timestamp matches an EARLIER row (a newer one having been appended
+    // elsewhere and pulled) — checking only the tail would wave that stale snapshot
+    // straight back in as a duplicate. The timestamp is the snapshot's identity.
     const existing = await readHistory(snap.key);
-    if (existing.length && last(existing)!.at === snap.at) {
+    if (existing.some((r) => r.at === snap.at)) {
       skipped++;
       continue;
     }
@@ -385,19 +391,36 @@ function trend(rows: HistoryRow[], pick: (r: HistoryRow) => number | null): numb
 export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record<string, ModLabel>) {
   const out: CategoryAnalysis[] = [];
   /**
-   * Per-tablet-type mod counts, stashed so prefixes can be pooled afterwards.
+   * Each tablet type's data, stashed so mods can be classified shared-vs-specific
+   * *across* types after the loop rather than ranked in isolation.
    *
-   * Map prefixes are shared across every tablet type — Breach, Ritual and the rest all
-   * draw from the same generic pool (Gold found, Monster Rarity, Experience, Pack
-   * Size…). Only suffixes are type-specific (Wombgifts and Rare Breach Monsters only
-   * roll on Breach). Ranking prefixes per type would therefore split one pool of ~800
-   * observations into eight thin slices of ~100 and estimate the same quantity eight
-   * times, badly — the exact fragmentation that made the tier analysis meaningless.
-   * Pooling keeps each type's own dear/baseline definition and just sums the counts,
-   * which is a stratified estimate: it controls for type rather than ignoring it.
+   * Tablet mods split two ways that only the full set reveals:
+   *  - **Shared** — the generic map pool that rolls on every type: prefixes (Gold
+   *    found, Monster Rarity, Pack Size…) and a handful of suffixes (Shrines,
+   *    Strongboxes, Waystone quantity…). Ranking these per type splits one pool of
+   *    ~800 observations into eight ~100 slices and estimates the same quantity eight
+   *    times, badly — the fragmentation that made the tier analysis meaningless.
+   *  - **Type-specific** — suffixes tied to the mechanic (Wombgifts on Breach,
+   *    Abysses on Abyss, Ritual Favours on Ritual). These belong on the type's card.
+   *
+   * Which is which is decided empirically: a mod seen on a majority of types is
+   * shared; one seen on a single type is specific. That self-updates each season and
+   * needs no hand-maintained list.
    */
-  const tabletPools: { agg: Map<string, [number, number]>; nDear: number; nBase: number; total: number; at: string }[] =
-    [];
+  const tabletUnits: {
+    key: string;
+    label: string;
+    group: string;
+    at: string;
+    total: number;
+    nDear: number;
+    nBase: number;
+    dearThresholdEx: number | null;
+    snapshots: number;
+    trendPct: number | null;
+    agg: Map<string, [number, number]>;
+    mods: RankedMod[];
+  }[] = [];
 
   for (const [, rows] of history) {
     if (!rows.length) continue;
@@ -516,8 +539,24 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
             .slice(0, TOP_MODS)
         : [];
 
+    // Tablets are finalised after the loop, once every type is known and mods can be
+    // classified shared-vs-specific across the full set.
     if (latest.kind === 'tablet') {
-      tabletPools.push({ agg: aggMods, nDear, nBase, total: latest.total, at: latest.at });
+      tabletUnits.push({
+        key: latest.key,
+        label: latest.label,
+        group: latest.group,
+        at: latest.at,
+        total: latest.total,
+        nDear,
+        nBase,
+        dearThresholdEx: latest.dearThresholdEx,
+        snapshots: pool.length,
+        trendPct: trend(rows, (r) => r.total),
+        agg: aggMods,
+        mods,
+      });
+      continue;
     }
 
     out.push({
@@ -546,48 +585,59 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
     });
   }
 
-  // Pooled tablet prefixes: one card standing in for all types, with ~8x the evidence
-  // of any single type's estimate.
-  if (tabletPools.length > 1) {
-    const agg = new Map<string, [number, number]>();
-    let nDear = 0;
-    let nBase = 0;
-    let total = 0;
-    for (const p of tabletPools) {
-      nDear += p.nDear;
-      nBase += p.nBase;
-      total += p.total;
-      for (const [k, [a, b]] of p.agg) {
-        const c = agg.get(k) ?? [0, 0];
-        agg.set(k, [c[0] + a, c[1] + b]);
-      }
-    }
+  // Classify tablet mods and split them into one shared card + per-type cards.
+  const dataUnits = tabletUnits.filter((u) => u.nBase >= MIN_IN_STRATUM);
+  if (dataUnits.length >= 2) {
+    const N = dataUnits.length;
+    const affix = (k: string): 'prefix' | 'suffix' | 'other' => {
+      const seg = k.split('|')[1];
+      return seg === 'p' ? 'prefix' : seg === 's' ? 'suffix' : 'other';
+    };
     const modLabel = (k: string) => {
       const l = labels[k];
       return l?.stats.length ? l.stats.join(' / ') : k;
     };
-    const pooled: RankedMod[] = rankFeatures(agg, nDear, nBase, modLabel)
-      .filter((r) => r.key.split('|')[1] === 'p')
-      .map((r) => ({
-        ...r,
-        desecrated: labels[r.key]?.desecrated ?? false,
-        tierRange: null,
-        tierDear: null,
-        tierMarket: null,
-      }))
-      .sort((a, b) => b.ciLow - a.ciLow || b.lift - a.lift)
-      .slice(0, TOP_MODS);
+    const byEvidence = (x: RankedMod, y: RankedMod) => y.ciLow - x.ciLow || y.lift - x.lift;
 
-    if (pooled.length) {
+    // A mod is "present" on a type if seen a couple of times in its baseline; "shared"
+    // if present on a majority of types. The data separates cleanly (shared mods land
+    // on 6-7 of 7 types, specific ones on exactly 1), so the exact cutoff is not
+    // delicate, but a majority rule is the robust choice as types accrue.
+    const typeCount = new Map<string, number>();
+    for (const u of dataUnits) for (const [k, [, b]] of u.agg) if (b >= 2) typeCount.set(k, (typeCount.get(k) ?? 0) + 1);
+    const sharedMin = Math.max(2, Math.ceil(N / 2));
+    const isShared = (k: string) => (typeCount.get(k) ?? 0) >= sharedMin;
+
+    // Shared card: pool the shared keys' counts across every type, then rank. This is
+    // the ~N-fold-larger sample that makes the generic mods' lift trustworthy.
+    const agg = new Map<string, [number, number]>();
+    let nDear = 0;
+    let nBase = 0;
+    let total = 0;
+    for (const u of dataUnits) {
+      nDear += u.nDear;
+      nBase += u.nBase;
+      total += u.total;
+      for (const [k, [a, b]] of u.agg) if (isShared(k)) {
+        const c = agg.get(k) ?? [0, 0];
+        agg.set(k, [c[0] + a, c[1] + b]);
+      }
+    }
+    const sharedRanked = rankFeatures(agg, nDear, nBase, modLabel).map(
+      (r): RankedMod => ({ ...r, desecrated: labels[r.key]?.desecrated ?? false, tierRange: null, tierDear: null, tierMarket: null }),
+    );
+    const sharedPre = sharedRanked.filter((m) => affix(m.key) === 'prefix').sort(byEvidence).slice(0, TOP_MODS);
+    const sharedSuf = sharedRanked.filter((m) => affix(m.key) === 'suffix').sort(byEvidence).slice(0, TOP_MODS);
+
+    if (sharedPre.length || sharedSuf.length) {
       out.push({
         key: 'map.tablet/_shared',
-        label: 'Tablet prefixes — shared by every type',
+        label: 'Shared by every tablet',
         group: 'Tablet (shared)',
         section: 'Maps',
         kind: 'tablet-shared',
-        // Oldest contributor, so the age pill doesn't overstate freshness: the pooled
-        // view is only complete as of its stalest component.
-        at: tabletPools.map((p) => p.at).sort()[0]!,
+        // Oldest contributor, so the age pill can't overstate freshness.
+        at: dataUnits.map((u) => u.at).sort()[0]!,
         minIlvl: 0,
         total,
         ladder: [],
@@ -595,11 +645,42 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
         dearCount: null,
         nDear,
         nBase,
-        snapshots: tabletPools.length,
+        snapshots: N,
         trendPct: null,
         bases: [],
-        prefixes: pooled,
-        suffixes: [],
+        prefixes: sharedPre,
+        suffixes: sharedSuf,
+        rewards: [],
+        sinks: [],
+      });
+    }
+
+    // Per-type cards: the mods NOT shared — the mechanic-specific ones. A type with
+    // none of its own (Temple) gets no card; its generic mods live on the shared card.
+    for (const u of dataUnits) {
+      const specific = u.mods.filter((m) => !isShared(m.key));
+      const pre = specific.filter((m) => affix(m.key) === 'prefix').sort(byEvidence).slice(0, TOP_MODS);
+      const suf = specific.filter((m) => affix(m.key) === 'suffix').sort(byEvidence).slice(0, TOP_MODS);
+      if (!pre.length && !suf.length) continue;
+      out.push({
+        key: u.key,
+        label: u.label,
+        group: u.group,
+        section: 'Maps',
+        kind: 'tablet',
+        at: u.at,
+        minIlvl: 0,
+        total: u.total,
+        ladder: [],
+        dearThresholdEx: u.dearThresholdEx,
+        dearCount: null,
+        nDear: u.nDear,
+        nBase: u.nBase,
+        snapshots: u.snapshots,
+        trendPct: u.trendPct,
+        bases: [],
+        prefixes: pre,
+        suffixes: suf,
         rewards: [],
         sinks: [],
       });
