@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T03:35:51.663Z",
+  "generatedAt": "2026-07-24T04:35:53.782Z",
   "league": "Runes of Aldur",
   "minIlvl": 70,
   "divineRate": 420,
@@ -940,6 +940,285 @@
         }
       ],
       "rewards": [],
+      "sinks": []
+    },
+    {
+      "key": "map.waystone/t14",
+      "label": "Waystone (Tier 14–16)",
+      "group": "Waystone (T14-16)",
+      "section": "Maps",
+      "kind": "waystone",
+      "at": "2026-07-24T04:35:14.608Z",
+      "minIlvl": 70,
+      "total": 8063,
+      "ladder": [
+        {
+          "minEx": 1,
+          "count": 8063
+        },
+        {
+          "minEx": 50,
+          "count": 6830
+        },
+        {
+          "minEx": 200,
+          "count": 5079
+        },
+        {
+          "minEx": 1000,
+          "count": 1510
+        },
+        {
+          "minEx": 5000,
+          "count": 777
+        }
+      ],
+      "dearThresholdEx": 1000,
+      "dearCount": 1510,
+      "nDear": 43,
+      "nBase": 100,
+      "snapshots": 1,
+      "trendPct": null,
+      "bases": [
+        {
+          "key": "Waystone (Tier 15)",
+          "label": "Waystone (Tier 15)",
+          "lift": 0.9966777408637874,
+          "ciLow": 0.9443270749171768,
+          "ciHigh": 1.0519305710052496,
+          "inDear": 42,
+          "inBase": 98,
+          "shareDear": 0.9767441860465116,
+          "shareBase": 0.98,
+          "significant": false
+        }
+      ],
+      "prefixes": [
+        {
+          "key": "exp|p|Monsters deal #% of Damage as Extra Cold",
+          "label": "Monsters deal #% of Damage as Extra Cold",
+          "lift": 1.6913319238900635,
+          "ciLow": 0.7318735159292636,
+          "ciHigh": 3.9086038974064254,
+          "inDear": 8,
+          "inBase": 11,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.11,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|#% increased Monster Damage",
+          "label": "#% increased Monster Damage",
+          "lift": 1.8087855297157625,
+          "ciLow": 0.7202526740073345,
+          "ciHigh": 4.542440744171142,
+          "inDear": 7,
+          "inBase": 9,
+          "shareDear": 0.16279069767441862,
+          "shareBase": 0.09,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|#% more Monster Life",
+          "label": "#% more Monster Life",
+          "lift": 1.550387596899225,
+          "ciLow": 0.682765754154441,
+          "ciHigh": 3.52053641529777,
+          "inDear": 8,
+          "inBase": 12,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.12,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|Monsters have #% increased Accuracy Rating",
+          "label": "Monsters have #% increased Accuracy Rating",
+          "lift": 1.744186046511628,
+          "ciLow": 0.6439971986655793,
+          "ciHigh": 4.723910245494153,
+          "inDear": 6,
+          "inBase": 8,
+          "shareDear": 0.13953488372093023,
+          "shareBase": 0.08,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|Monsters have #% chance to Poison on Hit",
+          "label": "Monsters have #% chance to Poison on Hit",
+          "lift": 1.101591187270502,
+          "ciLow": 0.5426696686885641,
+          "ciHigh": 2.2361727840891334,
+          "inDear": 9,
+          "inBase": 19,
+          "shareDear": 0.20930232558139536,
+          "shareBase": 0.19,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        },
+        {
+          "key": "exp|p|Monsters have #% increased Attack, Cast and Movement Speed",
+          "label": "Monsters have #% increased Attack, Cast and Movement Speed",
+          "lift": 1.094391244870041,
+          "ciLow": 0.5115337928515218,
+          "ciHigh": 2.3413745359259996,
+          "inDear": 8,
+          "inBase": 17,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.17,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "P1",
+          "tierDear": "P1",
+          "tierMarket": "P1"
+        }
+      ],
+      "suffixes": [
+        {
+          "key": "exp|s|Monster have #% increased Elemental Ailment Application",
+          "label": "Monster have #% increased Elemental Ailment Application",
+          "lift": 1.6913319238900635,
+          "ciLow": 0.7318735159292636,
+          "ciHigh": 3.9086038974064254,
+          "inDear": 8,
+          "inBase": 11,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.11,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|#% maximum Player Resistances",
+          "label": "#% maximum Player Resistances",
+          "lift": 1.550387596899225,
+          "ciLow": 0.682765754154441,
+          "ciHigh": 3.52053641529777,
+          "inDear": 8,
+          "inBase": 12,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.12,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|Area has patches of Ignited Ground",
+          "label": "Area has patches of Ignited Ground",
+          "lift": 1.744186046511628,
+          "ciLow": 0.6439971986655793,
+          "ciHigh": 4.723910245494153,
+          "inDear": 6,
+          "inBase": 8,
+          "shareDear": 0.13953488372093023,
+          "shareBase": 0.08,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|Players have #% less Recovery Rate of Life and Energy Shield",
+          "label": "Players have #% less Recovery Rate of Life and Energy Shield",
+          "lift": 1.4311270125223612,
+          "ciLow": 0.6398685589385389,
+          "ciHigh": 3.200851952108349,
+          "inDear": 8,
+          "inBase": 13,
+          "shareDear": 0.18604651162790697,
+          "shareBase": 0.13,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|#% Monster Elemental Resistances",
+          "label": "#% Monster Elemental Resistances",
+          "lift": 1.4799154334038056,
+          "ciLow": 0.6152838981805074,
+          "ciHigh": 3.559575825896624,
+          "inDear": 7,
+          "inBase": 11,
+          "shareDear": 0.16279069767441862,
+          "shareBase": 0.11,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        },
+        {
+          "key": "exp|s|Players are periodically Cursed with Enfeeble",
+          "label": "Players are periodically Cursed with Enfeeble",
+          "lift": 1.661129568106312,
+          "ciLow": 0.5581753928140372,
+          "ciHigh": 4.943520401581684,
+          "inDear": 5,
+          "inBase": 7,
+          "shareDear": 0.11627906976744186,
+          "shareBase": 0.07,
+          "significant": false,
+          "desecrated": false,
+          "tierRange": "S1",
+          "tierDear": "S1",
+          "tierMarket": "S1"
+        }
+      ],
+      "rewards": [
+        {
+          "label": "Monster Rarity",
+          "dearMedian": 25,
+          "marketMedian": 23,
+          "marketP75": 37,
+          "n": 43
+        },
+        {
+          "label": "Waystone Drop Chance",
+          "dearMedian": 70,
+          "marketMedian": 70,
+          "marketP75": 85,
+          "n": 78
+        },
+        {
+          "label": "Pack Size",
+          "dearMedian": 15,
+          "marketMedian": 15,
+          "marketP75": 21,
+          "n": 68
+        },
+        {
+          "label": "Item Rarity",
+          "dearMedian": 23,
+          "marketMedian": 24,
+          "marketP75": 27,
+          "n": 65
+        }
+      ],
       "sinks": []
     },
     {
