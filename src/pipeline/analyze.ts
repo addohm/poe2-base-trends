@@ -165,24 +165,13 @@ const last = <T>(xs: T[]): T | undefined => xs[xs.length - 1];
 async function main(): Promise<void> {
   const files = existsSync(RAW) ? (await readdir(RAW)).filter((f) => f.endsWith('.json')) : [];
 
-  // Nothing collected yet is a normal state, not a failure: the rotation does one
-  // category per tick and early ticks may be held off by a rate limit. Throwing here
-  // would mark every tick red until the first category lands.
-  if (!files.length) {
-    console.log('No snapshots in cache/raw yet — nothing to aggregate.');
-    console.log('The rotation collects one category per tick; this resolves once one lands.');
-    return;
-  }
-
   await mkdir(HISTORY, { recursive: true });
   const labelUpdates: Record<string, ModLabel> = {};
-  const keys: string[] = [];
   let appended = 0;
   let skipped = 0;
 
   for (const f of files) {
     const snap = JSON.parse(await readFile(path.join(RAW, f), 'utf8')) as RawSnapshot;
-    keys.push(snap.key);
 
     // One category refreshes per run, so most raw files are unchanged. Re-appending
     // them would fabricate history: duplicate rows inflate pooled counts and make a
@@ -260,8 +249,28 @@ async function main(): Promise<void> {
   }
 
   const labels = await mergeLabels(labelUpdates);
+
+  // Build the analysis from EVERY committed history file, not just the categories
+  // that happen to have raw snapshots in this machine's cache. Raw cache is local,
+  // disposable state; history is the committed record. The distinction bit hard on
+  // the first VPS run: its fresh cache held one raw file, so analysis.json — and
+  // with it the site — collapsed from 45 categories to 1. Keying off the history
+  // directory makes analyze produce the same output on any machine with the repo.
   const history = new Map<string, HistoryRow[]>();
-  for (const k of new Set(keys)) history.set(k, await readHistory(k));
+  const histFiles = (await readdir(HISTORY)).filter((f) => f.endsWith('.jsonl'));
+  for (const f of histFiles) {
+    const rows = (await readFile(path.join(HISTORY, f), 'utf8'))
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => JSON.parse(l) as HistoryRow);
+    // The row carries its own key; the filename is just a sanitised rendering of it.
+    if (rows.length) history.set(rows[rows.length - 1]!.key, rows);
+  }
+
+  if (!history.size) {
+    console.log('No history yet — nothing to aggregate. The rotation fills this in one unit per tick.');
+    return;
+  }
 
   const analysis = buildAnalysis(history, labels);
   await writeFile(ANALYSIS, JSON.stringify(analysis, null, 2));
