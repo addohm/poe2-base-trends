@@ -312,7 +312,11 @@ export interface CategoryAnalysis {
   label: string;
   group: string;
   section: string;
-  kind: 'gear' | 'tablet' | 'waystone';
+  /**
+   * `tablet-shared` is a synthetic card, not a collected unit: the pooled prefix
+   * analysis across every tablet type. See buildAnalysis.
+   */
+  kind: 'gear' | 'tablet' | 'waystone' | 'tablet-shared';
   at: string;
   minIlvl: number;
   total: number;
@@ -371,6 +375,20 @@ function trend(rows: HistoryRow[], pick: (r: HistoryRow) => number | null): numb
 
 export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record<string, ModLabel>) {
   const out: CategoryAnalysis[] = [];
+  /**
+   * Per-tablet-type mod counts, stashed so prefixes can be pooled afterwards.
+   *
+   * Map prefixes are shared across every tablet type — Breach, Ritual and the rest all
+   * draw from the same generic pool (Gold found, Monster Rarity, Experience, Pack
+   * Size…). Only suffixes are type-specific (Wombgifts and Rare Breach Monsters only
+   * roll on Breach). Ranking prefixes per type would therefore split one pool of ~800
+   * observations into eight thin slices of ~100 and estimate the same quantity eight
+   * times, badly — the exact fragmentation that made the tier analysis meaningless.
+   * Pooling keeps each type's own dear/baseline definition and just sums the counts,
+   * which is a stratified estimate: it controls for type rather than ignoring it.
+   */
+  const tabletPools: { agg: Map<string, [number, number]>; nDear: number; nBase: number; total: number; at: string }[] =
+    [];
 
   for (const [, rows] of history) {
     if (!rows.length) continue;
@@ -489,6 +507,10 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
             .slice(0, TOP_MODS)
         : [];
 
+    if (latest.kind === 'tablet') {
+      tabletPools.push({ agg: aggMods, nDear, nBase, total: latest.total, at: latest.at });
+    }
+
     out.push({
       key: latest.key,
       label: latest.label,
@@ -513,6 +535,66 @@ export function buildAnalysis(history: Map<string, HistoryRow[]>, labels: Record
       rewards,
       sinks,
     });
+  }
+
+  // Pooled tablet prefixes: one card standing in for all types, with ~8x the evidence
+  // of any single type's estimate.
+  if (tabletPools.length > 1) {
+    const agg = new Map<string, [number, number]>();
+    let nDear = 0;
+    let nBase = 0;
+    let total = 0;
+    for (const p of tabletPools) {
+      nDear += p.nDear;
+      nBase += p.nBase;
+      total += p.total;
+      for (const [k, [a, b]] of p.agg) {
+        const c = agg.get(k) ?? [0, 0];
+        agg.set(k, [c[0] + a, c[1] + b]);
+      }
+    }
+    const modLabel = (k: string) => {
+      const l = labels[k];
+      return l?.stats.length ? l.stats.join(' / ') : k;
+    };
+    const pooled: RankedMod[] = rankFeatures(agg, nDear, nBase, modLabel)
+      .filter((r) => r.key.split('|')[1] === 'p')
+      .map((r) => ({
+        ...r,
+        desecrated: labels[r.key]?.desecrated ?? false,
+        tierRange: null,
+        tierDear: null,
+        tierMarket: null,
+      }))
+      .sort((a, b) => b.ciLow - a.ciLow || b.lift - a.lift)
+      .slice(0, TOP_MODS);
+
+    if (pooled.length) {
+      out.push({
+        key: 'map.tablet/_shared',
+        label: 'Tablet prefixes — shared by every type',
+        group: 'Tablet (shared)',
+        section: 'Maps',
+        kind: 'tablet-shared',
+        // Oldest contributor, so the age pill doesn't overstate freshness: the pooled
+        // view is only complete as of its stalest component.
+        at: tabletPools.map((p) => p.at).sort()[0]!,
+        minIlvl: 0,
+        total,
+        ladder: [],
+        dearThresholdEx: null,
+        dearCount: null,
+        nDear,
+        nBase,
+        snapshots: tabletPools.length,
+        trendPct: null,
+        bases: [],
+        prefixes: pooled,
+        suffixes: [],
+        rewards: [],
+        sinks: [],
+      });
+    }
   }
 
   const latestRows = [...history.values()].flatMap((rows) => last(rows) ?? []);

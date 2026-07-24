@@ -268,13 +268,25 @@ function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): st
 </div>`;
   }
 
-  // A tablet unit is one base type (affixes are type-specific), so there's no base to
-  // rank — just its own prefixes and suffixes.
+  // The pooled prefix card: map prefixes are the same generic pool on every tablet
+  // type, so they're estimated once across all of them rather than eight times thinly.
+  if (c.kind === 'tablet-shared') {
+    return `${open}
+  <p class="stat" style="margin:0 0 10px">Map prefixes are generic — the same pool rolls on every tablet
+  type — so they're pooled across all types for ~8&times; the evidence. Type-specific mods are suffixes,
+  shown on each tablet's own card.</p>
+  <div class="cols cols2">
+    <div class="col"><h4>Target prefixes (all tablets)</h4>${modRows(c.prefixes)}</div>
+  </div>
+</div>`;
+  }
+
+  // A tablet unit shows only its suffixes: that's where the type identity lives
+  // (Wombgifts on Breach, Ritual Favours on Ritual). Prefixes live on the shared card.
   if (c.kind === 'tablet') {
     return `${open}
   <div class="cols cols2">
-    <div class="col"><h4>Target prefixes</h4>${modRows(c.prefixes)}</div>
-    <div class="col"><h4>Target suffixes</h4>${modRows(c.suffixes)}</div>
+    <div class="col"><h4>Target suffixes (type-specific)</h4>${modRows(c.suffixes)}</div>
   </div>
 </div>`;
   }
