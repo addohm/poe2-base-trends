@@ -77,6 +77,13 @@ burst this design exists to avoid. If a cycle feels too slow, shorten the interv
 the per-run cost stays flat either way, and the duty cycle rises gently instead of
 spiking.
 
+## Scheduling on a VPS (Linux)
+
+See [vps.md](vps.md) — `scripts/snapshot.sh` + cron. A VPS sits between the two
+options above: a datacenter IP (so Cloudflare may challenge it — test first), but
+*dedicated*, so its budget and its bans are yours alone, unlike shared CI runners.
+Run one collector at a time; when the VPS takes over, disable the Windows task.
+
 ## Scheduling on Windows
 
 ```powershell

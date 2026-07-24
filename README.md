@@ -195,12 +195,15 @@ npm run serve       # preview at http://localhost:4173
 npm run typecheck && npm test
 ```
 
-Scheduled use (Windows) — one base per tick, on a rotation:
+Scheduled use — one unit per tick, on a rotation. Windows (Task Scheduler):
 
 ```powershell
 .\scripts\snapshot.ps1                                # one run by hand, local only
 .\scripts\register-task.ps1 -IntervalMinutes 30 -Push # wire up the rotation
 ```
+
+Or a Linux VPS (cron) — `scripts/snapshot.sh`, setup in [docs/vps.md](docs/vps.md).
+**One collector at a time**, whichever machine runs it.
 
 Pick the interval to taste; 15-60 min all work for a six-base set. Slower is politer,
 and the cycle only has to beat the speed prices move (hours). See
