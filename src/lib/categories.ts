@@ -50,6 +50,25 @@ const CLASS_TO_CATEGORY: Record<string, string> = {
 
 export const categoryForClass = (itemClass: string): string | undefined => CLASS_TO_CATEGORY[itemClass];
 
+/**
+ * Display names where the game-file item class differs from what the game and trade
+ * actually call the thing. "Warstaff" is the internal name for a Quarterstaff.
+ */
+const DISPLAY_CLASS: Record<string, string> = { Warstaff: 'Quarterstaff' };
+export const displayClass = (itemClass: string): string => DISPLAY_CLASS[itemClass] ?? itemClass;
+
+/**
+ * Normalises any label or group key for display, e.g. "Warstaff / ar" -> "Quarterstaff
+ * / ar". Applied at render time so labels already persisted in history (collected
+ * before a rename) don't have to wait for re-collection to read correctly.
+ */
+export function displayLabel(s: string): string {
+  for (const [from, to] of Object.entries(DISPLAY_CLASS)) {
+    if (s.startsWith(from)) return to + s.slice(from.length);
+  }
+  return s;
+}
+
 /** Human labels for the defence archetypes. */
 export const ARCHETYPE_LABEL: Record<string, string> = {
   ar: 'Armour',
@@ -166,7 +185,9 @@ export function workUnits(groups: Record<string, string[] | unknown[]>, families
       kind: 'gear',
       archetype: (archetype as Archetype) ?? null,
       minIlvl: 70,
-      label: archetype ? `${itemClass} — ${ARCHETYPE_LABEL[archetype] ?? archetype}` : itemClass,
+      label: archetype
+        ? `${displayClass(itemClass)} — ${ARCHETYPE_LABEL[archetype] ?? archetype}`
+        : displayClass(itemClass),
       section: SECTION_OF[family] ?? 'Other',
     });
   }

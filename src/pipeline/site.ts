@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { BasesDoc, RankedBase } from './bases.ts';
 import type { CategoryAnalysis, RankedMod, Ranked } from './analyze.ts';
-import { workUnits } from '../lib/categories.ts';
+import { workUnits, displayLabel } from '../lib/categories.ts';
 
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, 'dist');
@@ -240,7 +240,7 @@ function cardHead(c: CategoryAnalysis): string {
   const mins = Math.max(0, Math.round((Date.now() - Date.parse(c.at)) / 60_000));
   const age = mins < 90 ? `${mins}m ago` : mins < 2880 ? `${Math.round(mins / 60)}h ago` : `${Math.round(mins / 1440)}d ago`;
   return `<div class="cardhead">
-    <h3>${esc(c.label)}</h3>
+    <h3>${esc(displayLabel(c.label))}</h3>
     <span class="pill" title="Rare listings of this type at the tracked item level / tier">${c.total.toLocaleString()} listed</span>
     <span class="pill" title="'Expensive' = listings at or above this price. The % is that slice of the market.">expensive ≥ ${c.dearThresholdEx ?? '?'} ex (${c.dearCount && c.total ? pct(c.dearCount / c.total) : '?'})</span>
     <span class="pill" title="Sample sizes: expensive items vs the whole market">n = ${c.nDear} vs ${c.nBase}</span>
@@ -250,7 +250,10 @@ function cardHead(c: CategoryAnalysis): string {
 
 function categoryCard(c: CategoryAnalysis, statOf: (name: string) => string): string {
   const anchor = c.key.replace(/[^a-z0-9]/gi, '-');
-  const open = `<div class="card" id="c-${anchor}" data-label="${esc(c.label.toLowerCase())}">\n  ${cardHead(c)}`;
+  // Filter key carries both the display name and the raw class name, so a card titled
+  // "Quarterstaff" still matches a search for "warstaff" and vice versa.
+  const searchKey = [...new Set([displayLabel(c.label), c.label])].join(' ').toLowerCase();
+  const open = `<div class="card" id="c-${anchor}" data-label="${esc(searchKey)}">\n  ${cardHead(c)}`;
 
   // Waystones invert the model: no base variety (the tier IS the base), value comes
   // from reward magnitudes you want high and mods you want to avoid. The card is
@@ -310,7 +313,7 @@ function statTable(group: string, bases: RankedBase[]): string {
       <td class="mono">${b.dropLevel}</td></tr>`,
     )
     .join('');
-  return `<tr><td colspan="3"><strong>${esc(group)}</strong></td></tr>${rows}`;
+  return `<tr><td colspan="3"><strong>${esc(displayLabel(group))}</strong></td></tr>${rows}`;
 }
 
 async function main(): Promise<void> {
@@ -346,11 +349,26 @@ async function main(): Promise<void> {
   const statOf = (name: string) => statByName.get(name) ?? '';
 
   const UNITS = workUnits(basesDoc.groups, basesDoc.families);
-  const bySection = (s: string) => (analysis?.categories ?? []).filter((c) => c.section === s);
+
+  /**
+   * Only groups with an actual market are shown.
+   *
+   * PoE2 adds and removes content each season, so a base or tablet type the game data
+   * still lists may simply not exist in the current league — Expedition Tablet returns
+   * zero listings at every price. Collection keeps probing them (cheap, count-only, and
+   * they come back when the content does), but rendering an empty card for something
+   * nobody can trade is pure clutter. The pooled tablet-prefix card is exempt: its
+   * `total` is a sum over contributors, not its own market.
+   */
+  const traded = (analysis?.categories ?? []).filter((c) => c.kind === 'tablet-shared' || c.total > 0);
+  const bySection = (s: string) => traded.filter((c) => c.section === s);
   const SECTIONS = ['Armour', 'Weapons', 'Caster weapons', 'Jewellery', 'Maps'] as const;
 
-  const covered = analysis?.categories.length ?? 0;
-  const pending = UNITS.length - covered;
+  // Groups shown vs still to collect. Collected-but-untraded groups count as neither:
+  // they're done, they just have no market this league.
+  const covered = traded.filter((c) => c.kind !== 'tablet-shared').length;
+  const collected = (analysis?.categories ?? []).filter((c) => c.kind !== 'tablet-shared').length;
+  const pending = Math.max(0, UNITS.length - collected);
 
   const body = `
 <h1>What to craft in PoE2</h1>
